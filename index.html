@@ -393,9 +393,9 @@ body{opacity:0;animation:appFadeIn 1.2s cubic-bezier(.4,0,.2,1) forwards}
 
 
 /* ── SHARE MODAL ── */
-#share-overlay{position:fixed;inset:0;isolation:isolate;background:rgba(0,0,0,.72);z-index:8300}
-.share-sheet{background:rgba(8,14,28,.55);border-radius:20px 20px 0 0;padding:20px 0 48px;width:100%;max-width:480px;animation:slideUp .3s ease}
-.share-handle{width:36px;height:3px;background:#334155;border-radius:2px;margin:0 auto 16px}
+#share-overlay{position:fixed;inset:0;isolation:isolate;background:rgba(0,0,0,.72);z-index:8300;display:flex;align-items:center;justify-content:center;padding:20px}
+.share-sheet{background:#0f172a;border-radius:20px;padding:20px 0 28px;width:100%;max-width:440px;animation:fadeIn .2s ease;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.share-handle{display:none}
 .share-head{padding:0 18px 16px;border-bottom:1px solid rgba(51,65,85,.4)}
 .share-title{font-size:17px;font-weight:700;color:#f1f5f9;letter-spacing:-.03em}
 .share-sub{font-size:13px;color:#64748b;margin-top:3px}
@@ -416,7 +416,7 @@ body{opacity:0;animation:appFadeIn 1.2s cubic-bezier(.4,0,.2,1) forwards}
 /* ── SHARE SHEET ── */
 #share-overlay{position:fixed;inset:0;isolation:isolate;background:rgba(0,0,0,.72);z-index:8300}
 .share-sheet{background:rgba(8,14,28,.55);border-radius:20px 20px 0 0;padding:20px 0 44px;width:100%;max-width:480px;animation:slideUp .3s ease;position:fixed;bottom:0;left:0;right:0;margin:0 auto;max-height:90vh;overflow-y:auto}
-.share-handle{width:36px;height:3px;background:#334155;border-radius:2px;margin:0 auto 16px}
+.share-handle{display:none}
 .share-head{padding:0 18px 16px;border-bottom:1px solid rgba(51,65,85,.4)}
 .share-title{font-size:17px;font-weight:700;color:#f1f5f9;letter-spacing:-.03em}
 .share-sub{font-size:12px;color:#475569;margin-top:3px}
@@ -496,6 +496,59 @@ body{opacity:0;animation:appFadeIn 1.2s cubic-bezier(.4,0,.2,1) forwards}
   #shared-view .sv-container{max-width:100%;padding:0 40px}
   #shared-view canvas{max-width:900px}
 }
+
+/* ── Universal button press effect ──────────────────────────── */
+button,
+.nav-tab,
+.habit-check,
+.share-action-btn,
+.onb-btn,
+.period-btn,
+.manage-sw,
+.manage-trash,
+.hstat,
+[role="button"],
+.level-badge,
+.medal-card,
+.stat-card,
+.quick-action,
+.config-row,
+.week-day-btn,
+.add-habit-btn,
+.reset-btn,
+.close-btn {
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.08s ease;
+  user-select: none;
+}
+button:active,
+.nav-tab:active,
+.habit-check:active,
+.share-action-btn:active,
+.onb-btn:active,
+.period-btn:active,
+.manage-sw:active,
+.manage-trash:active,
+.hstat:active,
+[role="button"]:active,
+.level-badge:active,
+.medal-card:active,
+.stat-card:active,
+.quick-action:active,
+.config-row:active,
+.week-day-btn:active,
+.add-habit-btn:active,
+.reset-btn:active,
+.close-btn:active {
+  transform: scale(0.94);
+  opacity: 0.85;
+}
+/* Nav tabs special — slightly different press */
+.nav-tab:active { transform: scale(0.96); }
+/* Larger buttons press less */
+.share-action-btn:active, .onb-btn:active { transform: scale(0.97); }
+
 </style>
 <script>
 let swRegistration=null,deferredInstallPrompt=null;
