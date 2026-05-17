@@ -860,6 +860,7 @@ function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone
         <div class="vol-row" style="margin-bottom:10px">
           <div class="vol-icon"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
           <span class="vol-label" style="margin-bottom:0;flex:1;padding-left:6px">Música</span>
+          <button id="music-toggle-btn" onclick="toggleMusicOnOff()" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid rgba(0,185,200,.4);background:rgba(0,185,200,.12);color:#00B9C8;cursor:pointer;margin-right:8px;min-width:36px">ON</button>
           <input class="vol-slider" type="range" min="0" max="100" id="vol-slider" oninput="updateMusicVol(this.value)">
           <span class="vol-val" id="vol-val">50%</span>
         </div>
@@ -2810,6 +2811,45 @@ function addSwipeToDismiss(el,closeFn){
     if(dy>80){el.style.transform='translateY(100vh)';setTimeout(()=>{el.style.transform='';el.style.transition='';closeFn();},240);}
     else el.style.transform='';
   },{passive:true});
+}
+
+function toggleMusicOnOff(){
+  const btn=document.getElementById('music-toggle-btn');
+  const slider=document.getElementById('vol-slider');
+  const isMusicOn=musicCtx&&musicCtx.state==='running';
+  if(isMusicOn){
+    // Turn OFF — suspend context
+    if(musicMasterGain&&musicCtx){
+      musicMasterGain.gain.cancelScheduledValues(musicCtx.currentTime);
+      musicMasterGain.gain.linearRampToValueAtTime(0,musicCtx.currentTime+0.3);
+      setTimeout(function(){if(musicCtx)musicCtx.suspend();},350);
+    }
+    if(btn){btn.textContent='OFF';btn.style.color='#475569';btn.style.borderColor='rgba(71,85,105,.4)';btn.style.background='rgba(71,85,105,.1)';}
+  } else {
+    // Turn ON — resume context
+    if(musicCtx){
+      musicCtx.resume().then(function(){
+        if(musicMasterGain){
+          const v=(parseInt(slider?slider.value:50))/100*.16;
+          musicMasterGain.gain.cancelScheduledValues(musicCtx.currentTime);
+          musicMasterGain.gain.linearRampToValueAtTime(v,musicCtx.currentTime+1.2);
+        }
+      });
+    } else {
+      startMusic();
+    }
+    if(btn){btn.textContent='ON';btn.style.color='#00B9C8';btn.style.borderColor='rgba(0,185,200,.4)';btn.style.background='rgba(0,185,200,.12)';}
+  }
+}
+
+function syncMusicToggleBtn(){
+  const btn=document.getElementById('music-toggle-btn');
+  if(!btn)return;
+  const on=musicCtx&&musicCtx.state==='running';
+  btn.textContent=on?'ON':'OFF';
+  btn.style.color=on?'#00B9C8':'#475569';
+  btn.style.borderColor=on?'rgba(0,185,200,.4)':'rgba(71,85,105,.4)';
+  btn.style.background=on?'rgba(0,185,200,.12)':'rgba(71,85,105,.1)';
 }
 
 function initApp(){
