@@ -2740,47 +2740,7 @@ function renderReadOnly(data){
 // INIT
 // ═══════════════════════════════════════════════════════════
 
-function setupScrollFade(){
-  // Create overlay BELOW nav z-index so it doesn't cover nav buttons
-  // but ABOVE content so it fades content going under the nav
-  const ov=document.createElement('div');
-  ov.id='scroll-fade-ov';
-  ov.style.cssText=[
-    'position:fixed',
-    'left:0','right:0',
-    'height:64px',
-    'pointer-events:none',
-    'z-index:15', // below nav(20) — fades content, nav stays clickable on top
-    'opacity:0',
-    'will-change:opacity',
-    'background:linear-gradient(to bottom,#080e1c 0%,rgba(8,14,28,.7) 50%,rgba(8,14,28,0) 100%)'
-  ].join(';');
-  document.body.appendChild(ov);
-
-  let rafId=null;
-  function applyFade(){
-    rafId=null;
-    const sy=window.scrollY||window.pageYOffset||document.documentElement.scrollTop||0;
-    // Position just below sticky nav
-    const nav=document.querySelector('nav');
-    if(nav){
-      const nb=nav.getBoundingClientRect();
-      ov.style.top=nb.bottom+'px';
-    }
-    ov.style.opacity=sy<5?'0':Math.min(1,sy/40).toFixed(2);
-  }
-
-  function onScroll(){
-    if(!rafId)rafId=requestAnimationFrame(applyFade);
-  }
-
-  window.addEventListener('scroll',onScroll,{passive:true});
-  // Re-position on resize (nav height can change)
-  window.addEventListener('resize',applyFade,{passive:true});
-  // Fallback poll for PWA/standalone
-  setInterval(applyFade,500);
-  setTimeout(applyFade,200); // initial after DOM settles
-}
+function setupScrollFade(){/* disabled — performance test */}
 function addSwipeToDismiss(el,closeFn){
   let sy=0,dragging=false;
   el.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;dragging=true;el.style.transition='none';},{passive:true});
