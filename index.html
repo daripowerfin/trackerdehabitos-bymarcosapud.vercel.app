@@ -2824,12 +2824,15 @@ document.addEventListener('visibilitychange',()=>{
 });
 
 // Route: shared link OR normal app
-if(checkSharedView()){
-  // Shared view mode — renderSharedView called via setTimeout inside checkSharedView
+const _hash = window.location.hash || '';
+if(_hash.startsWith('#share=') && _hash.length > 8 && checkSharedView()){
+  // Shared view mode
 } else {
+  // Normal app
+  try{history.replaceState(null,'',window.location.pathname);}catch(e){} // clear stale hash
   loadState();
   injectLogos();
-  if(ST.onboarded){
+  if(ST && ST.onboarded){
     document.getElementById('onboarding').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     initApp();
@@ -2840,27 +2843,24 @@ if(checkSharedView()){
 </script>
 </body>
 </htmlasync function renderSharedView(data){
-  const{n,f,t,c}=data;
+  const sv=document.getElementById('shared-view');
+  if(!sv)return;
+  const f=data.f,t=data.t,comp=data.c||{},uname=data.n||'';
   const days=getDaysInRange(f,t);
-  const uname=n||'';
-  const comp=c||{};
-  let totalPts=0,activeDays=0,totalPct=0;
   const allH=allHabitsAll();
+  let totalPts=0,activeDays=0,totalPct=0;
   days.forEach(d=>{
     const done=Object.keys(comp[d]||{}).filter(k=>(comp[d]||{})[k]);
     totalPts+=done.length*10;
-    if(done.length>0)activeDays++;
+    if(done.length)activeDays++;
     totalPct+=allH.length?Math.round(done.length/allH.length*100):0;
   });
   const avgP=days.length?Math.round(totalPct/days.length):0;
-  const CATS=typeof CATEGORIES!=='undefined'?CATEGORIES:[];
-  const sv=document.getElementById('shared-view');
-  sv.innerHTML='';
-  sv.style.cssText='position:fixed;inset:0;background:#0f172a;z-index:9500;overflow-y:auto;color:white;font-family:inherit';
-  document.getElementById('onboarding')?.classList.add('hidden');
-  document.getElementById('app')?.classList.add('hidden');
   const nameStr=uname?(uname.charAt(0).toUpperCase()+uname.slice(1)):'';
-  const catRows=CATS.map(cat=>{
+  const lvName=typeof getLevel!=='undefined'?getLevel(totalPts).name:'Iniciado';
+  const CATS=typeof CATEGORIES!=='undefined'?CATEGORIES:[];
+
+  const catRowsHtml=CATS.map(cat=>{
     const catHabs=allH.filter(h=>h.cat===cat.id);
     const catMax=catHabs.length*10*days.length||1;
     const catPts=days.reduce((s,d)=>{
@@ -2868,50 +2868,64 @@ if(checkSharedView()){
       return s+done.filter(id=>catHabs.some(h=>h.id===id)).length*10;
     },0);
     const pct=Math.min(100,Math.round(catPts/catMax*100));
-    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
-      '<span style="width:130px;font-size:14px;font-weight:600;color:'+(cat.color||'#00B9C8')+'">'+(cat.icon||'')+' '+cat.name+'</span>'+
-      '<div style="flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden">'+
-        '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,'+(cat.color||'#00B9C8')+','+(cat.color2||'#00BC88')+');border-radius:4px"></div>'+
-      '</div>'+
-      '<span style="width:42px;text-align:right;font-size:13px;font-weight:700;color:'+(cat.color||'#00B9C8')+'">'+pct+'%</span>'+
-    '</div>';
+    const col=cat.color||'#00B9C8';
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="width:130px;font-size:14px;font-weight:600;color:${col}">${cat.icon||''} ${cat.name}</span>
+      <div style="flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${col};border-radius:4px"></div>
+      </div>
+      <span style="width:42px;text-align:right;font-size:13px;font-weight:700;color:${col}">${pct}%</span>
+    </div>`;
   }).join('');
-  const lvName=typeof getLevel!=='undefined'?getLevel(totalPts).name:'Iniciado';
-  const stats=[
-    ['Puntos del período','<b style="font-size:26px;color:#00B9C8">'+totalPts+' pts</b>'],
-    ['Días activos','<b style="font-size:26px;color:#00B9C8">'+activeDays+'/'+days.length+' días</b>'],
-    ['Promedio diario','<b style="font-size:26px;color:#f59e0b">'+avgP+'%</b>'],
-    ['Nivel','<b style="font-size:26px;color:#00B9C8">'+lvName+'</b>'],
-  ];
-  const compStr=encodeURIComponent(JSON.stringify(comp));
-  sv.innerHTML='<div style="max-width:600px;margin:0 auto;padding-bottom:60px">'+
-    '<div style="background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);padding:28px 24px 20px">'+
-      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'+
-        '<div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#00B9C8,#00BC88);display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
-          '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>'+
-        '</div>'+
-        '<div>'+
-          '<div style="font-size:19px;font-weight:800;color:#003d57">Tracker de Hábitos Biohacker</div>'+
-          '<div style="font-size:13px;color:rgba(0,61,87,.75)">by Marcos Apud'+(nameStr?' · Informe de '+nameStr:'')+'</div>'+
-        '</div>'+
-      '</div>'+
-      '<div style="background:rgba(0,61,87,.15);border-radius:8px;padding:6px 12px;display:inline-block;font-size:13px;font-weight:700;color:#003d57">'+fmtShort(f)+' — '+fmtShort(t)+'</div>'+
-    '</div>'+
-    '<div style="background:#0f172a;padding:20px 24px">'+
-      '<div style="color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px">RESUMEN</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">'+
-        stats.map(([l,v])=>'<div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px">'+
-          '<div style="font-size:12px;color:#64748b;margin-bottom:4px">'+l+'</div>'+v+'</div>').join('')+
-      '</div>'+
-      '<div style="color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px">DESEMPEÑO POR CATEGORÍA</div>'+
-      catRows+
-      '<div style="margin-top:32px;display:flex;flex-direction:column;gap:10px">'+
-        '<button onclick="window.location.href=window.location.origin" style="padding:16px;background:linear-gradient(135deg,#00B9C8,#00BC88);color:white;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;width:100%">⚡ Quiero usar esta app</button>'+
-        '<button onclick="generateSharedPDF(''+f+'',''+t+'',JSON.parse(decodeURIComponent(''+compStr+'')),''+nameStr+'')" style="padding:14px;background:rgba(0,185,200,.1);color:#00B9C8;border:1px solid rgba(0,185,200,.3);border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;width:100%">📥 Descargar mi informe PDF</button>'+
-      '</div>'+
-    '</div>'+
-  '</div>';
+
+  sv.style.cssText='position:fixed;inset:0;background:#0f172a;z-index:9500;overflow-y:auto;color:white;font-family:inherit';
+  sv.classList.remove('hidden');
+  document.getElementById('onboarding')?.classList.add('hidden');
+  document.getElementById('app')?.classList.add('hidden');
+
+  sv.innerHTML=`
+  <div style="max-width:600px;margin:0 auto;padding-bottom:60px">
+    <div style="background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);padding:28px 24px 20px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#00B9C8,#00BC88);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+        </div>
+        <div>
+          <div style="font-size:19px;font-weight:800;color:#003d57">Tracker de Hábitos Biohacker</div>
+          <div style="font-size:13px;color:rgba(0,61,87,.75)">by Marcos Apud${nameStr?' · Informe de '+nameStr:''}</div>
+        </div>
+      </div>
+      <div style="background:rgba(0,61,87,.15);border-radius:8px;padding:6px 12px;display:inline-block;font-size:13px;font-weight:700;color:#003d57">${fmtShort(f)} — ${fmtShort(t)}</div>
+    </div>
+    <div style="background:#0f172a;padding:20px 24px">
+      <div style="color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px">RESUMEN</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px">
+          <div style="font-size:12px;color:#64748b;margin-bottom:4px">Puntos del período</div>
+          <b style="font-size:26px;color:#00B9C8">${totalPts} pts</b>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px">
+          <div style="font-size:12px;color:#64748b;margin-bottom:4px">Días activos</div>
+          <b style="font-size:26px;color:#00B9C8">${activeDays}/${days.length} días</b>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px">
+          <div style="font-size:12px;color:#64748b;margin-bottom:4px">Promedio diario</div>
+          <b style="font-size:26px;color:#f59e0b">${avgP}%</b>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px">
+          <div style="font-size:12px;color:#64748b;margin-bottom:4px">Nivel</div>
+          <b style="font-size:26px;color:#00B9C8">${lvName}</b>
+        </div>
+      </div>
+      <div style="color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px">DESEMPEÑO POR CATEGORÍA</div>
+      ${catRowsHtml}
+      <div style="margin-top:32px;display:flex;flex-direction:column;gap:10px">
+        <button onclick="window.location.href=window.location.origin" style="padding:16px;background:linear-gradient(135deg,#00B9C8,#00BC88);color:white;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;width:100%">⚡ Quiero usar esta app</button>
+      </div>
+    </div>
+  </div>`;
 }
+
 
 async function generateSharedPDF(from,to,comp,name){
   if(typeof ST==='undefined')window.ST={completions:{},medals:[],userName:'',hiddenHabits:[],deletedDefaults:[],customHabits:[],settings:{}};
