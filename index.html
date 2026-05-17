@@ -2104,98 +2104,97 @@ function drawReportCanvas(ctx,W,H,from,to,dna1Img,dna2Img){
   const _seed=_seedStr.split('').reduce((a,ch)=>((a<<5)-a+ch.charCodeAt(0))|0,0);
   const _r=(arr,offset=0)=>arr[Math.abs(_seed+offset)%arr.length];
 
-  // 27 mensajes ALTO rendimiento (avgP >= 65)
+  // 27 mensajes ALTO rendimiento (avgP >= 65) — exactamente 5 líneas cada uno
   const _mHi=[
-    'Tu consistencia reconfigura tu cerebro: cada hábito libera dopamina y refuerza conexiones neuronales permanentes.',
-    'Operar al '+avgP+'% sostenido activa la neuroplasticidad positiva. Tu biología se está reescribiendo.',
-    'La ciencia lo confirma: repetir hábitos durante semanas crea autopistas neuronales que hacen del bienestar tu estado por defecto.',
-    'Cada día al '+avgP+'% es una votación por la persona que querés ser. Ya estás ganando esa elección.',
-    'El '+avgP+'% de cumplimiento está en la zona donde ocurre la transformación real. Tu cuerpo lo sabe.',
-    'Consistencia sobre perfección: '+avgP+'% mantenido en el tiempo vale más que cualquier sprint aislado.',
-    'Tu sistema nervioso autónomo está aprendiendo a preferir estos estados. Lo que hoy requiere esfuerzo, mañana será automático.',
-    'Biohacking real: no es un suplemento ni un gadget. Es lo que estás haciendo — '+avgP+'% de presencia diaria.',
-    'Con este nivel de consistencia, ya no estás construyendo hábitos. Estás construyendo identidad.',
-    'El '+avgP+'% de hoy se suma al de ayer y al de mañana. El efecto compuesto del bienestar es exponencial.',
-    'Tu corteza prefrontal se fortalece con cada decisión consciente que tomás. '+avgP+'% de decisiones correctas hoy.',
-    'Lo que tu cuerpo experimenta repetidamente, tu cerebro lo normaliza como estado base. Estás elevando ese baseline.',
-    'Un '+avgP+'% sostenido cambia la expresión genética. La epigenética responde a tus comportamientos diarios.',
-    'Estás en la zona de alto rendimiento. Pocos llegan acá. Menos se quedan. Vos te estás quedando.',
-    'La disciplina al '+avgP+'% no es restricción — es libertad de elegir quién querés ser cada día.',
-    'Tu microbioma, tu ritmo circadiano, tu variabilidad cardíaca: todo mejora con la consistencia que estás mostrando.',
-    'Neurológicamente, un '+avgP+'% de cumplimiento durante semanas equivale a remodelar los circuitos de recompensa.',
-    'Cada hábito completado suprime el cortisol crónico y activa la serotonina. Tu química interna está cambiando.',
-    'El rendimiento compuesto: 1% mejor cada día = 37x mejor en un año. Al '+avgP+'%, ya llevas ventaja.',
-    'Tu sistema linfático, tu sueño profundo, tu foco mental: todos responden a lo que estás haciendo.',
-    'Con '+avgP+'% de cumplimiento sostenido ya entraste en el territorio del cambio estructural, no cosmético.',
-    'La zona de flujo no es accidental. Se construye exactamente así — con la consistencia que estás mostrando.',
-    'Bienestar de alto rendimiento: no es lo que hacés una vez. Es lo que hacés casi siempre. '+avgP+'% confirma que ya llegaste.',
-    'Tu ritmo cardíaco en reposo, tu VFC, tu energía basal — todos mejoran con el protocolo que estás siguiendo.',
-    'Lo que tu mente entrena, tu cuerpo entrega. Al '+avgP+'%, ya estás entrenando la mente correcta.',
-    'La constancia al '+avgP+'% es la variable más predictiva de salud a largo plazo. No el talento, no la genética.',
-    'Estás construyendo el capital biológico más valioso: salud real, sostenida, comprobada día a día.',
+    'Tu consistencia al '+avgP+'% está reconfigurando tu cerebro a nivel estructural. Cada hábito completado libera dopamina y fortalece las sinapsis responsables del autocontrol. Estás creando una arquitectura neurológica del bienestar que se vuelve más sólida cada semana.',
+    'Operar al '+avgP+'% de forma sostenida activa la neuroplasticidad positiva en su máxima expresión. Tu corteza prefrontal se fortalece, tu amígdala se regula mejor y tu sistema de recompensa aprende a preferir los estados que vos mismo estás cultivando con cada acción.',
+    'La ciencia del bienestar confirma que el '+avgP+'% sostenido produce cambios epigenéticos reales. Tus genes de inflamación bajan, tus genes de recuperación suben. No es motivación lo que te mueve ahora — es biología adaptándose a tus decisiones diarias repetidas.',
+    'Cada día al '+avgP+'% es una votación poderosa por la persona que querés ser. Tu cerebro no distingue entre hábito y carácter — con suficientes repeticiones, lo que hacés se convierte en quién sos. Ya estás del otro lado de esa línea que pocos cruzan.',
+    'El '+avgP+'% de cumplimiento sostenido está en la zona donde ocurre la transformación real y permanente. Tu cuerpo lo sabe: hormona por hormona, célula por célula, tu biología está respondiendo a la señal que le enviás cada día con tus decisiones conscientes.',
+    'Consistencia sobre perfección: tu '+avgP+'% mantenido en el tiempo supera en impacto biológico a cualquier sprint perfecto que no se sostiene. La adaptación fisiológica necesita señales repetidas, y vos las estás enviando con una regularidad que ya produce resultados medibles.',
+    'Tu sistema nervioso autónomo está aprendiendo a preferir estos estados que creás con tus hábitos. Lo que hoy requiere esfuerzo consciente, mañana será automático. Estás instalando el bienestar como sistema operativo, no como aplicación que hay que recordar abrir.',
+    'Biohacking real al '+avgP+'%: no es un suplemento ni un gadget. Es la comprensión de que el cuerpo responde a señales repetidas, y que vos tenés el control de qué señales enviás. Esa inteligencia aplicada con consistencia es la herramienta más poderosa que existe.',
+    'Con este nivel de consistencia ya no estás construyendo hábitos aislados — estás construyendo identidad biológica. Cada hábito completado refuerza la narrativa interna de alguien que se cuida, y esa narrativa se convierte en la realidad que tu cuerpo habita cada día.',
+    'El '+avgP+'% de hoy se suma al de ayer y al de mañana en un efecto compuesto exponencial. El bienestar acumulado no se mide en días sino en sistemas: tu sistema inmune, tu eje hormonal, tu microbioma y tu ritmo circadiano responden a la regularidad que mantenés.',
+    'Tu corteza prefrontal se fortalece con cada decisión consciente, y al '+avgP+'% estás tomando muchas. Este fortalecimiento mejora tu capacidad de autorregulación en todas las áreas de tu vida — lo que hacés por tus hábitos trasciende los hábitos mismos.',
+    'Lo que tu cuerpo experimenta repetidamente, tu cerebro lo normaliza como estado base. Al '+avgP+'%, estás elevando ese baseline hacia arriba. Dentro de semanas, lo que hoy te exige esfuerzo será tu punto de partida natural — y querrás ir aún más lejos.',
+    'Un '+avgP+'% sostenido cambia la expresión genética de forma medible. La epigenética confirma que los comportamientos regulares modifican qué genes se activan y cuáles se silencian. Tu ADN está respondiendo a las decisiones que tomás cada día en esta app.',
+    'Estás operando en la zona de alto rendimiento biológico. Pocos llegan acá, y menos se quedan el tiempo suficiente para ver los resultados sistémicos. Vos te estás quedando, y eso es exactamente lo que diferencia a quienes transforman su salud de quienes solo lo intentan.',
+    'La disciplina al '+avgP+'% no es restricción — es libertad de nivel superior. Es la capacidad de elegir quién querés ser cada día y ejecutar esa elección independientemente de cómo te sentís. Eso es lo que estás entrenando, y ya lo estás dominando consistentemente.',
+    'Tu microbioma, tu ritmo circadiano y tu variabilidad cardíaca están mejorando en respuesta directa a la consistencia que mostrás. Son sistemas invisibles pero fundamentales — el '+avgP+'% que mantenés los está calibrando hacia un equilibrio que se siente en tu energía.',
+    'Neurológicamente, el '+avgP+'% de cumplimiento durante semanas remodela los circuitos de recompensa. Tu cerebro empieza a anticipar el placer de completar tus hábitos antes de hacerlos. Esa anticipación es la señal de que el hábito ya está instalado a nivel profundo.',
+    'Cada hábito completado suprime el cortisol crónico y activa la serotonina y las endorfinas. Tu química interna está cambiando en favor tuyo. El '+avgP+'% que mantenés no es solo un número — es la frecuencia con la que le enviás mensajes positivos a tu biología.',
+    'El rendimiento compuesto del bienestar: pequeñas mejoras sostenidas se vuelven enormes con el tiempo. Al '+avgP+'% estás sembrando cambios que en meses serán visibles, palpables y mensurables en cada sistema de tu organismo, desde tu energía hasta tu claridad mental.',
+    'Tu sistema linfático, tu sueño profundo, tu foco mental y tu capacidad de recuperación responden directamente a lo que estás haciendo. El '+avgP+'% sostenido en esta app es la señal que esos sistemas necesitan para operar en su nivel más alto y eficiente.',
+    'Con '+avgP+'% de cumplimiento sostenido ya entraste en el territorio del cambio estructural, no cosmético. No estás maquillando síntomas ni buscando atajos — estás interviniendo en las causas raíz de tu bienestar con la herramienta más efectiva que existe: la constancia.',
+    'La zona de flujo no es accidental. Se construye exactamente como vos lo estás haciendo — con presencia diaria, con ritmo, con la disposición de aparecer incluso cuando no tenés ganas. El '+avgP+'% sostenido es la arquitectura que hace posible el rendimiento máximo.',
+    'Bienestar de alto rendimiento al '+avgP+'%: no es lo que hacés una vez ni lo que hacés cuando estás motivado. Es lo que hacés casi siempre, especialmente cuando no querés. Ese nivel de compromiso es el que produce los cambios biológicos que duran toda la vida.',
+    'Tu ritmo cardíaco en reposo, tu variabilidad cardíaca y tu energía basal están respondiendo al protocolo que construís con tus hábitos. Estas métricas no mienten — reflejan el estado real de tu sistema nervioso autónomo, y el tuyo está mejorando semana a semana.',
+    'Lo que tu mente entrena, tu cuerpo entrega. Al '+avgP+'%, ya estás entrenando la mente que produce resultados extraordinarios. La disciplina, la atención y la autorregulación que construís acá trascienden esta app y se transfieren a cada área de tu vida.',
+    'La constancia al '+avgP+'% es la variable más predictiva de salud a largo plazo según la evidencia científica. No el talento, no la genética, no el acceso a tecnología. La regularidad con la que aparecés y ejecutás es lo que determina quién sos en 10 años.',
+    'Estás construyendo el capital biológico más valioso que existe: salud real, sostenida, probada día a día con acciones concretas. Ese capital no se deprecia — se aprecia. Y el '+avgP+'% que mantenés es exactamente la tasa de retorno que produce riqueza biológica real.',
   ];
 
-  // 27 mensajes MEDIO rendimiento (35-65%)
+  // 27 mensajes MEDIO rendimiento (35-65%) — exactamente 5 líneas cada uno
   const _mMed=[
-    'Estás construyendo los cimientos del ser humano que querés ser. La repetición sostenida transforma comportamientos en identidad.',
-    'El progreso no es lineal, pero la dirección importa más que la velocidad. Seguís avanzando.',
-    'Cada día que elegís tus hábitos sobre el impulso del momento es un entrenamiento de voluntad que se acumula.',
-    'La constancia al '+avgP+'% sostenida en el tiempo supera al sprint perfecto que no se mantiene.',
-    'Tu sistema nervioso está aprendiendo. Cada repetición, aunque sea parcial, deja una huella que facilita la siguiente.',
-    'El '+avgP+'% de hoy no es un fracaso — es el punto de partida para el '+Math.min(99,avgP+10)+'% de mañana.',
-    'Biohacking es ciencia aplicada con paciencia. Cada semana de '+avgP+'% construye sobre la anterior.',
-    'El cerebro no aprende en saltos — aprende en capas. Cada hábito completado agrega una capa más.',
-    'No buscamos perfección — buscamos progresión. Y '+avgP+'% en movimiento ya es progresión real.',
-    'Tu eje HPA (hipotálamo-hipófisis-adrenal) se estabiliza con la rutina que estás construyendo. Seguí.',
-    'Los días difíciles donde igualmente aparecés cuentan el doble. Ese '+avgP+'% tiene más peso de lo que parece.',
-    'Consistencia parcial es infinitamente mejor que abandono total. Seguís en la cancha.',
-    'El '+avgP+'% de hoy alimenta los sistemas de recompensa del mañana. Tu cerebro ya está empezando a disfrutarlo.',
-    'Cada hábito que completás, aunque sea uno solo, activa una cascada hormonal positiva. Suma siempre.',
-    'La identidad biohacker no se construye en días perfectos — se construye en días normales donde aparecés igual.',
-    'Tu mitocondria responde a la consistencia, no a la intensidad aislada. El '+avgP+'% sostenido es el estímulo correcto.',
-    'Progreso real vs. progreso aspiracional: el '+avgP+'% sostenido en el mundo real vale más que el 100% imaginario.',
-    'El volumen acumulado de esfuerzo es lo que transforma. Cada semana a este ritmo suma a ese volumen.',
-    'No existe meseta si seguís apareciendo. La adaptación biológica es silenciosa pero constante.',
-    'Tu historial de '+avgP+'% le está enseñando a tu sistema nervioso que esto es tu nuevo normal.',
-    'La zona de progreso sostenible es exactamente donde estás. Arriba del mínimo, debajo del burnout.',
-    'Cada repetición imperfecta tiene más valor neurológico que la inacción perfectamente justificada.',
-    'Tu microbioma intestinal — directamente vinculado al estado de ánimo — responde a la regularidad que estás construyendo.',
-    'El '+avgP+'% de cumplimiento activa la vía de la dopamina por anticipación. Tu cerebro ya espera estos rituales.',
-    'Aparecer cuando no tenés ganas es el ejercicio más poderoso de autorregulación que existe. Lo estás haciendo.',
-    'El bienestar compuesto funciona igual que el interés compuesto: lento al principio, explosivo después.',
-    'Seguís eligiendo. Esa decisión diaria es exactamente lo que separa a quienes cambian de quienes lo intentan.',
+    'Estás construyendo los cimientos del ser humano que querés ser al '+avgP+'%. La repetición sostenida transforma comportamientos en identidad, y la identidad determina el destino. No subestimes el poder acumulado de cada día que elegís aparecer aunque sea parcialmente.',
+    'El progreso no es lineal, pero la dirección importa más que la velocidad. Al '+avgP+'% seguís avanzando, y cada paso en la dirección correcta recalibra tu sistema nervioso hacia el bienestar. La constancia parcial sostenida supera siempre al esfuerzo máximo esporádico.',
+    'Cada día que elegís tus hábitos sobre el impulso del momento entrenás la voluntad como músculo. Al '+avgP+'% ese músculo se está fortaleciendo. La autorregulación que construís en esta app es transferible a cada decisión importante que tomás fuera de ella también.',
+    'La constancia al '+avgP+'% sostenida en el tiempo supera al sprint perfecto que no se mantiene. Tu sistema nervioso necesita señales repetidas para adaptarse, y vos las estás enviando. La biología responde a la regularidad, no a la intensidad aislada de un día brillante.',
+    'Tu sistema nervioso está aprendiendo a través de la repetición al '+avgP+'%. Cada hábito completado, aunque sea parcial, deja una huella sináptica que facilita la siguiente ejecución. La neurociencia llama a esto potenciación a largo plazo — lo estás activando cada día.',
+    'El '+avgP+'% de hoy no es un fracaso — es el punto de partida exacto desde donde construís el mañana. Tu cerebro registra cada ejecución y la usa para bajar el umbral de activación del próximo intento. Estás haciendo más fácil lo que viene con cada cosa que hacés ahora.',
+    'Biohacking es ciencia aplicada con paciencia, y al '+avgP+'% estás aplicando ambas. Cada semana de cumplimiento construye sobre la anterior en un efecto compuesto que se hace visible cuando menos lo esperás. El cambio biológico real tarda — pero llega de forma definitiva.',
+    'El cerebro no aprende en saltos sino en capas sucesivas. Al '+avgP+'%, cada hábito completado agrega una capa más a la estructura neurológica del bienestar. Con suficientes capas, el comportamiento deja de ser esfuerzo consciente y se convierte en quién sos naturalmente.',
+    'No buscamos perfección — buscamos progresión. Y '+avgP+'% en movimiento sostenido ya es progresión real y medible. La biología responde a tendencias, no a momentos aislados. Tu tendencia actual está apuntando en la dirección correcta, y eso es lo que importa.',
+    'Tu eje HPA — hipotálamo, hipófisis y glándulas suprarrenales — se estabiliza con la rutina que estás construyendo. Al '+avgP+'% le enviás señales de seguridad y previsibilidad que reducen el estrés crónico y liberan energía para la recuperación y el rendimiento real.',
+    'Los días difíciles donde igualmente aparecés al '+avgP+'% cuentan el doble en términos de fortalecimiento del hábito. Tu cerebro registra la ejecución bajo condiciones adversas y la pondera más alto. Esos son los días que más construyen la resiliencia que buscás.',
+    'Consistencia parcial es infinitamente más valiosa que abandono total. Al '+avgP+'% seguís en la cancha y eso es exactamente lo que necesita tu biología para adaptarse. El cuerpo humano responde a señales regulares, y vos las estás enviando con una frecuencia real.',
+    'El '+avgP+'% de hoy alimenta los sistemas de recompensa del mañana a través de la vía dopaminérgica. Tu cerebro ya está empezando a anticipar el placer de completar tus hábitos. Esa anticipación es la señal temprana de que el hábito está echando raíces profundas.',
+    'Cada hábito que completás, aunque sea uno solo, activa una cascada hormonal positiva que mejora tu estado de ánimo y tu energía. Al '+avgP+'% ese efecto es acumulativo — no hay dosis mínima de bienestar, cualquier cantidad suma y se compone con el tiempo.',
+    'La identidad biohacker no se construye en días perfectos sino en días normales donde aparecés igual. Al '+avgP+'% estás mostrando exactamente eso: la disposición de seguir aunque no sea perfecto. Esa disposición es la materia prima del cambio sostenible real.',
+    'Tu mitocondria responde a la consistencia y no a la intensidad aislada. Al '+avgP+'% sostenido estás enviando el estímulo correcto para que tus células energéticas se multipliquen y se vuelvan más eficientes. La energía que sentís en semanas es el resultado directo de esto.',
+    'Progreso real versus progreso aspiracional: el '+avgP+'% sostenido en el mundo real vale más que el cien por ciento imaginario que nunca llega. Darte crédito por lo que hacés — no castigarte por lo que no hacés — es la actitud que produce el cambio más duradero.',
+    'El volumen acumulado de esfuerzo es lo que transforma, no el pico máximo aislado. Al '+avgP+'%, cada semana que pasa suma a ese volumen total. La biología hace la cuenta de forma acumulativa y te devuelve los resultados en forma de mejor energía, recuperación y foco.',
+    'No existe meseta si seguís apareciendo. La adaptación biológica es silenciosa, constante y no lineal. Al '+avgP+'% podés sentir que no avanzás, pero internamente tu microbioma, tu sistema inmune y tus circuitos neurológicos se están reorganizando en tu favor.',
+    'Tu historial al '+avgP+'% le está enseñando a tu sistema nervioso que este ritmo es tu nuevo normal. Cada semana que mantenés este nivel, el umbral se ajusta hacia arriba. Lo que hoy requiere esfuerzo, en dos meses será tu punto de partida natural y cómodo.',
+    'La zona de progreso sostenible es exactamente donde estás: arriba del mínimo, debajo del burnout. Al '+avgP+'% tenés margen para crecer sin riesgo de colapsar. Ese equilibrio es más valioso de lo que parece y mucho más difícil de mantener que los extremos.',
+    'Cada repetición imperfecta tiene más valor neurológico que la inacción perfectamente justificada. Tu cerebro registra la ejecución independientemente de la calidad, y esa ejecución al '+avgP+'% es la que va instalando el patrón que buscás de forma gradual.',
+    'Tu microbioma intestinal — directamente vinculado al estado de ánimo y a la inmunidad — responde a la regularidad que estás construyendo. Al '+avgP+'% le enviás señales de ritmo y consistencia que favorecen las bacterias beneficiosas sobre las que generan inflamación.',
+    'El '+avgP+'% de cumplimiento activa la vía de la dopamina por anticipación. Tu cerebro ya está empezando a esperar estos rituales y a prepararse para ellos con anticipación. Ese fenómeno de anticipación positiva es la señal más clara de que el hábito está instalándose.',
+    'Aparecer cuando no tenés ganas es el ejercicio más poderoso de autorregulación que existe. Al '+avgP+'%, cuantas más veces hacés eso, más fácil se vuelve hacerlo en el futuro. Estás entrenando la voluntad de la misma forma que entrenás un músculo físico.',
+    'El bienestar compuesto funciona igual que el interés compuesto: lento y casi imperceptible al principio, pero exponencial a medida que pasa el tiempo. Al '+avgP+'% sostenido estás en la fase de siembra. La fase de cosecha llega sola si seguís apareciendo.',
+    'Seguís eligiendo al '+avgP+'%, y esa decisión diaria es exactamente lo que separa a quienes transforman su salud de quienes solo tienen la intención de hacerlo. Nadie que transformó su bienestar lo hizo en un día perfecto — lo hizo en días como este.',
   ];
 
-  // 26 mensajes BAJO rendimiento (< 35%)
+  // 26 mensajes BAJO rendimiento (<35%) — exactamente 5 líneas cada uno
   const _mLow=[
-    'Cada acción consciente es una señal poderosa que le enviás a tu biología. El sistema nervioso aprende con la repetición.',
-    'Empezar es la parte más difícil. Ya lo hiciste. Ahora se trata de aparecer un día más, aunque sea con un solo hábito.',
-    'Los grandes cambios comienzan con pequeñas acciones repetidas. No importa cuántos — importa que empieces.',
-    'El camino del biohacker no es perfecto: es consciente. Cada día que registrás es un día que te prestás atención.',
-    'Roma no se construyó en un día. Tu versión más saludable tampoco. Pero se construye — un hábito a la vez.',
-    'Un solo hábito completado hoy activa más vías neurológicas positivas que ninguno. El umbral mínimo importa.',
-    'No medimos perfección — medimos presencia. Y hoy estás presente. Eso cuenta.',
-    'El primer escalón es siempre el más empinado. Ya lo subiste — seguir es más fácil de lo que parece.',
-    'Tu cuerpo responde a señales de intención, no solo a resultados perfectos. Cada hábito es una señal.',
-    'Incluso el esfuerzo parcial activa la plasticidad neuronal. Tu cerebro está cambiando, aunque no lo notes.',
-    'La racha más larga que existe empieza con un día. Este puede ser ese día.',
-    'No comparés tu capítulo 1 con el capítulo 20 de otro. Estás exactamente donde tenés que estar.',
-    'El cuerpo humano tiene una capacidad infinita de regenerarse si le damos las señales correctas. Hoy diste una.',
-    'Baja el umbral: un hábito diario mantenido 30 días produce más cambio que cualquier programa intensivo de una semana.',
-    'La motivación sigue a la acción, no al revés. No esperes sentirte listo — empezá y la motivación aparece.',
-    'Tu microbioma, tu inflamación, tu energía: todo responde al primer paso. Dalo hoy.',
-    'Los días de bajo cumplimiento son datos, no juicios. Usalos para entender qué está compitiendo con tus hábitos.',
-    'El hábito más poderoso es el más simple que podés hacer hoy, aunque el día esté complicado.',
-    'No existe el "volver a empezar". Existe el continuar desde donde estás. Continuá.',
-    'Cada vez que abris esta app y registrás, le estás enviando a tu cerebro un mensaje de intención. Ese mensaje importa.',
-    'El progreso mínimo sostenido supera siempre al esfuerzo máximo esporádico. Hoy es un día de progreso mínimo — es suficiente.',
-    'Tu sistema nervioso parasimpático necesita rutina para activarse. Cada hábito, incluso pequeño, construye esa rutina.',
-    'La autocompasión no es lo opuesto del rendimiento — es su combustible. Sé amable con el proceso.',
-    'En biología, la señal importa más que la dosis. Incluso una pequeña dosis de hábito manda la señal correcta.',
-    'No te medís contra el ideal — te medís contra quien eras ayer. ¿Hoy apareció aunque sea un poco? Ganaste.',
-    'El momento más importante para retomar no es mañana. Es ahora, con lo que tenés, donde estás.',
+    'Cada acción consciente es una señal poderosa que le enviás a tu biología. El sistema nervioso aprende con la repetición, no con la perfección. Un solo hábito completado hoy activa más vías neurológicas positivas que ninguno. El umbral mínimo importa más de lo que creés.',
+    'Empezar es la parte más difícil de cualquier proceso de cambio biológico real. Ya lo hiciste — estás usando esta app. Ahora se trata de aparecer un día más, aunque sea con un solo hábito completado. El cerebro no distingue entre grande y chico: registra presencia o ausencia.',
+    'Los grandes cambios comienzan con pequeñas acciones repetidas con una consistencia que parece insignificante. No importa cuántos hábitos completes hoy — importa que volviste y ejecutaste algo. Esa ejecución mínima es neurológicamente más valiosa que la inacción perfecta.',
+    'El camino del biohacker no es perfecto: es consciente. Cada día que registrás es un día que te prestás atención y le enviás señales intencionales a tu cuerpo. Esa atención sostenida es el primer ingrediente de cualquier transformación real y duradera en la salud.',
+    'Empezar desde cero no existe. Siempre continuás desde donde estás, con lo que tenés, en el contexto que tenés. Lo que parece poco hoy es el punto de partida de lo que viene. La biología no juzga el tamaño del paso — solo registra si el paso se dio o no se dio.',
+    'Un solo hábito completado hoy activa más vías neurológicas positivas que ninguno. No hay dosis mínima de bienestar — cualquier cantidad cuenta y se suma. Tu cerebro registra la ejecución y baja el umbral de activación para la próxima vez que intentes lo mismo.',
+    'No medimos perfección — medimos presencia. Y hoy estás presente, usando esta app y eligiendo conscientemente registrar tu progreso. Eso cuenta de una forma que la mayoría de las personas subestima. La presencia sostenida es el único ingrediente verdaderamente imprescindible.',
+    'El primer escalón es siempre el más empinado en cualquier proceso de cambio. Ya lo subiste — estás acá. Ahora cada paso siguiente es más fácil que el anterior porque el cerebro ya tiene el patrón iniciado. Seguir es siempre más fácil que empezar, y ya empezaste.',
+    'Tu cuerpo responde a señales de intención, no solo a resultados perfectos. Cuando completás aunque sea un hábito, le decís a tu biología que este es el rumbo. Esa señal de dirección es más importante que la magnitud del cambio que produce en este momento.',
+    'Incluso el esfuerzo parcial activa la plasticidad neuronal y deja una huella que facilita la siguiente ejecución. Tu cerebro está cambiando aunque no lo notes todavía — los cambios biológicos reales preceden a los resultados visibles, siempre, en todo proceso de transformación.',
+    'La racha más larga que existe empieza con un solo día. Hoy puede ser ese día de inicio. No importa lo que pasó antes — lo único que el cerebro necesita para instalar un hábito es la próxima repetición. La siguiente siempre está a un momento de distancia.',
+    'No comparés tu proceso con el de nadie más. Estás exactamente donde tenés que estar para el punto de partida que tenés. La biología es personal y el camino es tuyo. Lo que importa no es cuánto avanzaste sino que elegís seguir avanzando en la dirección correcta.',
+    'El cuerpo humano tiene una capacidad extraordinaria de regenerarse y adaptarse cuando le damos las señales correctas de forma repetida. Hoy diste una señal. Mañana podés dar otra. Con suficientes señales en la misma dirección, el sistema completo se recalibra.',
+    'Bajá el umbral: un hábito diario mantenido treinta días produce más cambio biológico real que cualquier programa intensivo de una semana. La clave no es la intensidad sino la regularidad. Cada día que volvés, independientemente de cuánto hacés, fortalece el patrón.',
+    'La motivación sigue a la acción y no al revés — la neurociencia lo confirma. No esperes sentirte listo para empezar. Empezá y la motivación aparece como consecuencia de haber ejecutado. Tu cerebro libera dopamina al completar tareas, no al planearlas.',
+    'Tu microbioma, tu inflamación sistémica y tus niveles de energía responden al primer paso en la dirección correcta. No hace falta el plan perfecto — hace falta el próximo hábito. Ese hábito específico, ejecutado hoy, es más valioso que cualquier intención futura.',
+    'Los días de bajo cumplimiento son datos valiosos, no fracasos morales. Usalos para entender qué está compitiendo con tus hábitos. ¿Es el horario? ¿La energía? ¿La claridad? Esa información te permite ajustar el sistema para que funcione con tu vida real.',
+    'El hábito más poderoso que podés tener hoy es el más simple que podés ejecutar, aunque el día esté complicado y las condiciones sean imperfectas. La simplicidad ejecutada supera a la complejidad planificada en términos de impacto biológico real y acumulativo.',
+    'No existe el volver a empezar. Existe continuar desde donde estás con lo que aprendiste. Cada intento anterior — aunque no haya salido como querías — te enseñó algo sobre vos mismo que hace el próximo intento más informado y más efectivo que el anterior.',
+    'Cada vez que abrís esta app y registrás algo, le enviás a tu cerebro un mensaje claro de intención y de identidad. Ese mensaje importa. Se acumula. Con el tiempo, el cerebro empieza a construir la identidad de alguien que se cuida, y esa identidad cambia todo.',
+    'El progreso mínimo sostenido supera siempre al esfuerzo máximo esporádico en términos de resultados biológicos duraderos. Hoy es un día de progreso mínimo — y eso es exactamente suficiente. No hace falta más que el próximo paso en la dirección correcta.',
+    'Tu sistema nervioso parasimpático necesita rutina para activarse y producir los estados de calma y recuperación que buscás. Cada hábito, incluso uno pequeño, contribuye a construir esa rutina. El sistema no exige perfección — exige regularidad, y podés dársela.',
+    'La autocompasión no es lo opuesto del rendimiento: es su combustible más sostenible. Sé amable con el proceso y con vos mismo. El cambio biológico real no se logra con presión y culpa sino con la disposición de seguir eligiendo, día a día, de forma consistente.',
+    'En biología, la señal importa más que la dosis en las etapas iniciales de cualquier cambio. Una pequeña dosis de hábito enviada regularmente manda la señal correcta y produce adaptación. Estás en esa etapa — lo que hacés ahora está estableciendo el patrón base.',
+    'No te medís contra el ideal — te medís contra quien eras ayer. Si hoy completaste algo, ganaste. Si mañana completás algo, ganás de nuevo. Así se construye el bienestar: una decisión a la vez, un día a la vez, sin necesidad de que cada día sea perfecto.',
+    'El momento más importante para retomar no es mañana ni el lunes ni cuando terminen las obligaciones. Es ahora, con lo que tenés, donde estás. Tu biología no puede esperar al momento perfecto — solo puede responder al momento presente en el que elegís actuar.',
   ];
-
   // Selección principal
   const rParts=[];
   if(avgP>=65)rParts.push(_r(_mHi));
@@ -2726,25 +2725,45 @@ function renderReadOnly(data){
 // ═══════════════════════════════════════════════════════════
 
 function setupScrollFade(){
+  // Create overlay BELOW nav z-index so it doesn't cover nav buttons
+  // but ABOVE content so it fades content going under the nav
   const ov=document.createElement('div');
   ov.id='scroll-fade-ov';
-  ov.style.cssText='position:fixed;left:0;right:0;height:56px;pointer-events:none;z-index:21;opacity:0;transition:opacity 80ms linear;background:linear-gradient(to bottom,rgba(8,14,28,0.92) 0%,rgba(8,14,28,0) 100%)';
+  ov.style.cssText=[
+    'position:fixed',
+    'left:0','right:0',
+    'height:64px',
+    'pointer-events:none',
+    'z-index:15', // below nav(20) — fades content, nav stays clickable on top
+    'opacity:0',
+    'will-change:opacity',
+    'background:linear-gradient(to bottom,#080e1c 0%,rgba(8,14,28,.7) 50%,rgba(8,14,28,0) 100%)'
+  ].join(';');
   document.body.appendChild(ov);
-  function pos(){
+
+  let rafId=null;
+  function applyFade(){
+    rafId=null;
+    const sy=window.scrollY||window.pageYOffset||document.documentElement.scrollTop||0;
+    // Position just below sticky nav
     const nav=document.querySelector('nav');
-    const hdr=document.querySelector('header');
-    const top=nav?nav.getBoundingClientRect().bottom:(hdr?hdr.getBoundingClientRect().bottom:100);
-    ov.style.top=Math.max(0,top)+'px';
+    if(nav){
+      const nb=nav.getBoundingClientRect();
+      ov.style.top=nb.bottom+'px';
+    }
+    ov.style.opacity=sy<5?'0':Math.min(1,sy/40).toFixed(2);
   }
-  function upd(){
-    const sy=Math.max(window.pageYOffset||0,document.documentElement.scrollTop||0,document.body.scrollTop||0);
-    ov.style.opacity=Math.min(1,sy/30);
-    pos();
+
+  function onScroll(){
+    if(!rafId)rafId=requestAnimationFrame(applyFade);
   }
-  window.addEventListener('scroll',upd,{passive:true,capture:true});
-  window.addEventListener('resize',pos,{passive:true});
-  setInterval(upd,300);
-  pos();upd();
+
+  window.addEventListener('scroll',onScroll,{passive:true});
+  // Re-position on resize (nav height can change)
+  window.addEventListener('resize',applyFade,{passive:true});
+  // Fallback poll for PWA/standalone
+  setInterval(applyFade,500);
+  setTimeout(applyFade,200); // initial after DOM settles
 }
 function addSwipeToDismiss(el,closeFn){
   let sy=0,dragging=false;
@@ -2825,7 +2844,8 @@ document.addEventListener('visibilitychange',()=>{
 
 // Route: shared link OR normal app
 const _hash = window.location.hash || '';
-if(_hash.startsWith('#share=') && _hash.length > 8 && checkSharedView()){
+const _isRealSite = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+if(_isRealSite && _hash.startsWith('#share=') && _hash.length > 8 && checkSharedView()){
   // Shared view mode
 } else {
   // Normal app
@@ -2845,85 +2865,94 @@ if(_hash.startsWith('#share=') && _hash.length > 8 && checkSharedView()){
 </htmlasync function renderSharedView(data){
   const sv=document.getElementById('shared-view');
   if(!sv)return;
+  if(!(window.location.hash||'').startsWith('#share='))return;
+  if(window.location.protocol!=='https:'&&window.location.hostname!=='localhost')return;
+
   const f=data.f,t=data.t,comp=data.c||{},uname=data.n||'';
   const days=getDaysInRange(f,t);
   const allH=allHabitsAll();
   let totalPts=0,activeDays=0,totalPct=0;
-  days.forEach(d=>{
-    const done=Object.keys(comp[d]||{}).filter(k=>(comp[d]||{})[k]);
-    totalPts+=done.length*10;
-    if(done.length)activeDays++;
+  days.forEach(function(d){
+    const done=Object.keys(comp[d]||{}).filter(function(k){return !!(comp[d]||{})[k];});
+    totalPts+=done.length*10;if(done.length)activeDays++;
     totalPct+=allH.length?Math.round(done.length/allH.length*100):0;
   });
   const avgP=days.length?Math.round(totalPct/days.length):0;
   const nameStr=uname?(uname.charAt(0).toUpperCase()+uname.slice(1)):'';
   const lvName=typeof getLevel!=='undefined'?getLevel(totalPts).name:'Iniciado';
-  const CATS=typeof CATEGORIES!=='undefined'?CATEGORIES:[];
 
-  const catRowsHtml=CATS.map(cat=>{
-    const catHabs=allH.filter(h=>h.cat===cat.id);
-    const catMax=catHabs.length*10*days.length||1;
-    const catPts=days.reduce((s,d)=>{
-      const done=Object.keys(comp[d]||{}).filter(k=>(comp[d]||{})[k]);
-      return s+done.filter(id=>catHabs.some(h=>h.id===id)).length*10;
-    },0);
-    const pct=Math.min(100,Math.round(catPts/catMax*100));
-    const col=cat.color||'#00B9C8';
-    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <span style="width:130px;font-size:14px;font-weight:600;color:${col}">${cat.icon||''} ${cat.name}</span>
-      <div style="flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:${col};border-radius:4px"></div>
-      </div>
-      <span style="width:42px;text-align:right;font-size:13px;font-weight:700;color:${col}">${pct}%</span>
-    </div>`;
-  }).join('');
-
+  // Build using DOM — no innerHTML with dynamic vars
   sv.style.cssText='position:fixed;inset:0;background:#0f172a;z-index:9500;overflow-y:auto;color:white;font-family:inherit';
   sv.classList.remove('hidden');
-  document.getElementById('onboarding')?.classList.add('hidden');
-  document.getElementById('app')?.classList.add('hidden');
+  document.getElementById('onboarding')&&document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('app')&&document.getElementById('app').classList.add('hidden');
 
-  sv.innerHTML=`
-  <div style="max-width:600px;margin:0 auto;padding-bottom:60px">
-    <div style="background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);padding:28px 24px 20px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#00B9C8,#00BC88);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
-        </div>
-        <div>
-          <div style="font-size:19px;font-weight:800;color:#003d57">Tracker de Hábitos Biohacker</div>
-          <div style="font-size:13px;color:rgba(0,61,87,.75)">by Marcos Apud${nameStr?' · Informe de '+nameStr:''}</div>
-        </div>
-      </div>
-      <div style="background:rgba(0,61,87,.15);border-radius:8px;padding:6px 12px;display:inline-block;font-size:13px;font-weight:700;color:#003d57">${fmtShort(f)} — ${fmtShort(t)}</div>
-    </div>
-    <div style="background:#0f172a;padding:20px 24px">
-      <div style="color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px">RESUMEN</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-        <div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px">
-          <div style="font-size:12px;color:#64748b;margin-bottom:4px">Puntos del período</div>
-          <b style="font-size:26px;color:#00B9C8">${totalPts} pts</b>
-        </div>
-        <div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px">
-          <div style="font-size:12px;color:#64748b;margin-bottom:4px">Días activos</div>
-          <b style="font-size:26px;color:#00B9C8">${activeDays}/${days.length} días</b>
-        </div>
-        <div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px">
-          <div style="font-size:12px;color:#64748b;margin-bottom:4px">Promedio diario</div>
-          <b style="font-size:26px;color:#f59e0b">${avgP}%</b>
-        </div>
-        <div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px">
-          <div style="font-size:12px;color:#64748b;margin-bottom:4px">Nivel</div>
-          <b style="font-size:26px;color:#00B9C8">${lvName}</b>
-        </div>
-      </div>
-      <div style="color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px">DESEMPEÑO POR CATEGORÍA</div>
-      ${catRowsHtml}
-      <div style="margin-top:32px;display:flex;flex-direction:column;gap:10px">
-        <button onclick="window.location.href=window.location.origin" style="padding:16px;background:linear-gradient(135deg,#00B9C8,#00BC88);color:white;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;width:100%">⚡ Quiero usar esta app</button>
-      </div>
-    </div>
-  </div>`;
+  function el(tag,style,text){
+    const e=document.createElement(tag);
+    if(style)e.style.cssText=style;
+    if(text!=null)e.textContent=text;
+    return e;
+  }
+
+  const wrap=el('div','max-width:600px;margin:0 auto;padding-bottom:60px');
+
+  // Header
+  const hdr=el('div','background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);padding:28px 24px 20px');
+  const hRow=el('div','display:flex;align-items:center;gap:12px;margin-bottom:10px');
+  const logoBox=el('div','width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#00B9C8,#00BC88);display:flex;align-items:center;justify-content:center;flex-shrink:0');
+  logoBox.innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>';
+  const titleBox=el('div');
+  const appTitle=el('div','font-size:19px;font-weight:800;color:#003d57','Tracker de Hábitos Biohacker');
+  const appSub=el('div','font-size:13px;color:rgba(0,61,87,.75)','by Marcos Apud'+(nameStr?' · Informe de '+nameStr:''));
+  titleBox.append(appTitle,appSub);hRow.append(logoBox,titleBox);
+  const dateBadge=el('div','background:rgba(0,61,87,.15);border-radius:8px;padding:6px 12px;display:inline-block;font-size:13px;font-weight:700;color:#003d57',fmtShort(f)+' — '+fmtShort(t));
+  hdr.append(hRow,dateBadge);
+
+  // Content
+  const content=el('div','background:#0f172a;padding:20px 24px');
+  content.appendChild(el('div','color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px','RESUMEN'));
+
+  const grid=el('div','display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px');
+  [[totalPts+' pts','Puntos del período','#00B9C8'],[activeDays+'/'+days.length+' días','Días activos','#00B9C8'],[avgP+'%','Promedio diario','#f59e0b'],[lvName,'Nivel','#00B9C8']].forEach(function(s){
+    const card=el('div','background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px');
+    card.appendChild(el('div','font-size:12px;color:#64748b;margin-bottom:4px',s[1]));
+    card.appendChild(el('b','font-size:26px;color:'+s[2],s[0]));
+    grid.appendChild(card);
+  });
+  content.appendChild(grid);
+
+  // Categories
+  const CATS=typeof CATEGORIES!=='undefined'?CATEGORIES:[];
+  if(CATS.length){
+    content.appendChild(el('div','color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px','DESEMPEÑO POR CATEGORÍA'));
+    CATS.forEach(function(cat){
+      const catHabs=allH.filter(function(h){return h.cat===cat.id;});
+      const catMax=catHabs.length*10*days.length||1;
+      let catPts=0;
+      days.forEach(function(d){
+        const done=Object.keys(comp[d]||{}).filter(function(k){return !!(comp[d]||{})[k];});
+        catPts+=done.filter(function(id){return catHabs.some(function(h){return h.id===id;});}).length*10;
+      });
+      const pct=Math.min(100,Math.round(catPts/catMax*100));
+      const col=cat.color||'#00B9C8';
+      const row=el('div','display:flex;align-items:center;gap:10px;margin-bottom:10px');
+      row.appendChild(el('span','width:130px;font-size:14px;font-weight:600;color:'+col,cat.name));
+      const barWrap=el('div','flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden');
+      const barFill=el('div','height:100%;width:'+pct+'%;background:'+col+';border-radius:4px');
+      barWrap.appendChild(barFill);row.appendChild(barWrap);
+      row.appendChild(el('span','width:42px;text-align:right;font-size:13px;font-weight:700;color:'+col,pct+'%'));
+      content.appendChild(row);
+    });
+  }
+
+  // CTA
+  const cta=el('button','margin-top:32px;padding:16px;background:linear-gradient(135deg,#00B9C8,#00BC88);color:white;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;width:100%','⚡ Quiero usar esta app');
+  cta.onclick=function(){window.location.href=window.location.origin;};
+  content.appendChild(cta);
+
+  wrap.append(hdr,content);
+  sv.innerHTML='';
+  sv.appendChild(wrap);
 }
 
 
