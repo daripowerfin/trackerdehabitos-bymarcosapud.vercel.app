@@ -483,6 +483,44 @@ body{opacity:0;animation:appFadeIn 1.2s cubic-bezier(.4,0,.2,1) forwards}
 
 @media(max-width:380px){.header-right{gap:5px}.hstat{min-width:48px;padding:6px 7px}.hstat-val{font-size:14px}}
 
+
+@media(max-width:899px){
+  /* Header: 2-column top row + name in second row */
+  .header-inner{
+    grid-template-columns:auto 1fr !important;
+    grid-template-rows:auto auto !important;
+    padding:8px 14px !important;
+    gap:0 10px !important;
+    align-items:center !important;
+  }
+  .header-left{grid-column:1;grid-row:1}
+  .header-right{grid-column:2;grid-row:1;justify-content:flex-end}
+  /* Name: full-width second row, only shown when exists */
+  #header-name-wrap{
+    grid-column:1/-1 !important;
+    grid-row:2 !important;
+    display:block !important;
+    text-align:center;
+    padding:3px 0 0;
+    border-top:1px solid rgba(255,255,255,.07);
+    margin-top:4px;
+  }
+  #header-name-wrap[style*="display:none"]{display:none !important}
+  #header-name{font-size:13px !important;font-weight:700 !important;color:#00B9C8 !important;letter-spacing:-.2px}
+  /* Compact title */
+  .header-title h1{font-size:13px !important;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+  .header-title .by{font-size:9px !important}
+  .header-level{display:none !important}
+  /* Compact logo */
+  .header-logo svg,.header-logo img{width:30px !important;height:30px !important}
+  .header-left{gap:8px !important}
+  /* Compact stats */
+  .header-right{gap:5px !important}
+  .hstat{padding:5px 8px !important;border-radius:10px !important}
+  .hstat-val{font-size:16px !important}
+  .hstat-label{font-size:9px !important}
+}
+
 @media(min-width:900px){
   main{max-width:100%;padding:20px 40px 40px}
   #global-tools{max-width:100%;padding:10px 40px 0}
@@ -1587,7 +1625,8 @@ function updateHeaderName(){
   if(ST.userName){
     const name=ST.userName.charAt(0).toUpperCase()+ST.userName.slice(1);
     el.textContent=name;
-    wrap.style.display='block';
+    // Remove inline style so CSS media query controls display
+    wrap.style.removeProperty('display');
   } else {
     wrap.style.display='none';
   }
@@ -2795,7 +2834,21 @@ function renderReadOnly(data){
 // INIT
 // ═══════════════════════════════════════════════════════════
 
-function setupScrollFade(){/* disabled — performance test */}
+function setupScrollFade(){
+  // CSS-only gradient — no scroll listeners, no rAF, zero CPU
+  const ov=document.createElement('div');
+  ov.id='scroll-fade-ov';
+  ov.style.cssText='position:fixed;left:0;right:0;height:52px;pointer-events:none;z-index:15;background:linear-gradient(to bottom,#080e1c 0%,rgba(8,14,28,0) 100%)';
+  document.body.appendChild(ov);
+  function pos(){
+    const nav=document.querySelector('nav');
+    if(nav)ov.style.top=nav.getBoundingClientRect().bottom+'px';
+  }
+  pos();
+  window.addEventListener('resize',pos,{passive:true});
+  // Re-position after fonts/images load
+  setTimeout(pos,500);
+}
 function addSwipeToDismiss(el,closeFn){
   let sy=0,dragging=false;
   el.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;dragging=true;el.style.transition='none';},{passive:true});
@@ -2884,7 +2937,7 @@ function initApp(){
 }
 
 // Music auto-starts — fallback on interaction if browser blocks autoplay
-tryAutoplayMusic();
+// tryAutoplayMusic(); // disabled — user activates manually
 
 // Also pause on window blur (iframe losing focus covers Claude modal close)
 window.addEventListener('blur',()=>{
