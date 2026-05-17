@@ -60,7 +60,7 @@ input,select{font-family:'Geist',system-ui,sans-serif}
 .msg-text{font-size:14px;color:#cbd5e1;line-height:1.7;letter-spacing:-.01em}
 
 /* ── ONBOARDING ── */
-#onboarding{position:fixed;inset:0;background:rgba(10,16,30,.88);backdrop-filter:blur(3px);z-index:9000;display:flex;align-items:flex-start;justify-content:center;padding:28px 20px 20px;overflow-y:auto}
+#onboarding{position:fixed;inset:0;background:rgba(10,16,30,.88);z-index:9000;display:flex;align-items:flex-start;justify-content:center;padding:28px 20px 20px;overflow-y:auto}
 .ob-wrap{width:100%;max-width:400px;padding-bottom:20px}
 .ob-slide{display:none;animation:fadeUp .4s ease}
 .ob-slide.active{display:block}
@@ -114,9 +114,9 @@ input,select{font-family:'Geist',system-ui,sans-serif}
 #app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
 .cloud-wrap{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .cloud{position:absolute;border-radius:50%;filter:blur(55px)}
-.c1{width:600px;height:600px;background:radial-gradient(circle,rgba(0,185,200,.38) 0%,rgba(0,188,136,.18) 45%,transparent 70%);top:-12%;left:-18%;animation:c1m 14s infinite;animation-fill-mode:both;animation-timing-function:ease-in-out}
-.c2{width:480px;height:480px;background:radial-gradient(circle,rgba(0,188,136,.34) 0%,rgba(0,185,200,.16) 45%,transparent 70%);bottom:-10%;right:-14%;animation:c2m 18s infinite;animation-delay:-7s;animation-fill-mode:both;animation-timing-function:ease-in-out}
-.c3{width:400px;height:400px;background:radial-gradient(circle,rgba(0,185,200,.28) 0%,rgba(0,188,136,.12) 50%,transparent 70%);top:38%;left:28%;animation:c3m 11s infinite;animation-delay:-4s;animation-fill-mode:both;animation-timing-function:ease-in-out}
+.c1{width:600px;height:600px;background:radial-gradient(circle,rgba(0,185,200,.38) 0%,rgba(0,188,136,.18) 45%,transparent 70%);top:-12%;left:-18%;animation:c1m 28s infinite;animation-fill-mode:both;animation-timing-function:ease-in-out}
+.c2{width:480px;height:480px;background:radial-gradient(circle,rgba(0,188,136,.34) 0%,rgba(0,185,200,.16) 45%,transparent 70%);bottom:-10%;right:-14%;animation:c2m 36s infinite;animation-delay:-7s;animation-fill-mode:both;animation-timing-function:ease-in-out}
+.c3{width:400px;height:400px;background:radial-gradient(circle,rgba(0,185,200,.28) 0%,rgba(0,188,136,.12) 50%,transparent 70%);top:38%;left:28%;animation:c3m 22s infinite;animation-delay:-4s;animation-fill-mode:both;animation-timing-function:ease-in-out}
 .c4{width:360px;height:360px;background:radial-gradient(circle,rgba(0,188,136,.24) 0%,rgba(0,185,200,.1) 50%,transparent 70%);top:8%;right:18%;animation:c4m 15s infinite;animation-delay:-9s;animation-fill-mode:both;animation-timing-function:ease-in-out}
 @keyframes c1m{0%{transform:translate(0,0) scale(1);opacity:0}8%{opacity:1}30%{transform:translate(26%,16%) scale(1.1)}55%{transform:translate(-6%,36%) scale(.92)}80%{transform:translate(16%,-10%) scale(1.05)}100%{transform:translate(0,0) scale(1);opacity:0}}
 @keyframes c2m{0%{transform:translate(0,0) scale(1);opacity:0}8%{opacity:.9}35%{transform:translate(-28%,-20%) scale(1.12)}60%{transform:translate(12%,10%) scale(.9)}85%{transform:translate(-8%,26%) scale(1.06)}100%{transform:translate(0,0) scale(1);opacity:0}}
@@ -124,7 +124,7 @@ input,select{font-family:'Geist',system-ui,sans-serif}
 @keyframes c4m{0%{transform:translate(0,0) scale(1);opacity:0}10%{opacity:.8}38%{transform:translate(-22%,30%) scale(1.1)}65%{transform:translate(20%,-16%) scale(.92)}88%{transform:translate(-6%,8%) scale(1.04)}100%{transform:translate(0,0) scale(1);opacity:0}}
 
 /* ── HEADER ── */
-header{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:none;position:sticky;top:0;z-index:30;display:flex;flex-direction:column}
+header{background:transparent;border-bottom:none;position:sticky;top:0;z-index:30;display:flex;flex-direction:column}
 .header-inner{max-width:720px;width:100%;margin:0 auto;padding:12px 16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
 .header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end}.header-left{display:flex;align-items:center;gap:11px;flex:1;min-width:0}
 .header-logo{flex-shrink:0;transition:transform .3s;cursor:pointer}
@@ -394,7 +394,7 @@ body{opacity:0;animation:appFadeIn 1.2s cubic-bezier(.4,0,.2,1) forwards}
 
 /* ── SHARE MODAL ── */
 #share-overlay{position:fixed;inset:0;isolation:isolate;background:rgba(0,0,0,.72);z-index:8300}
-.share-sheet{background:rgba(8,14,28,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:20px 20px 0 0;padding:20px 0 48px;width:100%;max-width:480px;animation:slideUp .3s ease}
+.share-sheet{background:rgba(8,14,28,.55);border-radius:20px 20px 0 0;padding:20px 0 48px;width:100%;max-width:480px;animation:slideUp .3s ease}
 .share-handle{width:36px;height:3px;background:#334155;border-radius:2px;margin:0 auto 16px}
 .share-head{padding:0 18px 16px;border-bottom:1px solid rgba(51,65,85,.4)}
 .share-title{font-size:17px;font-weight:700;color:#f1f5f9;letter-spacing:-.03em}
@@ -415,7 +415,7 @@ body{opacity:0;animation:appFadeIn 1.2s cubic-bezier(.4,0,.2,1) forwards}
 
 /* ── SHARE SHEET ── */
 #share-overlay{position:fixed;inset:0;isolation:isolate;background:rgba(0,0,0,.72);z-index:8300}
-.share-sheet{background:rgba(8,14,28,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:20px 20px 0 0;padding:20px 0 44px;width:100%;max-width:480px;animation:slideUp .3s ease;position:fixed;bottom:0;left:0;right:0;margin:0 auto;max-height:90vh;overflow-y:auto}
+.share-sheet{background:rgba(8,14,28,.55);border-radius:20px 20px 0 0;padding:20px 0 44px;width:100%;max-width:480px;animation:slideUp .3s ease;position:fixed;bottom:0;left:0;right:0;margin:0 auto;max-height:90vh;overflow-y:auto}
 .share-handle{width:36px;height:3px;background:#334155;border-radius:2px;margin:0 auto 16px}
 .share-head{padding:0 18px 16px;border-bottom:1px solid rgba(51,65,85,.4)}
 .share-title{font-size:17px;font-weight:700;color:#f1f5f9;letter-spacing:-.03em}
@@ -451,14 +451,14 @@ body{opacity:0;animation:appFadeIn 1.2s cubic-bezier(.4,0,.2,1) forwards}
 .share-url-hint{font-size:11px;color:#475569;margin-top:4px;text-align:center}
 
 /* ── READ-ONLY VIEW ── */
-#shared-view{position:fixed;inset:0;background:rgba(8,14,28,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9500;overflow-y:auto}
+#shared-view{position:fixed;inset:0;background:rgba(8,14,28,.7);z-index:9500;overflow-y:auto}
 .sv-header{background:linear-gradient(135deg,#00B9C8,#00BC88);padding:28px 20px 20px}
 .sv-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
 .sv-name{font-size:22px;font-weight:700;color:white;letter-spacing:-.03em;line-height:1.2}
 .sv-period{font-size:13px;color:rgba(255,255,255,.75);margin-top:4px}
 .sv-body{max-width:480px;margin:0 auto;padding:16px}
 .sv-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.sv-stat{background:rgba(0,185,200,.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(0,185,200,.2);border-radius:12px;padding:14px;text-align:center}
+.sv-stat{background:rgba(0,185,200,.08);border:1px solid rgba(0,185,200,.2);border-radius:12px;padding:14px;text-align:center}
 .sv-stat-val{font-size:26px;font-weight:700;color:#22d3ee;letter-spacing:-.04em}
 .sv-stat-label{font-size:11px;color:#475569;margin-top:2px}
 .sv-section-title{font-size:12px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px}
@@ -509,7 +509,7 @@ window.addEventListener('beforeinstallprompt',e=>{
   if(document.getElementById('pwa-banner'))return;
   const b=document.createElement('div');b.id='pwa-banner';
   b.innerHTML=`<img src="/icon-192.png" style="width:36px;height:36px;border-radius:8px"><div style="flex:1;margin:0 10px"><b style="font-size:14px">Instalá la app</b><div style="font-size:12px;opacity:.7">Acceso rápido desde tu pantalla de inicio</div></div><button onclick="triggerInstall()" style="background:linear-gradient(135deg,#00B9C8,#00BC88);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer">Instalar</button><button onclick="document.getElementById('pwa-banner').remove()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:22px;cursor:pointer;padding:0 6px">✕</button>`;
-  b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:rgba(8,14,28,.97);backdrop-filter:blur(12px);border-top:1px solid rgba(0,185,200,.25);padding:14px 16px;display:flex;align-items:center;gap:10px;z-index:9900;color:white;font-family:inherit';
+  b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:rgba(8,14,28,.97);border-top:1px solid rgba(0,185,200,.25);padding:14px 16px;display:flex;align-items:center;gap:10px;z-index:9900;color:white;font-family:inherit';
   document.body.appendChild(b);
 });
 function triggerInstall(){if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.then(r=>{if(r.outcome==='accepted')document.getElementById('pwa-banner')?.remove();deferredInstallPrompt=null;});}
@@ -924,7 +924,7 @@ function startMusic(){
     lfo.frequency.value=0.08;lg.gain.value=v*.3;lfo.connect(lg);lg.connect(master.gain);lfo.start();
     function mkO(f,v2,t,p){const o=musicCtx.createOscillator(),g=musicCtx.createGain(),pn=musicCtx.createStereoPanner();o.type=t||'sine';o.frequency.value=f;g.gain.value=v2;pn.pan.value=p||0;o.connect(g);g.connect(pn);pn.connect(master);o.start();}
     mkO(432,.9,'sine',-1);mkO(439,.9,'sine',1);mkO(528,.35,'sine',0);mkO(216,.25,'sine',0);
-    function shimmer(){const fs=[528,639,741,852,963];const f=fs[Math.floor(Math.random()*fs.length)];const o=musicCtx.createOscillator(),g=musicCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=0;o.connect(g);g.connect(master);o.start();g.gain.linearRampToValueAtTime(.07,musicCtx.currentTime+3);g.gain.linearRampToValueAtTime(0,musicCtx.currentTime+10);setTimeout(()=>o.stop(),11000);setTimeout(shimmer,(40+Math.random()*50)*1000);}
+    function shimmer(){const fs=[528,639,741,852,963];const f=fs[Math.floor(Math.random()*fs.length)];const o=musicCtx.createOscillator(),g=musicCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=0;o.connect(g);g.connect(master);o.start();g.gain.linearRampToValueAtTime(.07,musicCtx.currentTime+3);g.gain.linearRampToValueAtTime(0,musicCtx.currentTime+10);setTimeout(()=>o.stop(),11000);if(typeof musicPlaying!=='undefined'&&musicPlaying)setTimeout(shimmer,(40+Math.random()*50)*1000);}
     setTimeout(shimmer,(35+Math.random()*30)*1000);
   }catch(e){}
 }
@@ -2399,10 +2399,11 @@ function showFallbackURL(url,textEl,boxEl,statusEl){
 
 // ── READ-ONLY SHARED VIEW ─────────────────────────────
 function checkSharedView(){
-  const hash=window.location.hash||'';
-  if(!hash.startsWith('#share='))return false;
-  const encoded=hash.slice(7).trim();
-  if(!encoded)return false;
+  // Support both ?share= (new) and #share= (legacy)
+  const params=new URLSearchParams(window.location.search);
+  const hashStr=window.location.hash||'';
+  const encoded=(params.get('share')||hashStr.replace('#share=','')||'').trim();
+  if(!encoded||(!params.has('share')&&!hashStr.startsWith('#share=')))return false;
   try{
     const json=decodeURIComponent(escape(atob(encoded)));
     const raw=JSON.parse(json);
@@ -2635,7 +2636,7 @@ function copyShareLink(){
   catch(e){encoded=btoa(JSON.stringify(payload));}
   const base=getBaseURL();
   if(!base){const el=document.getElementById('share-status');if(el){el.textContent='Sin URL disponible';el.style.color='#ef4444';}return;}
-  const url=base+'#share='+encoded;
+  const url=base+'?share='+encoded;
   const nameStr=ST.userName?(ST.userName.charAt(0).toUpperCase()+ST.userName.slice(1)+' '):'';
   const title='Informe '+nameStr+'Tracking Habitos Biohacker - By Marcos Apud - '+fmtFileDate(from)+' al '+fmtFileDate(to);
   const statusEl=document.getElementById('share-status');
@@ -2780,7 +2781,7 @@ function initApp(){
     sessionStorage.setItem('ios-hint-shown','1');
     const hint=document.createElement('div');
     hint.innerHTML='<div style="font-size:15px;font-weight:700;margin-bottom:8px">📲 Instalá la app en tu iPhone</div><div style="font-size:13px;line-height:1.6;opacity:.85">1. Tocá el ícono <strong>Compartir</strong> (□↑) en Safari<br>2. Seleccioná <strong>"Agregar a pantalla de inicio"</strong><br>3. ¡Listo! Acceso directo con ícono propio</div><button onclick="this.parentElement.parentElement.remove()" style="margin-top:12px;width:100%;padding:10px;background:linear-gradient(135deg,#00B9C8,#00BC88);color:white;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">Entendido</button>';
-    hint.style.cssText='position:fixed;bottom:80px;left:16px;right:16px;background:rgba(8,14,28,.97);backdrop-filter:blur(12px);border:1px solid rgba(0,185,200,.3);border-radius:16px;padding:18px;z-index:9900;color:white;font-family:inherit;box-shadow:0 8px 32px rgba(0,0,0,.5)';
+    hint.style.cssText='position:fixed;bottom:80px;left:16px;right:16px;background:rgba(8,14,28,.97);border:1px solid rgba(0,185,200,.3);border-radius:16px;padding:18px;z-index:9900;color:white;font-family:inherit;box-shadow:0 8px 32px rgba(0,0,0,.5)';
     document.body.appendChild(hint);
     setTimeout(()=>hint.remove&&hint.remove(),12000);
   }
@@ -2820,8 +2821,9 @@ document.addEventListener('visibilitychange',()=>{
 
 // Route: shared link OR normal app
 const _hash = window.location.hash || '';
+  const _search = window.location.search || '';
 const _isRealSite = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
-if(_isRealSite && _hash.startsWith('#share=') && _hash.length > 8 && checkSharedView()){
+if(_isRealSite && (_hash.startsWith('#share=') || _search.includes('?share=') || _search.startsWith('?share=')) && checkSharedView()){
   // Shared view mode
 } else {
   // Normal app
@@ -2841,7 +2843,8 @@ if(_isRealSite && _hash.startsWith('#share=') && _hash.length > 8 && checkShared
 </htmlasync function renderSharedView(data){
   const sv=document.getElementById('shared-view');
   if(!sv)return;
-  if(!(window.location.hash||'').startsWith('#share='))return;
+  const _sv_params=new URLSearchParams(window.location.search);
+  if(!_sv_params.has('share')&&!(window.location.hash||'').startsWith('#share='))return;
   if(window.location.protocol!=='https:'&&window.location.hostname!=='localhost')return;
 
   const f=data.f,t=data.t,comp=data.c||{},uname=data.n||'';
