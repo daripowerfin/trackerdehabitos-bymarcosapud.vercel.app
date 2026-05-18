@@ -891,7 +891,7 @@ function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone
   <!-- GLOBAL TOOLS — arriba del nav -->
   <button id="gt-menu-btn" onclick="toggleGlobalMenu()" class="gt-row" style="justify-content:center;font-weight:700">
     <span id="gt-menu-icon">⋯</span>
-    <span id="gt-menu-label">Menú</span>
+    <span id="gt-menu-label">Menú De Configuración y Ajustes</span>
   </button>
   <div id="global-tools" style="max-height:0;overflow:hidden;transition:max-height .3s ease">
     <div class="gt-row" onclick="showOnboarding()">
@@ -1830,21 +1830,38 @@ function setStatsPeriod(p){
   renderStats();
 }
 function renderStats(){
-  const tot=getTotalPts(),str=computeStreak(),bstr=bestStreak(),lv=getLevel(tot),lp=lvPct(tot),nlv=LEVELS.find(l=>l.n===lv.n+1),bd=getBestDay(),bw=getBestWeekPts(),tp=dayPts(todayStr()),nm=ST.userName?`, ${ST.userName}`:'';
+  try{
+  const tot=getTotalPts(),str=computeStreak(),bstr=bestStreak(),lv=getLevel(tot),lp=lvPct(tot),nlv=LEVELS.find(l=>l.n===lv.n+1),bd=getBestDay(),bw=getBestWeekPts(),tp=dayPts(todayStr()),nm=ST.userName?', '+ST.userName:'';
   const {from:sf,to:st}=getStatsPeriodRange();
   const pdays=getDaysInRange(sf,st);
   const periodLabels={week:'7 días',month:'30 días','3months':'3 meses',all:'Todo'};
-  let html=`<div class="stats-period-bar">
+  // Calculate period stats safely (no template literals)
+  var periodPts=0,periodActiveDays=0,periodPctSum=0;
+  pdays.forEach(function(d){
+    periodPts+=dayPts(d);
+    var done=Object.keys(ST.completions[d]||{}).filter(function(k){return !!(ST.completions[d]||{})[k];});
+    if(done.length>0)periodActiveDays++;
+    periodPctSum+=getDayPctDone(d);
+  });
+  var periodAvg=pdays.length?Math.round(periodPctSum/pdays.length):0;
+  var periodBtns='';
+  ['week','month','3months','all'].forEach(function(p){
+    var lbl=periodLabels[p];
+    var active=statsPeriod===p?' active':'';
+    periodBtns+='<button class="stats-period-btn'+active+'" onclick="setStatsPeriod(\"'+p+'\")">'+lbl+'</button>';
+  });
+  var periodStatsHtml='<div class="stats-period-bar">'+periodBtns+'</div>'+
+    '<div class="stat-section-title">'+periodLabels[statsPeriod]+'</div>'+
+    '<div class="records-grid" style="margin-bottom:16px">'+
+    '<div class="record-card"><div class="record-icon">⚡</div><div class="record-val">'+periodPts+'</div><div class="record-label">Pts del período</div></div>'+
+    '<div class="record-card"><div class="record-icon">📅</div><div class="record-val">'+periodActiveDays+'/'+pdays.length+'</div><div class="record-label">Días activos</div></div>'+
+    '<div class="record-card"><div class="record-icon">📊</div><div class="record-val">'+periodAvg+'%</div><div class="record-label">Promedio</div></div>'+
+    '<div class="record-card"><div class="record-icon">🔥</div><div class="record-val">'+str+'</div><div class="record-label">Racha actual</div></div>'+
+    '</div>';
+  let html=periodStatsHtml+`<div class="stats-period-bar">
     ${['week','month','3months','all'].map(p=>`<button class="stats-period-btn${statsPeriod===p?' active':''}" onclick="setStatsPeriod('${p}')">${periodLabels[p]}</button>`).join('')}
   </div>
-  <div class="stat-section-title">Período: ${periodLabels[statsPeriod]}</div>
-  <div class="records-grid">
-    <div class="record-card"><div class="record-icon">⚡</div><div class="record-val">${pdays.reduce((s,d)=>s+dayPts(d),0)}</div><div class="record-label">Pts del período</div></div>
-    <div class="record-card"><div class="record-icon">📅</div><div class="record-val">${pdays.filter(d=>Object.keys(ST.completions[d]||{}).filter(k=>(ST.completions[d]||{})[k]).length>0).length}/${pdays.length}</div><div class="record-label">Días activos</div></div>
-    <div class="record-card"><div class="record-icon">📊</div><div class="record-val">${Math.round(pdays.reduce((s,d)=>s+getDayPctDone(d),0)/(pdays.length||1))}%</div><div class="record-label">Promedio diario</div></div>
-    <div class="record-card"><div class="record-icon">🔥</div><div class="record-val">${computeStreak()}</div><div class="record-label">Racha actual</div></div>
-  </div>
-  <div class="stat-section-title">Récords históricos${nm}</div><div class="records-grid">
+  <div class="stat-section-title">Récords${nm}</div><div class="records-grid">
   <div class="record-card"><div class="record-icon">🏆</div><div class="record-val">${bd.pts}</div><div class="record-label">Mejor día</div><div class="record-motive">${bd.date?mDia(bd):'Sin datos aún.'}</div></div>
   <div class="record-card"><div class="record-icon">📅</div><div class="record-val">${bw.pts}</div><div class="record-label">Mejor semana</div><div class="record-motive">${bw.start?mSem(bw):'Sin datos aún.'}</div></div>
   <div class="record-card"><div class="record-icon">⚡</div><div class="record-val">${tp}</div><div class="record-label">Hoy</div><div class="record-motive">${tp>0?'Vas bien. Seguí sumando.':'Todavía no empezaste.'}</div></div>
@@ -1861,7 +1878,7 @@ function renderStats(){
   for(let day=1;day<=ll.getDate();day++){const ds=`${yr}-${String(mo+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`,fut=isFuture(ds);let cls='cal-day ';if(fut)cls+='future-cal';else{const p=getDayPctDone(ds);if(p===0)cls+='no-data';else if(p<50)cls+='pct-low';else if(p<80)cls+='pct-mid';else if(p<100)cls+='pct-high';else cls+='pct-perfect';}html+=`<div class="${cls}"></div>`;}
   html+=`</div><div class="cal-legend"><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(51,65,85,.25)"></div>Sin datos</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.18)"></div>1–49%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.45)"></div>50–79%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.7)"></div>80–99%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:linear-gradient(135deg,#00B9C8,#00BC88)"></div>100%</div></div>`;
   document.getElementById('main-content').innerHTML=html;
-}
+}catch(e){console.error('renderStats error:',e);document.getElementById('main-content').innerHTML='<div style="padding:20px;color:#ef4444">Error cargando estadísticas: '+e.message+'</div>';}}
 function mDia(bd){const d=new Date(bd.date+'T12:00:00');const m=[`El ${DNAMES[d.getDay()]} ${d.getDate()}/${d.getMonth()+1} fuiste imparable con ${bd.pts} pts.`,`${bd.pts} pts el ${d.getDate()}/${d.getMonth()+1}. Eso es de lo que sos capaz.`];return m[bd.pts%m.length];}
 function mSem(bw){const d=new Date(bw.start+'T12:00:00');return `Semana del ${d.getDate()}/${d.getMonth()+1} — ${bw.pts} pts. Disciplina de élite.`;}
 
@@ -2342,7 +2359,7 @@ function drawReportCanvas(ctx,W,H,from,to,dna1Img,dna2Img){
   }
 
   /* ── RESUMEN ─────────────────────────────────────────────── */
-  sectionLabel('RESUMEN',y);y+=18;
+  sectionLabel('RESUMEN',y);y+=14;
   const STATS=[
     ['Puntos del período',tot.toLocaleString()+' pts','#0e6b8c'],
     ['Días activos',active+'/'+days.length+' días','#0e6b8c'],
@@ -2397,7 +2414,7 @@ function drawReportCanvas(ctx,W,H,from,to,dna1Img,dna2Img){
 
   /* ── MEDALLAS ─────────────────────────────────────────────── */
   if(earnedMedals.length>0){
-    sectionLabel('MEDALLAS OBTENIDAS',y);y+=22;
+    sectionLabel('MEDALLAS OBTENIDAS',y);y+=16;
     const MP={
       first_habit:'<path d="M12 22V17M12 17C10 17 7 15 7 12c0-2 1-4 2-5 0 2 1 3 3 4 0-3 1-6 3-8 1 3 2 5 2 7 0 3-2 5-5 5z"/>',
       first_50:'<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
@@ -2442,7 +2459,7 @@ function drawReportCanvas(ctx,W,H,from,to,dna1Img,dna2Img){
   // Calcular espacio disponible antes del footer
   const FH_REF=90;
   const footY=H-FH_REF-20;
-  const availLines=5;// always 5 lines
+  const availLines=Math.max(3,Math.min(5,Math.floor((footY-y-46)/32)));// 3-5 lines based on space
   const lines5=wrapped.slice(0,Math.min(5,availLines));
   const rcH=lines5.length*32+36;
   const rcG=ctx.createLinearGradient(48,y,W-48,y+rcH);
@@ -3057,7 +3074,7 @@ function toggleGlobalMenu(){
   const icon=document.getElementById('gt-menu-icon');
   const btn=document.getElementById('gt-menu-btn');
   if(el){el.style.maxHeight=_gtMenuOpen?(el.scrollHeight+200)+'px':'0';}
-  if(lbl)lbl.textContent=_gtMenuOpen?'Cerrar':'Menú';
+  if(lbl)lbl.textContent=_gtMenuOpen?'Cerrar':'Menú De Configuración y Ajustes';
   if(icon)icon.textContent=_gtMenuOpen?'✕':'⋯';
   if(btn)btn.style.color=_gtMenuOpen?'#00B9C8':'#64748b';
 }
@@ -3104,9 +3121,17 @@ async function renderSharedView(data){
   document.body.prepend(banner);
 
   // Initialize and render full app
-  // Setup app state without full initApp (avoid conflicts)
-  try{setupScrollFade();}catch(e){}
-  try{syncMusicToggleBtn();}catch(e){}
+  // Setup full app in readonly mode
+  try{
+    // 1. Load app defaults (habits structure etc.)
+    if(typeof loadState==='function')loadState();
+    // 2. Override with shared data
+    ST.completions=comp;
+    ST.userName=ST_SHARED_NAME;
+    ST.medals=data.m||ST.medals||[];
+    // 3. Init full app (sets up all event listeners, navigation)
+    if(typeof initApp==='function')initApp();
+  }catch(e){console.error('[share] setup error:',e);}
   setTimeout(function(){
     try{renderHeader();}catch(e){}
     try{if(typeof renderHoy==='function')renderHoy();}catch(e){}
