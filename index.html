@@ -133,7 +133,7 @@ header{background:transparent;border-bottom:none;position:relative;top:auto;z-in
 .header-logo{flex-shrink:0;transition:transform .3s;cursor:pointer}
 .header-logo:hover{transform:scale(1.08)}
 .header-title h1{font-size:11px;font-weight:700;color:#f1f5f9;line-height:1.0;letter-spacing:-.3px}
-.header-title .by{font-size:10px;color:#475569;margin-top:1px}
+.header-title .by{font-size:11px;color:#94a3b8;margin-top:1px;font-weight:600}
 .header-level{display:flex;align-items:center;gap:4px;margin-top:1px}
 .level-badge{font-size:8px;font-weight:600;color:#00B9C8;background:rgba(0,185,200,.1);border:1px solid rgba(0,185,200,.2);border-radius:4px;padding:1px 6px;letter-spacing:-.01em}
 .level-bar{width:36px;height:2px;background:#1e293b;border-radius:2px;overflow:hidden}
@@ -611,6 +611,11 @@ button:active,.nav-tab:active,.habit-check:active,.share-action-btn:active,.onb-
 .tab-ps-card{text-align:center;padding:6px 4px}
 .tab-ps-val{font-size:18px;font-weight:700;color:#00B9C8}
 .tab-ps-lbl{font-size:10px;color:#64748b;margin-top:2px}
+
+.date-nav{transition:background .25s,border-radius .25s}
+.date-nav.stuck{background:rgba(8,14,28,.97)!important;border-radius:0!important;border-left:none!important;border-right:none!important;border-top:none!important;margin:0 -16px!important;padding:10px 30px!important}
+.period-bar-sticky{transition:background .25s,border-radius .25s}
+.period-bar-sticky.stuck{background:rgba(8,14,28,.97)!important;border-radius:0!important;border-left:none!important;border-right:none!important;border-top:none!important;margin:0 -16px!important;padding:8px 30px!important}
 </style>
 <script>
 let swRegistration=null,deferredInstallPrompt=null;
@@ -1729,7 +1734,7 @@ function renderHoy(){
     if(open){html+=`<div class="cat-body">`;ch.forEach(hb=>{const isDone=!!c[hb.id],pc=isDone?'#00BC88':hb.pts>=20?'#22d3ee':'#64748b';html+=`<div class="habit-row" onclick=\"toggleHabit(event,'${hb.id}','${ds}')\"><div class="habit-check ${isDone?'checked bg-'+cat.color:''}"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div><span class="habit-name${isDone?' done':''}"${dha(hb.id)}>${hb.name}</span><span class="habit-pts" style="color:${pc}">+${hb.pts}</span>${infoBtn(hb.id)}</div>${infoPanel(hb.id)}`;}); html+=`</div>`;}
     html+=`</div>`;
   });
-  document.getElementById('main-content').innerHTML=buildTabPeriodBar()+html;attachTooltips();
+  document.getElementById('main-content').innerHTML=html;attachTooltips();
 }
 function toggleCat(key){catExpanded[key]=!catExpanded[key];if(currentTab==='hoy')renderHoy();}
 function toggleHabit(ev,hid,ds){
@@ -1862,10 +1867,8 @@ function deleteHabit(id){
 
 function buildTabPeriodBar(){
   var lbls={week:'7 días',month:'30 días','3months':'3 meses',all:'Todo'};
-  // Calculate top-bar height for sticky positioning
   var topEl=document.getElementById('top-bar');
   var topH=topEl?topEl.offsetHeight:0;
-  // Stats summary FIRST (right after nav tabs)
   var days=getTabPeriodDays();
   var pts=0,activeDays=0,pctSum=0;
   days.forEach(function(d){
@@ -1875,21 +1878,21 @@ function buildTabPeriodBar(){
     pctSum+=getDayPctDone(d);
   });
   var avg=days.length?Math.round(pctSum/days.length):0;
-  var html='<div class="tab-period-summary">';
-  html+='<div class="tab-ps-card"><div class="tab-ps-val">'+pts+'</div><div class="tab-ps-lbl">pts</div></div>';
-  html+='<div class="tab-ps-card"><div class="tab-ps-val">'+activeDays+'/'+days.length+'</div><div class="tab-ps-lbl">días activos</div></div>';
-  html+='<div class="tab-ps-card"><div class="tab-ps-val">'+avg+'%</div><div class="tab-ps-lbl">promedio</div></div>';
-  html+='</div>';
-  // Period buttons BELOW summary
-  html+='<div class="tab-period-bar">';
+  // Points bar (NOT sticky — scrolls away)
+  var summaryHtml='<div class="tab-period-summary">'+
+    '<div class="tab-ps-card"><div class="tab-ps-val">'+pts+'</div><div class="tab-ps-lbl">pts</div></div>'+
+    '<div class="tab-ps-card"><div class="tab-ps-val">'+activeDays+'/'+days.length+'</div><div class="tab-ps-lbl">días activos</div></div>'+
+    '<div class="tab-ps-card"><div class="tab-ps-val">'+avg+'%</div><div class="tab-ps-lbl">promedio</div></div>'+
+    '</div>';
+  // Period buttons (sticky wrapper)
+  var btnHtml='';
   ['week','month','3months','all'].forEach(function(p){
     var ac=tabPeriod===p?' active':'';
-    html+='<button class="stats-period-btn'+ac+'" onclick="setTabPeriod('+JSON.stringify(p)+')">'+lbls[p]+'</button>';
+    btnHtml+='<button class="stats-period-btn'+ac+'" onclick="setTabPeriod('+JSON.stringify(p)+')">'+lbls[p]+'</button>';
   });
-  html+='</div>';
-  return '<div class="period-bar-sticky" style="top:'+topH+'px">'+html+'</div>';
+  var stickyHtml='<div class="period-bar-sticky" style="top:'+topH+'px"><div class="tab-period-bar">'+btnHtml+'</div></div>';
+  return summaryHtml+stickyHtml;
 }
-
 function getTabPeriodDays(){
   var today=todayStr();
   var toDate=new Date(today);
@@ -2064,6 +2067,15 @@ function toggleReminder(){
 }
 
 
+
+function checkStickyState(){
+  var topH=(document.getElementById('top-bar')||{}).offsetHeight||0;
+  document.querySelectorAll('.date-nav,.period-bar-sticky').forEach(function(el){
+    var rect=el.getBoundingClientRect();
+    el.classList.toggle('stuck',Math.round(rect.top)<=topH+1&&rect.top>=0);
+  });
+}
+window.addEventListener('scroll',checkStickyState,{passive:true});
 function updateStickyTop(){
   var h=(document.getElementById('top-bar')||{}).offsetHeight||0;
   document.documentElement.style.setProperty('--top-bar-h',h+'px');
@@ -2725,7 +2737,15 @@ function shareWhatsApp(){
   });
   lines.push('');
   // Reflexión — mismos mensajes que el PDF
-  const refTextWA=getRefText(avgP,streak,bestCat||'',bestCatPct||0,ST.medals||[],from,to);
+  // Calculate best category for reflexion
+  let bestCatWA='',bestCatPctWA=0;
+  CATEGORIES.filter(cat=>catHabits(cat.id).length>0).forEach(cat=>{
+    const ch=catHabits(cat.id);let done=0;const t2=ch.length*days.length;
+    days.forEach(d=>{const comp=ST.completions[d]||{};done+=ch.filter(h=>comp[h.id]).length;});
+    const pct=t2>0?Math.round(done/t2*100):0;
+    if(pct>bestCatPctWA){bestCatPctWA=pct;bestCatWA=cat.name;}
+  });
+  const refTextWA=getRefText(avgP,streak,bestCatWA,bestCatPctWA,ST.medals||[],from,to);
   if(refTextWA)lines.push('\n💭 *Reflexión*\n_'+refTextWA+'_');
   lines.push('');
   lines.push('_Tracker de Hábitos Biohacker · by Marcos Apud_');
@@ -2805,6 +2825,15 @@ function toggleReminder(){
 }
 
 
+
+function checkStickyState(){
+  var topH=(document.getElementById('top-bar')||{}).offsetHeight||0;
+  document.querySelectorAll('.date-nav,.period-bar-sticky').forEach(function(el){
+    var rect=el.getBoundingClientRect();
+    el.classList.toggle('stuck',Math.round(rect.top)<=topH+1&&rect.top>=0);
+  });
+}
+window.addEventListener('scroll',checkStickyState,{passive:true});
 function updateStickyTop(){
   var h=(document.getElementById('top-bar')||{}).offsetHeight||0;
   document.documentElement.style.setProperty('--top-bar-h',h+'px');
@@ -2989,7 +3018,7 @@ function copyShareLink(){
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%;width:100%}
 body{
-  font-family:Arial,sans-serif;color:#0f172a;
+  margin:0;padding:0;font-family:Arial,sans-serif;color:#0f172a;
   background:linear-gradient(160deg,#c8e8f4 0%,#dff0f8 40%,#e8f5fa 70%,#f0f8fc 100%);
   min-height:100vh;position:relative;
 }
@@ -2998,9 +3027,10 @@ body::before{
   background:url('${dna1}') left top/65% no-repeat,url('${dna2}') right bottom/45% no-repeat;
   opacity:0.20;
 }
-.page{position:relative;z-index:1;width:75%;margin:0 auto;padding:28px 0 48px}
-.pdf-header{background:linear-gradient(135deg,#87CEEB 0%,#4ab8d8 40%,#1a8ab5 70%,#0e6b8c 100%);padding:26px 0 22px;margin-bottom:20px;width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw}
-.pdf-header-inner{max-width:75%;margin:0 auto;padding:0 32px}
+.page{position:relative;z-index:1;width:75%;margin:0 auto;padding:0}
+.pdf-header{background:linear-gradient(135deg,#87CEEB 0%,#4ab8d8 35%,#1a8ab5 65%,#0e6b8c 100%);padding:28px 0 24px;margin-bottom:20px;width:100%;position:relative;overflow:hidden}
+.pdf-header::after{content:'';position:absolute;inset:0;background:url('${dna1}') left top/55% no-repeat;opacity:.25;pointer-events:none}
+.pdf-header-inner{max-width:75%;margin:0 auto;padding:0 32px;position:relative;z-index:1}
 .logo-row{display:flex;align-items:center;gap:14px;margin-bottom:10px}
 .logo-box{width:54px;height:54px;background:linear-gradient(135deg,#00B9C8,#00BC88);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .app-title{font-size:26px;font-weight:800;color:#003d57;letter-spacing:-.03em}
@@ -3022,10 +3052,10 @@ body::before{
 .medal-name{font-weight:700;font-size:14px}
 .medal-desc{font-size:12px;color:#475569;margin-top:2px}
 .reflexion-box{background:rgba(255,255,255,.55);border:1px solid rgba(0,185,200,.25);border-radius:12px;padding:18px;font-size:15px;line-height:1.7;color:#1e293b;backdrop-filter:blur(4px)}
-.pdf-footer{margin-top:28px;padding:14px 0;background:linear-gradient(135deg,#0e6b8c,#1a8ab5);width:100vw;position:relative;left:50%;margin-left:-50vw;text-align:center;font-size:12px;color:rgba(255,255,255,.8);font-weight:600}
+.pdf-footer{margin-top:32px;padding:18px 32px;background:linear-gradient(135deg,#0e6b8c,#1a8ab5);width:100%;text-align:center;font-size:14px;color:rgba(255,255,255,.92);font-weight:700;letter-spacing:.03em}
 hr.divider{border:none;border-top:1px solid rgba(0,185,200,.2);margin:16px 0}
 </style></head><body>
-<div class="page">
+<div class="page" style="padding:24px 0 0">
   <div class="pdf-header">
     <div class="pdf-header-inner">
       <div class="logo-row">
