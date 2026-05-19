@@ -256,7 +256,7 @@ main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:14px 16px 32px}
 .week-day-btn.empty{background:rgba(51,65,85,.25);border:1px solid rgba(71,85,105,.3)}
 .week-day-btn.today-empty{background:rgba(0,185,200,.06);border:2px solid rgba(0,185,200,.35)}
 .week-day-btn.done svg{width:13px;height:13px;stroke:white;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.week-day-btn.future{background:rgba(51,65,85,.12);border:1px solid rgba(71,85,105,.15);opacity:.4;cursor:default}
+.week-day-btn.future{background:rgba(51,65,85,.12);border:1px solid rgba(71,85,105,.15);opacity:.35;cursor:not-allowed;pointer-events:none}
 .week-day-btn.today-done{outline:2px solid rgba(255,255,255,.3);outline-offset:1px}
 
 /* ── HÁBITOS ── */
@@ -588,7 +588,7 @@ button:active,
 .share-action-btn:active, .onb-btn:active { transform: scale(0.97); }
 
 
-#app-header{position:sticky;top:0;z-index:25;background:rgba(8,14,28,.97);border-bottom:1px solid rgba(51,65,85,.25)}
+#app-header{position:sticky;top:0;z-index:25;background:rgba(8,14,28,.96)!important;border-bottom:1px solid rgba(51,65,85,.25)}
 nav{background:rgba(8,14,28,.96)!important;position:sticky!important;top:0!important;z-index:20!important;border-bottom:1px solid rgba(51,65,85,.2)!important}
 #confetti-canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:9999}
 
@@ -1853,12 +1853,7 @@ function deleteHabit(id){
 // ═══════════════════════════════════════════════════════════
 function buildTabPeriodBar(){
   var lbls={week:'7 días',month:'30 días','3months':'3 meses',all:'Todo'};
-  var html='<div class="tab-period-bar">';
-  ['week','month','3months','all'].forEach(function(p){
-    var ac=tabPeriod===p?' active':'';
-    html+='<button class="stats-period-btn'+ac+'" onclick="setTabPeriod('+JSON.stringify(p)+')">'+lbls[p]+'</button>';
-  });
-  html+='</div>';
+  // Stats summary FIRST (right after nav tabs)
   var days=getTabPeriodDays();
   var pts=0,activeDays=0,pctSum=0;
   days.forEach(function(d){
@@ -1868,10 +1863,17 @@ function buildTabPeriodBar(){
     pctSum+=getDayPctDone(d);
   });
   var avg=days.length?Math.round(pctSum/days.length):0;
-  html+='<div class="tab-period-summary">';
+  var html='<div class="tab-period-summary">';
   html+='<div class="tab-ps-card"><div class="tab-ps-val">'+pts+'</div><div class="tab-ps-lbl">pts</div></div>';
   html+='<div class="tab-ps-card"><div class="tab-ps-val">'+activeDays+'/'+days.length+'</div><div class="tab-ps-lbl">días activos</div></div>';
   html+='<div class="tab-ps-card"><div class="tab-ps-val">'+avg+'%</div><div class="tab-ps-lbl">promedio</div></div>';
+  html+='</div>';
+  // Period buttons BELOW summary
+  html+='<div class="tab-period-bar">';
+  ['week','month','3months','all'].forEach(function(p){
+    var ac=tabPeriod===p?' active':'';
+    html+='<button class="stats-period-btn'+ac+'" onclick="setTabPeriod('+JSON.stringify(p)+')">'+lbls[p]+'</button>';
+  });
   html+='</div>';
   return html;
 }
@@ -1935,9 +1937,8 @@ function renderStats(){
   const tot=getTotalPts(),str=computeStreak(),bstr=bestStreak(),lv=getLevel(tot),lp=lvPct(tot),nlv=LEVELS.find(l=>l.n===lv.n+1),bd=getBestDay(),bw=getBestWeekPts(),tp=dayPts(todayStr()),nm=ST.userName?', '+ST.userName:'';
   const {from:sf,to:st}=getStatsPeriodRange();
   const pdays=getDaysInRange(sf,st);
-  const periodLabels={week:'7 días',fortnight:'15 días',month:'30 días','3months':'3 meses',all:'Todo'};
-  var isDayMode=statsPeriod&&statsPeriod.startsWith('day:');
-  var dayModeDate=isDayMode?statsPeriod.slice(4):'';
+  const periodLabels={week:'7 días',fortnight:'15 días',month:'Mensual','3months':'3 meses',all:'Todo'};
+  var isDayMode=false;
   // Calculate period stats safely (no template literals)
   var periodPts=0,periodActiveDays=0,periodPctSum=0;
   pdays.forEach(function(d){
@@ -1948,15 +1949,11 @@ function renderStats(){
   });
   var periodAvg=pdays.length?Math.round(periodPctSum/pdays.length):0;
   var periodBtns='';
-  ['week','fortnight','month','3months','all'].forEach(function(p){
+  ['fortnight','month'].forEach(function(p){
     var lbl=periodLabels[p];
     var active=statsPeriod===p?' active':'';
     periodBtns+='<button class="stats-period-btn'+active+'" onclick="setStatsPeriod('+JSON.stringify(p)+')">'+lbl+'</button>';
   });
-  var isDayModeBtn=statsPeriod&&statsPeriod.startsWith('day:');
-  var dayBtnLbl=isDayModeBtn?('Dia: '+statsPeriod.slice(4)):'Dia individual';
-  var dayBtnAc=isDayModeBtn?' active':'';
-  periodBtns+='<button class="stats-period-btn'+dayBtnAc+'" onclick="pickStatsDay()">'+dayBtnLbl+'</button>';
   var periodStatsHtml='<div class="stats-period-bar">'+periodBtns+'</div>'+
     '<div class="stat-section-title">'+periodLabels[statsPeriod]+'</div>'+
     '<div class="records-grid" style="margin-bottom:16px">'+
@@ -2477,16 +2474,16 @@ function drawReportCanvas(ctx,W,H,from,to,dna1Img,dna2Img){
     ['Nivel',lv.name,'#4f46e5'],
     ['Racha activa',str+' días',str>=7?'#b45309':'#0e6b8c'],
   ];
-  const CW=(W-112)/2-10,CH=70;
+  const CW=(W-112)/2-10,CH=76;
   STATS.forEach(([label,val,col],i)=>{
     const cx=48+(i%2)*(CW+20);if(i%2===0&&i>0)y+=CH+12;
     ctx.fillStyle=CARD2;rrect(ctx,cx,y,CW,CH,13);ctx.fill();
     ctx.strokeStyle=BRD;ctx.lineWidth=1;rrect(ctx,cx,y,CW,CH,13);ctx.stroke();
     ctx.fillStyle=col;ctx.fillRect(cx,y+14,4,CH-28);
     ctx.fillStyle=SEC2;ctx.font='21px Arial';ctx.textAlign='left';ctx.fillText(label,cx+18,y+30);
-    ctx.fillStyle=col;ctx.font='bold 38px Arial';ctx.fillText(val,cx+18,y+72);
+    ctx.fillStyle=col;ctx.font='bold 38px Arial';ctx.fillText(val,cx+18,y+66);
   });
-  y+=CH+20;divider(y);y+=18;
+  y+=CH+14;divider(y);y+=16;
 
   /* ── CATEGORÍAS ──────────────────────────────────────────── */
   sectionLabel('DESEMPEÑO POR CATEGORÍA',y);y+=12;
@@ -2569,7 +2566,7 @@ function drawReportCanvas(ctx,W,H,from,to,dna1Img,dna2Img){
   // Calcular espacio disponible antes del footer
   const FH_REF=90;
   const footY=H-FH_REF-20;
-  const availLines=Math.min(8,Math.max(4,Math.floor((footY-y-50)/32)));
+  const availLines=Math.min(8,Math.max(5,Math.floor((footY-y-30)/32)));
   const lines5=wrapped.slice(0,Math.min(5,availLines));
   const rcH=lines5.length*32+36;
   const rcG=ctx.createLinearGradient(48,y,W-48,y+rcH);
@@ -2795,8 +2792,11 @@ function checkSharedView(){
     if(!ST.customHabits)ST.customHabits=[];
     if(!ST.settings)ST.settings={};
 
-    // Render async — don't block
-    setTimeout(()=>renderSharedView({n:raw.n||'',f,t,c:comp}),0);
+    // Render async — simple read-only view (guaranteed non-editable)
+    setTimeout(function(){
+      try{renderReadOnly({n:raw.n||'',f:f,t:t,c:comp,v:raw.v||1});}
+      catch(e){console.error('[share] renderReadOnly error:',e);}
+    },0);
     return true;
   }catch(e){
     console.error('[share] Error decoding:',e);
@@ -2922,7 +2922,7 @@ function checkMissedReminder(){
 // SHARE — Parte 3
 // ═══════════════════════════════════════════════════════════
 let sharePeriod='week';
-var statsPeriod='month';
+var statsPeriod='fortnight';
 var tabPeriod='all'; // shared period for Hoy/Semana tabs
 
 function openShare(){
@@ -3093,7 +3093,7 @@ function renderReadOnly(data){
   const cal=div.querySelector('#ro-cal');
   dates.forEach(ds=>{
     const cell=document.createElement('div');
-    const n=(comps[ds]||[]).length;
+    const _cd=comps[ds]||{};const n=Array.isArray(_cd)?_cd.length:Object.keys(_cd).filter(function(k){return !!_cd[k];}).length;
     cell.style.cssText='aspect-ratio:1;border-radius:3px;';
     if(n===0)cell.style.background='rgba(51,65,85,.25)';
     else if(n<4)cell.style.background='rgba(0,185,200,.25)';
