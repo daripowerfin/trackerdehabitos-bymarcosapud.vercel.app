@@ -125,7 +125,7 @@ input,select{font-family:'Geist',system-ui,sans-serif}
 
 /* ── HEADER ── */
 header{background:transparent;border-bottom:none;position:relative;top:auto;z-index:1;display:flex;flex-direction:column}
-.period-bar-sticky{position:sticky;z-index:15;background:rgba(30,41,59,.5);border:1px solid rgba(51,65,85,.4);border-radius:12px;margin-bottom:14px;padding:10px 14px}
+.period-bar-sticky{position:sticky;top:var(--top-bar-h,0px);z-index:15;background:rgba(30,41,59,.5);border:1px solid rgba(51,65,85,.4);border-radius:12px;margin-bottom:14px;padding:10px 14px}
 #top-bar{position:sticky;top:0;z-index:25;background:rgba(8,14,28,.96);border-bottom:1px solid rgba(51,65,85,.2)}
 
 .header-inner{max-width:720px;width:100%;margin:0 auto;padding:2px 12px 2px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
@@ -145,11 +145,11 @@ header{background:transparent;border-bottom:none;position:relative;top:auto;z-in
 .hstat-val.cyan{color:#22d3ee}.hstat-val.emerald{color:#34d399}.hstat-val.fire{color:#fb923c}
 
 /* ── GLOBAL TOOLS (arriba del nav) ── */
-#global-tools{max-width:720px;width:100%;margin:0 auto;padding:10px 16px 0;position:relative;z-index:1}
-.gt-row,.add-habit-btn,.manage-open-btn{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;background:rgba(30,41,59,.4);border:1px solid rgba(51,65,85,.4);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:background .15s;-webkit-tap-highlight-color:transparent;font-size:13px;font-weight:500;color:#94a3b8;font-family:'Geist',sans-serif;letter-spacing:-.01em;text-align:left}
+#global-tools{max-width:720px;width:100%;margin:0 auto;padding:3px 12px 0;position:relative;z-index:1}
+.gt-row,.add-habit-btn,.manage-open-btn{display:flex;align-items:center;gap:10px;width:100%;padding:4px 12px;background:rgba(30,41,59,.4);border:1px solid rgba(51,65,85,.4);border-radius:8px;margin-bottom:4px;cursor:pointer;transition:background .15s;-webkit-tap-highlight-color:transparent;font-size:13px;font-weight:500;color:#94a3b8;font-family:'Geist',sans-serif;letter-spacing:-.01em;text-align:left}
 .gt-row:active,.add-habit-btn:active,.manage-open-btn:active{background:rgba(51,65,85,.3)}
 .gt-icon{width:16px;height:16px;stroke:#475569;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.gt-row-label{flex:1}
+.gt-row-label{flex:1;font-size:13px}
 .gt-row.red{color:#ef4444}.gt-row.red .gt-icon{stroke:#ef4444}
 .gt-chevron{width:14px;height:14px;stroke:#334155;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s;flex-shrink:0}
 .gt-config-body{padding:4px 2px 6px;display:none}
@@ -180,7 +180,7 @@ nav{background:transparent}
 main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:14px 16px 32px}
 
 /* ── DATE NAV ── */
-.date-nav{display:flex;align-items:center;justify-content:space-between;background:rgba(30,41,59,.5);border:1px solid rgba(51,65,85,.4);border-radius:12px;padding:10px 14px;margin-bottom:14px}
+.date-nav{display:flex;align-items:center;justify-content:space-between;background:rgba(30,41,59,.5);border:1px solid rgba(51,65,85,.4);border-radius:12px;padding:10px 14px;margin-bottom:14px;position:sticky;top:var(--top-bar-h,0px);z-index:15}
 .date-nav-btn{width:34px;height:34px;border-radius:9px;background:rgba(51,65,85,.4);color:#64748b;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .date-nav-btn:active{background:rgba(51,65,85,.7)}
 .date-nav-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
@@ -900,7 +900,7 @@ function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone
   </header>
 
   <!-- GLOBAL TOOLS — arriba del nav -->
-  <button id="gt-menu-btn" onclick="toggleGlobalMenu()" class="gt-row" style="justify-content:center;font-weight:700">
+  <button id="gt-menu-btn" onclick="toggleGlobalMenu()" class="gt-row" style="justify-content:center;font-weight:700;padding:3px 12px;margin-bottom:3px">
     <span id="gt-menu-icon">⋯</span>
     <span id="gt-menu-label">Menú De Configuración y Ajustes</span>
   </button>
@@ -1545,14 +1545,14 @@ function launchConfetti(n=20,ox,oy){
   if(cP.length>=cap)cP=cP.slice(-cap+n);
   for(let i=0;i<Math.min(n,cap);i++)cP.push({
     x:sx,y:sy,
-    vx:(Math.random()-.5)*12,
-    vy:-(Math.random()*8+4),
+    vx:(Math.random()-.5)*18,
+    vy:-(Math.random()*12+6),
     color:cols[Math.floor(Math.random()*cols.length)],
-    r:Math.random()*5+3,
+    r:Math.random()*7+5,
     rot:Math.random()*360,
-    rotV:(Math.random()-.5)*10,
+    rotV:(Math.random()-.5)*12,
     life:1,
-    decay:Math.random()*.08+.06,
+    decay:Math.random()*.04+.03,
     s:'r'
   });
   if(!cRAF)animConf();
@@ -1750,12 +1750,12 @@ function toggleHabit(ev,hid,ds){
     const prevPts=newPts-(hb?hb.pts:0);
     const newLv=getLevel(newPts);
     const prevLv=getLevel(prevPts);
-    launchConfetti(15,cx,cy);
+    launchConfetti(25,cx,cy);
     if(cat&&catComplete(cat.id,ds)){
-      setTimeout(function(){launchConfetti(15,cx,cy);sndCat();showCatToast(cat);},300);
+      setTimeout(function(){launchConfetti(25,cx,cy);sndCat();showCatToast(cat);},300);
     }
     if(newLv.n>prevLv.n){
-      setTimeout(function(){launchConfetti(20);sndLevel();showLevelToast(newLv);},600);
+      setTimeout(function(){launchConfetti(35);sndLevel();showLevelToast(newLv);},600);
     }
     if(newPts>prevPts){
       const nm=evalMedals(ds);
@@ -2063,6 +2063,11 @@ function toggleReminder(){
   }
 }
 
+
+function updateStickyTop(){
+  var h=(document.getElementById('top-bar')||{}).offsetHeight||0;
+  document.documentElement.style.setProperty('--top-bar-h',h+'px');
+}
 function updateReminderTime(v){
   ST.settings.reminderTime=v;saveState();
   if(ST.settings.reminderOn){scheduleReminder();showToast('Recordatorio: '+v);}
@@ -2799,6 +2804,11 @@ function toggleReminder(){
   }
 }
 
+
+function updateStickyTop(){
+  var h=(document.getElementById('top-bar')||{}).offsetHeight||0;
+  document.documentElement.style.setProperty('--top-bar-h',h+'px');
+}
 function updateReminderTime(v){
   ST.settings.reminderTime=v;saveState();
   if(ST.settings.reminderOn){scheduleReminder();showToast('Recordatorio: '+v);}
@@ -2954,6 +2964,7 @@ function copyShareLink(){
   const str=computeStreak();const lv=getLevel(getTotalPts());
   const earnedMedals=ST.medals||[];
   const nameStr=name?(name.charAt(0).toUpperCase()+name.slice(1)):'';
+  const informeTitle=(nameStr?'Informe '+nameStr+' ':'Informe ')+'Tracking Habitos Biohacker - By Marcos Apud - '+fmtFileDate(from)+' al '+fmtFileDate(to);
   const avgCol=avgP>=65?'#0a7c57':avgP>=35?'#0e6b8c':'#b45309';
   const CCLR={mente:'#7c3aed',nutricion:'#be123c',luz:'#a16207',movimiento:'#c2410c',naturaleza:'#4d7c0f',recuperacion:'#0e6b8c',sueno:'#4338ca',finanzas:'#065f46',custom:'#a21caf'};
   let catRows='',bestN='',bestP=0;
@@ -2971,8 +2982,9 @@ function copyShareLink(){
   });}
   let refText='';try{refText=getRefText(avgP,str,bestN,bestP,earnedMedals,from,to);}catch(e){}
   const sc=(label,val,col)=>`<div class="stat-card-ro"><div class="sc-label">${label}</div><div class="sc-val" style="color:${col}">${val}</div></div>`;
+  const dna1=DNA_IMG1||'';
   const dna2=DNA_IMG2||'';
-  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Informe Biohacker${nameStr?' - '+nameStr:''}</title>
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${informeTitle}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%;width:100%}
@@ -2983,12 +2995,12 @@ body{
 }
 body::before{
   content:'';position:fixed;inset:0;z-index:0;
-  background:url('${dna2}') center/cover no-repeat;
-  opacity:0.18;
+  background:url('${dna1}') left top/65% no-repeat,url('${dna2}') right bottom/45% no-repeat;
+  opacity:0.20;
 }
 .page{position:relative;z-index:1;width:75%;margin:0 auto;padding:28px 0 48px}
-.pdf-header{background:linear-gradient(135deg,#87CEEB 0%,#4ab8d8 40%,#1a8ab5 70%,#0e6b8c 100%);border-radius:0 0 16px 16px;padding:26px 32px 22px;margin-bottom:20px;margin-left:-10%;margin-right:-10%;width:calc(100% + 20%)}
-.pdf-header-inner{max-width:75%;margin:0 auto}
+.pdf-header{background:linear-gradient(135deg,#87CEEB 0%,#4ab8d8 40%,#1a8ab5 70%,#0e6b8c 100%);padding:26px 0 22px;margin-bottom:20px;width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw}
+.pdf-header-inner{max-width:75%;margin:0 auto;padding:0 32px}
 .logo-row{display:flex;align-items:center;gap:14px;margin-bottom:10px}
 .logo-box{width:54px;height:54px;background:linear-gradient(135deg,#00B9C8,#00BC88);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .app-title{font-size:26px;font-weight:800;color:#003d57;letter-spacing:-.03em}
@@ -3010,7 +3022,7 @@ body::before{
 .medal-name{font-weight:700;font-size:14px}
 .medal-desc{font-size:12px;color:#475569;margin-top:2px}
 .reflexion-box{background:rgba(255,255,255,.55);border:1px solid rgba(0,185,200,.25);border-radius:12px;padding:18px;font-size:15px;line-height:1.7;color:#1e293b;backdrop-filter:blur(4px)}
-.pdf-footer{margin-top:28px;padding-top:14px;border-top:1px solid rgba(0,185,200,.2);text-align:center;font-size:12px;color:#64748b}
+.pdf-footer{margin-top:28px;padding:14px 0;background:linear-gradient(135deg,#0e6b8c,#1a8ab5);width:100vw;position:relative;left:50%;margin-left:-50vw;text-align:center;font-size:12px;color:rgba(255,255,255,.8);font-weight:600}
 hr.divider{border:none;border-top:1px solid rgba(0,185,200,.2);margin:16px 0}
 </style></head><body>
 <div class="page">
@@ -3053,7 +3065,7 @@ hr.divider{border:none;border-top:1px solid rgba(0,185,200,.2);margin:16px 0}
     const dataUrl='data:text/html;base64,'+b64;
     navigator.clipboard.writeText(dataUrl).then(()=>{
       const s=document.getElementById('share-status');
-      if(s){s.textContent='✓ Informe abierto + link copiado';s.style.color='#34d399';setTimeout(()=>{if(s)s.textContent='';},3000);}
+      if(s){s.textContent='✓ '+informeTitle+' — link copiado';s.style.color='#34d399';setTimeout(()=>{if(s)s.textContent='';},4000);}
     }).catch(()=>{
       const s=document.getElementById('share-status');
       if(s){s.textContent='✓ Informe abierto en nueva pestaña';s.style.color='#34d399';setTimeout(()=>{if(s)s.textContent='';},3000);}
@@ -3187,6 +3199,7 @@ function initApp(){
   checkMissedReminder();
   scheduleReminder();
   setupScrollFade();
+  updateStickyTop();
   // iOS install hint — inline to ensure scope access
   function _showIOSHint(){
     if(typeof isIOS==='undefined'||!isIOS()||isInStandaloneMode())return;
@@ -3207,6 +3220,7 @@ function initApp(){
 tryAutoplayMusic();
 
 // Also pause on window blur (iframe losing focus covers Claude modal close)
+window.addEventListener('resize',updateStickyTop,{passive:true});
 window.addEventListener('blur',()=>{
   if(!musicCtx||!musicMasterGain)return;
   musicMasterGain.gain.cancelScheduledValues(musicCtx.currentTime);
