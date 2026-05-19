@@ -125,7 +125,6 @@ input,select{font-family:'Geist',system-ui,sans-serif}
 
 /* ── HEADER ── */
 header{background:transparent;border-bottom:none;position:relative;top:auto;z-index:1;display:flex;flex-direction:column}
-#period-bar-wrap{background:rgba(8,14,28,.96);border-bottom:1px solid rgba(51,65,85,.2);display:none}
 #top-bar{position:sticky;top:0;z-index:25;background:rgba(8,14,28,.96);border-bottom:1px solid rgba(51,65,85,.2)}
 
 .header-inner{max-width:720px;width:100%;margin:0 auto;padding:6px 16px 4px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
@@ -954,7 +953,6 @@ function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone
       <button class="nav-tab" data-tab="stats" onclick="switchTab('stats')"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>Estadíst.</button>
     </div>
   </nav>
-  <div id="period-bar-wrap"></div>
   </div><!-- /top-bar -->
   <main id="main-content"></main>
 </div>
@@ -1730,7 +1728,7 @@ function renderHoy(){
     if(open){html+=`<div class="cat-body">`;ch.forEach(hb=>{const isDone=!!c[hb.id],pc=isDone?'#00BC88':hb.pts>=20?'#22d3ee':'#64748b';html+=`<div class="habit-row" onclick=\"toggleHabit(event,'${hb.id}','${ds}')\"><div class="habit-check ${isDone?'checked bg-'+cat.color:''}"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div><span class="habit-name${isDone?' done':''}"${dha(hb.id)}>${hb.name}</span><span class="habit-pts" style="color:${pc}">+${hb.pts}</span>${infoBtn(hb.id)}</div>${infoPanel(hb.id)}`;}); html+=`</div>`;}
     html+=`</div>`;
   });
-  updatePeriodBar();document.getElementById('main-content').innerHTML=html;attachTooltips();
+  document.getElementById('main-content').innerHTML=buildTabPeriodBar()+html;attachTooltips();
 }
 function toggleCat(key){catExpanded[key]=!catExpanded[key];if(currentTab==='hoy')renderHoy();}
 function toggleHabit(ev,hid,ds){
@@ -1794,13 +1792,13 @@ function renderSemana(){
     });
     html+=`</div>`;
   });
-  updatePeriodBar();document.getElementById('main-content').innerHTML=html;attachTooltips();
+  document.getElementById('main-content').innerHTML=buildTabPeriodBar()+html;attachTooltips();
 }
 
 // ═══════════════════════════════════════════════════════════
 // HÁBITOS TAB
 // ═══════════════════════════════════════════════════════════
-function renderHabitos(){var pb=document.getElementById('period-bar-wrap');if(pb)pb.style.display='none';
+function renderHabitos(){
   let html=`<div style="font-size:11px;color:#334155;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">${allHabits().length} hábitos · ${maxPts()} pts máximos por día</div>`;
   CATEGORIES.filter(cat=>catHabits(cat.id).length>0).forEach(cat=>{
     const ch=catHabits(cat.id),cp=ch.reduce((s,h)=>s+h.pts,0);
@@ -1861,13 +1859,6 @@ function deleteHabit(id){
 // STATS
 // ═══════════════════════════════════════════════════════════
 
-function updatePeriodBar(){
-  var wrap=document.getElementById('period-bar-wrap');
-  if(!wrap)return;
-  var html=buildTabPeriodBar();
-  if(html){wrap.innerHTML=html;wrap.style.display='block';}
-  else{wrap.innerHTML='';wrap.style.display='none';}
-}
 function buildTabPeriodBar(){
   var lbls={week:'7 días',month:'30 días','3months':'3 meses',all:'Todo'};
   // Stats summary FIRST (right after nav tabs)
@@ -1998,7 +1989,7 @@ function renderStats(){
   for(let i=0;i<sdow;i++)html+=`<div class="cal-day empty"></div>`;
   for(let day=1;day<=ll.getDate();day++){const ds=`${yr}-${String(mo+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`,fut=isFuture(ds);let cls='cal-day ';if(fut)cls+='future-cal';else{const p=getDayPctDone(ds);if(p===0)cls+='no-data';else if(p<50)cls+='pct-low';else if(p<80)cls+='pct-mid';else if(p<100)cls+='pct-high';else cls+='pct-perfect';}html+=`<div class="${cls}"></div>`;}
   html+=`</div><div class="cal-legend"><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(51,65,85,.25)"></div>Sin datos</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.18)"></div>1–49%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.45)"></div>50–79%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.7)"></div>80–99%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:linear-gradient(135deg,#00B9C8,#00BC88)"></div>100%</div></div>`;
-  updatePeriodBar();document.getElementById('main-content').innerHTML=html;
+  document.getElementById('main-content').innerHTML=html;
 }catch(e){console.error('renderStats error:',e);document.getElementById('main-content').innerHTML='<div style="padding:20px;color:#ef4444">Error cargando estadísticas: '+e.message+'</div>';}}
 function mDia(bd){const d=new Date(bd.date+'T12:00:00');const m=[`El ${DNAMES[d.getDay()]} ${d.getDate()}/${d.getMonth()+1} fuiste imparable con ${bd.pts} pts.`,`${bd.pts} pts el ${d.getDate()}/${d.getMonth()+1}. Eso es de lo que sos capaz.`];return m[bd.pts%m.length];}
 function mSem(bw){const d=new Date(bw.start+'T12:00:00');return `Semana del ${d.getDate()}/${d.getMonth()+1} — ${bw.pts} pts. Disciplina de élite.`;}
