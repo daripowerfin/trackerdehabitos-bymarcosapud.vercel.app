@@ -304,7 +304,7 @@ main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:14px 16px 32px}
 .cat-dist-pct{font-size:11px;font-weight:600;color:#334155}
 .cat-dist-bar{height:5px;background:rgba(51,65,85,.35);border-radius:3px;overflow:hidden}
 .cat-dist-fill{height:100%;border-radius:3px;transition:width .7s ease}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;max-width:520px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;width:100%;max-width:600px;margin-left:auto;margin-right:auto}
 .cal-day-label{font-size:9px;color:#334155;text-align:center;font-weight:600;padding:3px 0;text-transform:uppercase}
 .cal-day{aspect-ratio:1;border-radius:2pxmin-height:24px}
 .cal-day.empty{background:transparent}.cal-day.no-data{background:rgba(51,65,85,.18)}
@@ -588,8 +588,8 @@ button:active,
 .share-action-btn:active, .onb-btn:active { transform: scale(0.97); }
 
 
-#app-header{position:sticky;top:0;z-index:25;background:rgba(8,14,28,.96)!important;border-bottom:1px solid rgba(51,65,85,.25)}
-nav{background:rgba(8,14,28,.96)!important;position:sticky!important;top:0!important;z-index:20!important;border-bottom:1px solid rgba(51,65,85,.2)!important}
+#app-header{position:sticky;top:0;z-index:25;background:rgba(8,14,28,.96)!important;padding-bottom:0!important;margin-bottom:0!important;border-bottom:none!important}
+nav{background:rgba(8,14,28,.96)!important;position:sticky!important;top:0!important;margin-top:0!important;border-top:none!important;z-index:20!important;border-bottom:1px solid rgba(51,65,85,.2)!important}
 #confetti-canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:9999}
 
 /* ── Button press effect ── */
@@ -598,6 +598,8 @@ button:active,.nav-tab:active,.habit-check:active,.share-action-btn:active,.onb-
 .share-action-btn:active,.onb-btn:active{transform:scale(0.97)}
 .nav-tab:active{transform:scale(0.96)}
 
+
+.stats-period-nav{display:flex;align-items:center;gap:8px;padding:8px 0 4px}
 .stats-period-bar{display:flex;gap:6px;padding:12px 16px 4px;flex-wrap:wrap}
 .stats-period-btn{padding:5px 14px;border-radius:20px;border:1px solid rgba(51,65,85,.4);background:rgba(30,41,59,.4);color:#64748b;font-size:12px;font-weight:600;cursor:pointer}
 .stats-period-btn.active{background:rgba(0,185,200,.15);border-color:rgba(0,185,200,.4);color:#00B9C8}
@@ -1727,6 +1729,7 @@ function renderHoy(){
 function toggleCat(key){catExpanded[key]=!catExpanded[key];if(currentTab==='hoy')renderHoy();}
 function toggleHabit(ev,hid,ds){
   if(typeof ST_READONLY!=='undefined'&&ST_READONLY)return;
+  if(ds>todayStr())return; // Block future dates absolutely
   if(!ST.completions[ds])ST.completions[ds]={};
   ST.completions[ds][hid]=!ST.completions[ds][hid];
   const now=ST.completions[ds][hid];
@@ -1902,31 +1905,21 @@ function setTabPeriod(p){
 
 function getStatsPeriodRange(){
   const today=todayStr();
-  const toDate=new Date(today);
-  let fromDate=new Date(today);
-  if(statsPeriod==='week'){fromDate.setDate(fromDate.getDate()-6);}
-  else if(statsPeriod==='fortnight'){fromDate.setDate(fromDate.getDate()-14);}
-  else if(statsPeriod==='month'){fromDate.setDate(fromDate.getDate()-29);}
-  else if(statsPeriod==='3months'){fromDate.setDate(fromDate.getDate()-89);}
-  else if(statsPeriod && statsPeriod.startsWith('day:')){
-    // Single day: "day:2026-05-18"
-    const d=statsPeriod.slice(4);
-    return {from:d,to:d};
-  }
-  else{// 'all' — find earliest completion
-    const keys=Object.keys(ST.completions||{}).sort();
-    if(keys.length){fromDate=new Date(keys[0]);}
-    else{fromDate.setDate(fromDate.getDate()-29);}
-  }
-  const fmt=d=>d.toISOString().slice(0,10);
-  return {from:fmt(fromDate),to:fmt(toDate)};
+  const periodLen=statsPeriod==='fortnight'?14:29;
+  // End = today shifted by offset periods
+  const endDate=new Date(today+'T12:00:00');
+  if(statsOffset<0)endDate.setDate(endDate.getDate()+(statsOffset*(periodLen+1)));
+  // Never exceed today
+  const nowDate=new Date(today+'T12:00:00');
+  if(endDate>nowDate)endDate.setTime(nowDate.getTime());
+  const fromDate=new Date(endDate);
+  fromDate.setDate(endDate.getDate()-periodLen);
+  const fmt=d=>{const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;};
+  return {from:fmt(fromDate),to:fmt(endDate)};
 }
+function prevStatsPeriod(){statsOffset--;renderStats();}
+function nextStatsPeriod(){if(statsOffset<0){statsOffset++;renderStats();}}
 
-function pickStatsDay(){
-  var d=prompt('Fecha (YYYY-MM-DD):',todayStr());
-  if(d&&/^\d{4}-\d{2}-\d{2}$/.test(d)){setStatsDay(d);}
-}
-function setStatsDay(ds){statsPeriod='day:'+ds;renderStats();}
 
 function setStatsPeriod(p){
   statsPeriod=p;
@@ -1951,10 +1944,20 @@ function renderStats(){
   var periodBtns='';
   ['fortnight','month'].forEach(function(p){
     var lbl=periodLabels[p];
-    var active=statsPeriod===p?' active':'';
-    periodBtns+='<button class="stats-period-btn'+active+'" onclick="setStatsPeriod('+JSON.stringify(p)+')">'+lbl+'</button>';
+    var ac=statsPeriod===p?' active':'';
+    periodBtns+='<button class="stats-period-btn'+ac+'" onclick="setStatsPeriod('+JSON.stringify(p)+');statsOffset=0;renderStats()">'+lbl+'</button>';
   });
-  var periodStatsHtml='<div class="stats-period-bar">'+periodBtns+'</div>'+
+  var _canNext=statsOffset<0;
+  var _navHtml='<div class="stats-period-nav">'+
+    '<button class="date-nav-btn" onclick="prevStatsPeriod()"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>'+
+    '<div class="date-nav-center" style="cursor:default">'+
+      '<div class="date-nav-label">'+fmtShort(sf)+' — '+fmtShort(st)+'</div>'+
+      '<div class="date-nav-sub">'+periodLabels[statsPeriod]+' · '+pdays.length+' días</div>'+
+    '</div>'+
+    '<button class="date-nav-btn" onclick="nextStatsPeriod()" style="opacity:'+(_canNext?'1':'0.3')+';pointer-events:'+(_canNext?'auto':'none')+'"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>'+
+  '</div>'+
+  '<div class="stats-period-bar">'+periodBtns+'</div>';
+  var periodStatsHtml=_navHtml+
     '<div class="stat-section-title">'+periodLabels[statsPeriod]+'</div>'+
     '<div class="records-grid" style="margin-bottom:16px">'+
     '<div class="record-card"><div class="record-icon">⚡</div><div class="record-val">'+periodPts+'</div><div class="record-label">Pts del período</div></div>'+
@@ -2923,6 +2926,7 @@ function checkMissedReminder(){
 // ═══════════════════════════════════════════════════════════
 let sharePeriod='week';
 var statsPeriod='fortnight';
+var statsOffset=0; // 0=current period, -1=previous, etc.
 var tabPeriod='all'; // shared period for Hoy/Semana tabs
 
 function openShare(){
@@ -3042,67 +3046,118 @@ function fallbackCopy(url,cb){
 // READ-ONLY VIEW
 
 function renderReadOnly(data){
-  document.getElementById('onboarding').classList.add('hidden');
-  document.getElementById('app').classList.add('hidden');
-  const comps=data.c||{},f=data.f,t=data.t,name=data.n||'';
-  const dates=getDatesInRange(f,t);
-  let daysActive=0,maxStr=0,curStr=0;
-  dates.forEach(ds=>{if((comps[ds]||[]).length>0){daysActive++;curStr++;maxStr=Math.max(maxStr,curStr);}else curStr=0;});
-  const avgHabits=dates.length?Math.round(dates.reduce((s,ds)=>s+(comps[ds]||[]).length,0)/dates.length):0;
-  const div=document.createElement('div');div.id='readonly-view';
-  div.style.cssText='min-height:100vh;background:#0f172a;padding:28px 20px 56px;max-width:480px;margin:0 auto;font-family:Geist,sans-serif;position:relative;z-index:1';
-  div.innerHTML=`
-    <div style="text-align:center;margin-bottom:24px">
-      <div id="ro-logo-wrap" style="display:flex;justify-content:center;margin-bottom:14px"></div>
-      <div style="font-size:21px;font-weight:700;color:#f1f5f9;letter-spacing:-.3px">${name?`Informe de ${name}`:'Informe de Hábitos'}</div>
-      <div style="font-size:13px;color:#475569;margin-top:5px">${fmtShort(f)} — ${fmtShort(t)}</div>
-      <div style="display:inline-block;margin-top:8px;font-size:9px;font-weight:700;color:#475569;background:rgba(51,65,85,.35);border-radius:5px;padding:3px 10px;text-transform:uppercase;letter-spacing:.07em">Vista compartida · Solo lectura</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
-      <div style="background:rgba(30,41,59,.5);border:1px solid rgba(51,65,85,.4);border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:26px;font-weight:700;color:#22d3ee;letter-spacing:-.04em">${daysActive}</div>
-        <div style="font-size:10px;color:#475569;margin-top:2px">días activos</div>
-        <div style="font-size:9px;color:#334155">de ${dates.length}</div>
-      </div>
-      <div style="background:rgba(30,41,59,.5);border:1px solid rgba(51,65,85,.4);border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:26px;font-weight:700;color:#fb923c;letter-spacing:-.04em">${maxStr}</div>
-        <div style="font-size:10px;color:#475569;margin-top:2px">mejor racha</div>
-        <div style="font-size:9px;color:#334155">días</div>
-      </div>
-      <div style="background:rgba(30,41,59,.5);border:1px solid rgba(51,65,85,.4);border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:26px;font-weight:700;color:#34d399;letter-spacing:-.04em">${avgHabits}</div>
-        <div style="font-size:10px;color:#475569;margin-top:2px">hábitos/día</div>
-        <div style="font-size:9px;color:#334155">promedio</div>
-      </div>
-    </div>
-    <div style="background:rgba(30,41,59,.5);border:1px solid rgba(51,65,85,.4);border-radius:12px;padding:14px;margin-bottom:16px">
-      <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Actividad del período</div>
-      <div id="ro-cal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
-        <div style="font-size:9px;color:#334155;display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:rgba(51,65,85,.25)"></div>Sin hábitos</div>
-        <div style="font-size:9px;color:#334155;display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:rgba(0,185,200,.3)"></div>Pocos</div>
-        <div style="font-size:9px;color:#334155;display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:rgba(0,185,200,.65)"></div>Varios</div>
-        <div style="font-size:9px;color:#334155;display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:linear-gradient(135deg,#00B9C8,#00BC88)"></div>Muchos</div>
-      </div>
-    </div>
-    <button onclick="window.location.hash='';window.location.reload()" style="display:block;width:100%;padding:14px;background:linear-gradient(135deg,#00B9C8,#00BC88);color:white;border-radius:10px;font-size:14px;font-weight:700;font-family:Geist,sans-serif;border:none;cursor:pointer;letter-spacing:-.01em;margin-top:8px">
-      Empezar mi propio tracker
-    </button>`;
-  document.body.appendChild(div);
-  const logoWrap=div.querySelector('#ro-logo-wrap');if(logoWrap){logoWrap.appendChild(makeLogo(52));}
-  const cal=div.querySelector('#ro-cal');
-  dates.forEach(ds=>{
-    const cell=document.createElement('div');
-    const _cd=comps[ds]||{};const n=Array.isArray(_cd)?_cd.length:Object.keys(_cd).filter(function(k){return !!_cd[k];}).length;
-    cell.style.cssText='aspect-ratio:1;border-radius:3px;';
-    if(n===0)cell.style.background='rgba(51,65,85,.25)';
-    else if(n<4)cell.style.background='rgba(0,185,200,.25)';
-    else if(n<8)cell.style.background='rgba(0,185,200,.5)';
-    else if(n<15)cell.style.background='rgba(0,185,200,.75)';
-    else cell.style.background='linear-gradient(135deg,#00B9C8,#00BC88)';
-    cal.appendChild(cell);
+  // Replace entire page with web version of the PDF informe
+  document.body.innerHTML='';
+  document.body.style.cssText='margin:0;padding:0;background:#f0f7fa;font-family:Arial,sans-serif;color:#0f172a';
+  document.title='Informe Biohacker'+(data.n?' - '+data.n:'');
+
+  const comp=data.c||{}, f=data.f, t=data.t, name=data.n||'';
+  const days=getDaysInRange(f,t);
+  const tot=days.reduce(function(s,d){return s+dayPts(d);},0);
+  const active=days.filter(function(d){return dayHasHabit(d);}).length;
+  const avgP=days.length?Math.round(days.reduce(function(s,d){return s+getDayPctDone(d);},0)/days.length):0;
+
+  // We need ST.completions to point to shared data for helper functions
+  if(typeof ST==='undefined')window.ST={completions:{},medals:[],userName:'',hiddenHabits:[],deletedDefaults:[],customHabits:[],settings:{}};
+  ST.completions=comp;
+  ST.medals=data.m||[];
+  ST.userName=name;
+  if(!ST.hiddenHabits)ST.hiddenHabits=[];
+  if(!ST.deletedDefaults)ST.deletedDefaults=[];
+  if(!ST.customHabits)ST.customHabits=[];
+
+  const lv=getLevel(typeof getTotalPts==='function'?getTotalPts():0);
+  const str=typeof computeStreak==='function'?computeStreak():0;
+  const earnedMedals=ST.medals||[];
+
+  // Category performance
+  var catRows='';
+  var bestN='',bestP=0;
+  var CCLR2={mente:'#7c3aed',nutricion:'#be123c',luz:'#a16207',movimiento:'#c2410c',naturaleza:'#4d7c0f',recuperacion:'#0e6b8c',sueno:'#4338ca',finanzas:'#065f46',custom:'#a21caf'};
+  CATEGORIES.filter(function(cat){return catHabits(cat.id).length>0;}).forEach(function(cat){
+    var ch=catHabits(cat.id),done=0,tot2=ch.length*days.length;
+    days.forEach(function(d){var cc=comp[d]||{};done+=ch.filter(function(h){return cc[h.id];}).length;});
+    var pct=tot2>0?Math.round(done/tot2*100):0;
+    if(pct>bestP){bestP=pct;bestN=cat.name;}
+    var col=CCLR2[cat.id]||'#0e6b8c';
+    catRows+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
+      '<div style="width:160px;font-weight:700;font-size:15px;color:'+col+'">'+cat.name+'</div>'+
+      '<div style="flex:1;height:18px;background:rgba(0,185,200,.15);border-radius:9px;overflow:hidden">'+
+        '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,'+col+',#00BC88);border-radius:9px"></div>'+
+      '</div>'+
+      '<div style="width:44px;text-align:right;font-weight:700;font-size:15px;color:'+col+'">'+pct+'%</div>'+
+    '</div>';
   });
+
+  // Medals
+  var medalCards='';
+  if(earnedMedals.length){
+    MEDALS_DEF.filter(function(m){return earnedMedals.includes(m.id);}).forEach(function(m){
+      medalCards+='<div style="background:rgba(0,185,200,.07);border:1px solid rgba(0,185,200,.2);border-radius:10px;padding:10px 14px;margin-bottom:8px">'+
+        '<div style="font-weight:700;font-size:14px">'+m.name+'</div>'+
+        '<div style="font-size:12px;color:#475569;margin-top:2px">'+m.desc+'</div>'+
+      '</div>';
+    });
+  }
+
+  // Reflexion text
+  var refText='';
+  try{refText=getRefText(avgP,str,bestN,bestP,earnedMedals,f,t);}catch(e){}
+
+  var html='<div style="max-width:720px;margin:0 auto;padding:24px 16px 48px">'+
+    // Header
+    '<div style="background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);border-radius:16px;padding:28px 28px 22px;margin-bottom:20px;position:relative;overflow:hidden">'+
+      '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">'+
+        '<div style="width:56px;height:56px;background:linear-gradient(135deg,#00B9C8,#00BC88);border-radius:12px;display:flex;align-items:center;justify-content:center">'+
+          '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>'+
+        '</div>'+
+        '<div>'+
+          '<div style="font-size:24px;font-weight:800;color:white">Tracker de Hábitos Biohacker</div>'+
+          '<div style="font-size:14px;color:rgba(255,255,255,.8);font-weight:600">by Marcos Apud</div>'+
+          (name?'<div style="font-size:13px;color:rgba(255,255,255,.7)">Informe de '+name+'</div>':'')+
+        '</div>'+
+      '</div>'+
+      '<div style="display:inline-block;background:rgba(0,0,0,.2);border-radius:8px;padding:5px 14px;font-size:13px;color:white;font-weight:700">'+
+        fmtShort(f)+' — '+fmtShort(t)+
+      '</div>'+
+    '</div>'+
+    // Resumen
+    '<div style="margin-bottom:16px">'+
+      '<div style="font-size:12px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Resumen</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+        statCard('Puntos del período',tot.toLocaleString()+' pts','#0e6b8c')+
+        statCard('Días activos',active+'/'+days.length+' días','#0e6b8c')+
+        statCard('Promedio diario',avgP+'%',avgP>=65?'#0a7c57':avgP>=35?'#0e6b8c':'#b45309')+
+        statCard('Nivel',lv.name,'#4f46e5')+
+        statCard('Racha activa',str+' días',str>=7?'#b45309':'#0e6b8c')+
+      '</div>'+
+    '</div>'+
+    // Categorias
+    (catRows?'<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Desempeño por Categoría</div>'+catRows+'</div>':'')+
+    // Medallas
+    (medalCards?'<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Medallas obtenidas</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+medalCards+'</div></div>':'')+
+    // Reflexion
+    (refText?'<div style="margin-bottom:24px">'+
+      '<div style="font-size:12px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Reflexión</div>'+
+      '<div style="background:rgba(0,185,200,.07);border:1px solid rgba(0,185,200,.2);border-radius:12px;padding:18px;font-size:15px;line-height:1.65;color:#334155">'+refText+'</div>'+
+    '</div>':'')+
+    // Footer
+    '<div style="text-align:center;font-size:12px;color:#94a3b8;border-top:1px solid rgba(0,185,200,.15);padding-top:16px">'+
+      'Tracker de Hábitos Biohacker &nbsp;·&nbsp; by Marcos Apud &nbsp;·&nbsp; Generado el '+fmtShort(todayStr())+
+    '</div>'+
+  '</div>';
+
+  function statCard(label,val,col){
+    return '<div style="background:rgba(0,185,200,.06);border:1px solid rgba(0,185,200,.18);border-left:4px solid '+col+';border-radius:10px;padding:12px 16px">'+
+      '<div style="font-size:12px;color:#64748b;margin-bottom:2px">'+label+'</div>'+
+      '<div style="font-size:22px;font-weight:700;color:'+col+'">'+val+'</div>'+
+    '</div>';
+  }
+
+  document.body.innerHTML=html;
 }
+
+
 
 // ═══════════════════════════════════════════════════════════
 // INIT
@@ -3363,9 +3418,53 @@ document.addEventListener('visibilitychange',()=>{
 const _hash = window.location.hash || '';
   const _search = window.location.search || '';
 const _isRealSite = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
-if(_isRealSite && (_hash.startsWith('#share=') || _search.includes('?share=') || _search.startsWith('?share=')) && checkSharedView()){
-  // Shared view mode
-} else {
+// SHARE MODE — detect and handle SYNCHRONOUSLY before any app init
+var _shareHandled = false;
+if(_isRealSite){
+  var _shareRaw='';
+  if(_search.indexOf('?share=')===0) _shareRaw=decodeURIComponent(_search.slice(7));
+  else if(_hash.indexOf('#share=')===0) _shareRaw=decodeURIComponent(_hash.slice(7));
+  if(_shareRaw){
+    try{
+      // Restore URL-safe base64 → standard base64
+      var _enc=_shareRaw.replace(/-/g,'+').replace(/_/g,'/');
+      var _pad=_enc.length%4; if(_pad)_enc+=('====').slice(_pad);
+      var _json=decodeURIComponent(escape(atob(_enc)));
+      var _raw=JSON.parse(_json);
+      if(_raw&&_raw.f&&_raw.t){
+        // Decode completions
+        var _HIDS=['h1','h2','h3','h4','h5','h6','h7','h8','h9','h10','h11','h12','h13',
+          'h14','h15','h16','h17','h18','h19','h20','h21','h22','h23','h24','h25',
+          'f1','f2','f3','f4','f5','f6'];
+        var _sf=_raw.f,_st=_raw.t,_comp={};
+        if(typeof _sf==='string'&&_sf.length===8){
+          _sf=_sf.slice(0,4)+'-'+_sf.slice(4,6)+'-'+_sf.slice(6,8);
+          _st=_st.slice(0,4)+'-'+_st.slice(4,6)+'-'+_st.slice(6,8);
+        }
+        var _days=getDaysInRange(_sf,_st);
+        if(_raw.v===2){
+          Object.keys(_raw.c||{}).forEach(function(di){
+            var d=_days[parseInt(di,10)]; if(!d)return;
+            var parts=(_raw.c[di]||'0_0').split('_');
+            var lo=parseInt(parts[0]||'0',36)||0, hi=parseInt(parts[1]||'0',36)||0;
+            var obj={};
+            _HIDS.forEach(function(id,j){var bit=j<16?((lo>>j)&1):((hi>>(j-16))&1);if(bit)obj[id]=true;});
+            if(Object.keys(obj).length)_comp[d]=obj;
+          });
+        } else {
+          Object.keys(_raw.c||{}).forEach(function(date){
+            var ids=_raw.c[date],obj={};
+            (Array.isArray(ids)?ids:[]).forEach(function(id){obj[id]=true;});
+            if(Object.keys(obj).length)_comp[date]=obj;
+          });
+        }
+        renderReadOnly({n:_raw.n||'',f:_sf,t:_st,c:_comp});
+        _shareHandled=true;
+      }
+    }catch(_e){console.error('[share]',_e);}
+  }
+}
+if(!_shareHandled){
   // Normal app
   try{history.replaceState(null,'',window.location.pathname);}catch(e){} // clear stale hash
   loadState();
