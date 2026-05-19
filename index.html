@@ -1964,15 +1964,16 @@ function renderStats(){
   var _navSub=statsPeriod==='day'?
     (pdays.reduce(function(s,d){return s+dayPts(d);},0)+' pts'):
     (periodLabels[statsPeriod]+(_isThisWeek?' · Esta semana':' · '+pdays.length+' días'));
-  var _navHtml='<div class="stats-period-nav">'+
+  var _navHtml=
+  '<div class="stats-period-bar">'+periodBtns+'</div>'+
+  '<div class="date-nav">'+
     '<button class="date-nav-btn" onclick="prevStatsPeriod()"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>'+
     '<div class="date-nav-center" style="cursor:default">'+
       '<div class="date-nav-label">'+_navLabel+'</div>'+
       '<div class="date-nav-sub">'+_navSub+'</div>'+
     '</div>'+
     '<button class="date-nav-btn" onclick="nextStatsPeriod()" style="opacity:'+(_canNext?'1':'0.3')+';pointer-events:'+(_canNext?'auto':'none')+'"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>'+
-  '</div>'+
-  '<div class="stats-period-bar">'+periodBtns+'</div>';
+  '</div>';
   var periodStatsHtml=_navHtml+
     '<div class="stat-section-title">'+periodLabels[statsPeriod]+'</div>'+
     '<div class="records-grid" style="margin-bottom:16px">'+
@@ -2950,112 +2951,117 @@ function copyShareLink(){
   const tot=days.reduce((s,d)=>s+dayPts(d),0);
   const active=days.filter(d=>dayHasHabit(d)).length;
   const avgP=days.length?Math.round(days.reduce((s,d)=>s+getDayPctDone(d),0)/days.length):0;
-  const str=computeStreak();
-  const lv=getLevel(getTotalPts());
+  const str=computeStreak();const lv=getLevel(getTotalPts());
   const earnedMedals=ST.medals||[];
-
-  // Category performance
-  let catRowsHTML='';
-  let bestN='',bestP=0;
-  const CCLR={mente:'#7c3aed',nutricion:'#be123c',luz:'#a16207',movimiento:'#c2410c',
-    naturaleza:'#4d7c0f',recuperacion:'#0e6b8c',sueno:'#4338ca',finanzas:'#065f46',custom:'#a21caf'};
+  const nameStr=name?(name.charAt(0).toUpperCase()+name.slice(1)):'';
+  const avgCol=avgP>=65?'#0a7c57':avgP>=35?'#0e6b8c':'#b45309';
+  const CCLR={mente:'#7c3aed',nutricion:'#be123c',luz:'#a16207',movimiento:'#c2410c',naturaleza:'#4d7c0f',recuperacion:'#0e6b8c',sueno:'#4338ca',finanzas:'#065f46',custom:'#a21caf'};
+  let catRows='',bestN='',bestP=0;
   CATEGORIES.filter(cat=>catHabits(cat.id).length>0).forEach(cat=>{
     const ch=catHabits(cat.id);let done=0;const tot2=ch.length*days.length;
     days.forEach(d=>{const cc=ST.completions[d]||{};done+=ch.filter(h=>cc[h.id]).length;});
     const pct=tot2>0?Math.round(done/tot2*100):0;
     if(pct>bestP){bestP=pct;bestN=cat.name;}
     const col=CCLR[cat.id]||'#0e6b8c';
-    catRowsHTML+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <div style="width:140px;font-weight:700;font-size:14px;color:${col}">${cat.name}</div>
-      <div style="flex:1;height:16px;background:rgba(0,185,200,.15);border-radius:8px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${col},#00BC88);border-radius:8px"></div>
-      </div>
-      <div style="width:40px;text-align:right;font-weight:700;font-size:14px;color:${col}">${pct}%</div>
-    </div>`;
+    catRows+=`<div class="cat-row"><div class="cat-name" style="color:${col}">${cat.icon||''} ${cat.name}</div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${col},#00BC88)"></div></div><div class="cat-pct" style="color:${col}">${pct}%</div></div>`;
   });
-
-  // Medals
-  let medalHTML='';
-  if(earnedMedals.length){
-    MEDALS_DEF.filter(m=>earnedMedals.includes(m.id)).forEach(m=>{
-      medalHTML+=`<div style="background:rgba(0,185,200,.07);border:1px solid rgba(0,185,200,.2);border-radius:10px;padding:10px 14px;margin-bottom:8px">
-        <div style="font-weight:700;font-size:14px">${m.name}</div>
-        <div style="font-size:12px;color:#475569;margin-top:2px">${m.desc}</div>
-      </div>`;
-    });
-  }
-
-  // Reflexion
-  let refText='';
-  try{refText=getRefText(avgP,str,bestN,bestP,earnedMedals,from,to);}catch(e){}
-
-  const sc=(label,val,col)=>`<div style="background:rgba(0,185,200,.06);border:1px solid rgba(0,185,200,.18);border-left:4px solid ${col};border-radius:10px;padding:12px 16px">
-    <div style="font-size:11px;color:#64748b;margin-bottom:2px">${label}</div>
-    <div style="font-size:20px;font-weight:700;color:${col}">${val}</div>
-  </div>`;
-
-  const nameStr=name?(name.charAt(0).toUpperCase()+name.slice(1)):'';
-  const avgCol=avgP>=65?'#0a7c57':avgP>=35?'#0e6b8c':'#b45309';
-
-  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Informe Biohacker${nameStr?' - '+nameStr:''}</title>
-<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f0f7fa;font-family:Arial,sans-serif;color:#0f172a;padding:0}</style>
-</head><body>
-<div style="max-width:680px;margin:0 auto;padding:20px 16px 48px">
-  <div style="background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);border-radius:14px;padding:24px;margin-bottom:16px">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-      <div style="width:50px;height:50px;background:linear-gradient(135deg,#00B9C8,#00BC88);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+  let medalCards='';
+  if(earnedMedals.length){MEDALS_DEF.filter(m=>earnedMedals.includes(m.id)).forEach(m=>{
+    medalCards+=`<div class="medal-card-ro"><div class="medal-name">${m.name}</div><div class="medal-desc">${m.desc}</div></div>`;
+  });}
+  let refText='';try{refText=getRefText(avgP,str,bestN,bestP,earnedMedals,from,to);}catch(e){}
+  const sc=(label,val,col)=>`<div class="stat-card-ro"><div class="sc-label">${label}</div><div class="sc-val" style="color:${col}">${val}</div></div>`;
+  const dna2=DNA_IMG2||'';
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Informe Biohacker${nameStr?' - '+nameStr:''}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;width:100%}
+body{
+  font-family:Arial,sans-serif;color:#0f172a;
+  background:linear-gradient(160deg,#c8e8f4 0%,#dff0f8 40%,#e8f5fa 70%,#f0f8fc 100%);
+  min-height:100vh;position:relative;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
+  background:url('${dna2}') center/cover no-repeat;
+  opacity:0.18;
+}
+.page{position:relative;z-index:1;width:75%;margin:0 auto;padding:28px 0 48px}
+.pdf-header{background:linear-gradient(135deg,#87CEEB 0%,#4ab8d8 40%,#1a8ab5 70%,#0e6b8c 100%);border-radius:0 0 16px 16px;padding:26px 32px 22px;margin-bottom:20px;margin-left:-10%;margin-right:-10%;width:calc(100% + 20%)}
+.pdf-header-inner{max-width:75%;margin:0 auto}
+.logo-row{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.logo-box{width:54px;height:54px;background:linear-gradient(135deg,#00B9C8,#00BC88);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.app-title{font-size:26px;font-weight:800;color:#003d57;letter-spacing:-.03em}
+.app-sub{font-size:14px;color:rgba(0,61,87,.8);font-weight:700;margin-top:2px}
+.app-name{font-size:13px;color:rgba(0,61,87,.7);font-weight:700;margin-top:1px}
+.date-badge{display:inline-block;background:rgba(0,61,87,.15);border-radius:8px;padding:5px 14px;font-size:13px;font-weight:700;color:#003d57}
+.section-title{font-size:11px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.1em;margin:18px 0 10px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.stat-card-ro{background:rgba(255,255,255,.6);border:1px solid rgba(0,185,200,.25);border-left:4px solid #0e6b8c;border-radius:10px;padding:12px 16px;backdrop-filter:blur(4px)}
+.sc-label{font-size:11px;color:#64748b;margin-bottom:3px}
+.sc-val{font-size:22px;font-weight:700}
+.cat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cat-name{width:150px;font-weight:700;font-size:14px;flex-shrink:0}
+.cat-bar-wrap{flex:1;height:16px;background:rgba(0,185,200,.15);border-radius:8px;overflow:hidden}
+.cat-bar-fill{height:100%;border-radius:8px;transition:width .5s}
+.cat-pct{width:44px;text-align:right;font-weight:700;font-size:14px}
+.medals-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.medal-card-ro{background:rgba(255,255,255,.5);border:1px solid rgba(0,185,200,.2);border-radius:10px;padding:10px 14px;backdrop-filter:blur(4px)}
+.medal-name{font-weight:700;font-size:14px}
+.medal-desc{font-size:12px;color:#475569;margin-top:2px}
+.reflexion-box{background:rgba(255,255,255,.55);border:1px solid rgba(0,185,200,.25);border-radius:12px;padding:18px;font-size:15px;line-height:1.7;color:#1e293b;backdrop-filter:blur(4px)}
+.pdf-footer{margin-top:28px;padding-top:14px;border-top:1px solid rgba(0,185,200,.2);text-align:center;font-size:12px;color:#64748b}
+hr.divider{border:none;border-top:1px solid rgba(0,185,200,.2);margin:16px 0}
+</style></head><body>
+<div class="page">
+  <div class="pdf-header">
+    <div class="pdf-header-inner">
+      <div class="logo-row">
+        <div class="logo-box"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+        <div>
+          <div class="app-title">Tracker de Hábitos Biohacker</div>
+          <div class="app-sub">by Marcos Apud</div>
+          ${nameStr?`<div class="app-name">Informe de ${nameStr}</div>`:''}
+        </div>
       </div>
-      <div>
-        <div style="font-size:22px;font-weight:800;color:white">Tracker de Hábitos Biohacker</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.85);font-weight:700">by Marcos Apud</div>
-        ${nameStr?`<div style="font-size:12px;color:rgba(255,255,255,.75);font-weight:700">Informe de ${nameStr}</div>`:''}
-      </div>
-    </div>
-    <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:5px 12px;display:inline-block;font-size:13px;color:white;font-weight:700">${fmtShort(from)} — ${fmtShort(to)}</div>
-  </div>
-  <div style="margin-bottom:14px">
-    <div style="font-size:11px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Resumen</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      ${sc('Puntos del período',tot.toLocaleString()+' pts','#0e6b8c')}
-      ${sc('Días activos',active+'/'+days.length+' días','#0e6b8c')}
-      ${sc('Promedio diario',avgP+'%',avgCol)}
-      ${sc('Nivel',lv.name,'#4f46e5')}
-      ${sc('Racha activa',str+' días',str>=7?'#b45309':'#0e6b8c')}
+      <div class="date-badge">${fmtShort(from)} — ${fmtShort(to)}</div>
     </div>
   </div>
-  ${catRowsHTML?`<div style="margin-bottom:14px">
-    <div style="font-size:11px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Desempeño por Categoría</div>
-    ${catRowsHTML}
-  </div>`:''}
-  ${medalHTML?`<div style="margin-bottom:14px">
-    <div style="font-size:11px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Medallas Obtenidas</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${medalHTML}</div>
-  </div>`:''}
-  ${refText?`<div style="margin-bottom:16px">
-    <div style="font-size:11px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Reflexión</div>
-    <div style="background:rgba(0,185,200,.07);border:1px solid rgba(0,185,200,.2);border-radius:12px;padding:16px;font-size:14px;line-height:1.65;color:#334155">${refText}</div>
-  </div>`:''}
-  <div style="text-align:center;font-size:11px;color:#94a3b8;border-top:1px solid rgba(0,185,200,.15);padding-top:14px">
-    Tracker de Hábitos Biohacker &nbsp;·&nbsp; by Marcos Apud &nbsp;·&nbsp; Generado el ${fmtShort(todayStr())}
+  <div class="section-title">Resumen</div>
+  <div class="stats-grid">
+    ${sc('Puntos del período',tot.toLocaleString()+' pts','#0e6b8c')}
+    ${sc('Días activos',active+'/'+days.length+' días','#0e6b8c')}
+    ${sc('Promedio diario',avgP+'%',avgCol)}
+    ${sc('Nivel',lv.name,'#4f46e5')}
+    ${sc('Racha activa',str+' días',str>=7?'#b45309':'#0e6b8c')}
   </div>
+  ${catRows?`<hr class="divider"><div class="section-title">Desempeño por Categoría</div>${catRows}`:''}
+  ${medalCards?`<hr class="divider"><div class="section-title">Medallas Obtenidas</div><div class="medals-grid">${medalCards}</div>`:''}
+  ${refText?`<hr class="divider"><div class="section-title">Reflexión</div><div class="reflexion-box">${refText}</div>`:''}
+  <div class="pdf-footer">Tracker de Hábitos Biohacker &nbsp;·&nbsp; by Marcos Apud &nbsp;·&nbsp; Generado el ${fmtShort(todayStr())}</div>
 </div></body></html>`;
 
-  // Open informe in new tab
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  const w=window.open(url,'_blank');
-  if(!w){
-    // Fallback: copy URL to clipboard
-    if(navigator.clipboard){navigator.clipboard.writeText(url);}
+  // Open in new tab
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const blobUrl=URL.createObjectURL(blob);
+  window.open(blobUrl,'_blank');
+  setTimeout(()=>URL.revokeObjectURL(blobUrl),120000);
+
+  // Copy data: URL to clipboard for sharing
+  try{
+    const b64=btoa(unescape(encodeURIComponent(html)));
+    const dataUrl='data:text/html;base64,'+b64;
+    navigator.clipboard.writeText(dataUrl).then(()=>{
+      const s=document.getElementById('share-status');
+      if(s){s.textContent='✓ Informe abierto + link copiado';s.style.color='#34d399';setTimeout(()=>{if(s)s.textContent='';},3000);}
+    }).catch(()=>{
+      const s=document.getElementById('share-status');
+      if(s){s.textContent='✓ Informe abierto en nueva pestaña';s.style.color='#34d399';setTimeout(()=>{if(s)s.textContent='';},3000);}
+    });
+  }catch(e){
+    const s=document.getElementById('share-status');
+    if(s){s.textContent='✓ Informe abierto';s.style.color='#34d399';}
   }
-  // Revoke after 60s
-  setTimeout(()=>URL.revokeObjectURL(url),60000);
-  const statusEl=document.getElementById('share-status');
-  if(statusEl){statusEl.textContent='✓ Informe abierto en nueva pestaña';statusEl.style.color='#34d399';
-    setTimeout(()=>{if(statusEl)statusEl.textContent='';},3000);}
 }
 
 function fallbackCopy(url,cb){
