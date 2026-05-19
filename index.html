@@ -125,6 +125,7 @@ input,select{font-family:'Geist',system-ui,sans-serif}
 
 /* ── HEADER ── */
 header{background:transparent;border-bottom:none;position:relative;top:auto;z-index:1;display:flex;flex-direction:column}
+.period-bar-sticky{position:sticky;z-index:15;background:rgba(8,14,28,.97);border-bottom:1px solid rgba(51,65,85,.18)}
 #top-bar{position:sticky;top:0;z-index:25;background:rgba(8,14,28,.96);border-bottom:1px solid rgba(51,65,85,.2)}
 
 .header-inner{max-width:720px;width:100%;margin:0 auto;padding:6px 16px 4px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
@@ -1861,6 +1862,9 @@ function deleteHabit(id){
 
 function buildTabPeriodBar(){
   var lbls={week:'7 días',month:'30 días','3months':'3 meses',all:'Todo'};
+  // Calculate top-bar height for sticky positioning
+  var topEl=document.getElementById('top-bar');
+  var topH=topEl?topEl.offsetHeight:0;
   // Stats summary FIRST (right after nav tabs)
   var days=getTabPeriodDays();
   var pts=0,activeDays=0,pctSum=0;
@@ -1883,7 +1887,7 @@ function buildTabPeriodBar(){
     html+='<button class="stats-period-btn'+ac+'" onclick="setTabPeriod('+JSON.stringify(p)+')">'+lbls[p]+'</button>';
   });
   html+='</div>';
-  return html;
+  return '<div class="period-bar-sticky" style="top:'+topH+'px">'+html+'</div>';
 }
 
 function getTabPeriodDays(){
@@ -2127,7 +2131,7 @@ function getBaseURL(){
   const h=location.href;
   // Si estamos en un servidor real (no preview/local), usar URL actual
   if(!h.startsWith('about:')&&!h.startsWith('blob:')&&!h.includes('srcdoc')&&!h.startsWith('file://')){
-    return h.split('#')[0];
+    return h.split('?')[0].split('#')[0];
   }
   // Fallback siempre disponible: URL de Netlify
   return 'https://trackerdehabitos-bymarcosapud.netlify.app/';
@@ -2445,7 +2449,7 @@ function drawReportCanvas(ctx,W,H,from,to,dna1Img,dna2Img){
   ctx.fillStyle='white';ctx.font='bold 50px Arial,sans-serif';ctx.textAlign='left';
   ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=5;
   ctx.fillText('Tracker de Hábitos Biohacker',TX,82);ctx.shadowBlur=0;
-  ctx.fillStyle='rgba(255,255,255,.88)';ctx.font='bold 26px Arial';ctx.fillText('by Marcos Apud',TX,116);
+  ctx.fillStyle='rgba(255,255,255,.97)';ctx.font='bold 28px Arial';ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=5;ctx.fillText('by Marcos Apud',TX,116);ctx.shadowBlur=0;ctx.shadowColor='transparent';
   if(name){ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=4;ctx.fillStyle='rgba(255,255,255,.97)';ctx.font='bold 24px Arial';ctx.fillText('Informe de '+name,TX,150);ctx.shadowBlur=0;ctx.shadowColor='transparent';}
   // Period badge
   ctx.font='bold 24px Arial';
@@ -2738,79 +2742,7 @@ function showFallbackURL(url,textEl,boxEl,statusEl){
 }
 
 // ── READ-ONLY SHARED VIEW ─────────────────────────────
-function checkSharedView(){
-  // Support both ?share= (new) and #share= (legacy)
-  const params=new URLSearchParams(window.location.search);
-  const hashStr=window.location.hash||'';
-  let encoded=(params.get('share')||hashStr.replace('#share=','')||'').trim();
-  // Restore URL-safe base64 to standard base64
-  encoded=encoded.replace(/-/g,'+').replace(/_/g,'/');
-  const pad=encoded.length%4;if(pad)encoded+=('====').slice(pad);
-  if(!encoded||(!params.has('share')&&!hashStr.startsWith('#share=')))return false;
-  // Restore URL-safe base64 to standard base64
-  encoded=encoded.replace(/-/g,'+').replace(/_/g,'/');
-  var _pad=(4-encoded.length%4)%4;encoded+='===='.slice(0,_pad);
-  try{
-    const json=decodeURIComponent(escape(atob(encoded)));
-    const raw=JSON.parse(json);
-    if(!raw||!raw.f||!raw.t)return false;
 
-    const HIDS=['h1','h2','h3','h4','h5','h6','h7','h8','h9','h10','h11','h12','h13',
-      'h14','h15','h16','h17','h18','h19','h20','h21','h22','h23','h24','h25',
-      'f1','f2','f3','f4','f5','f6'];
-
-    let f,t,comp={};
-    if(raw.v===2){
-      // Compact v2
-      f=raw.f.slice(0,4)+'-'+raw.f.slice(4,6)+'-'+raw.f.slice(6,8);
-      t=raw.t.slice(0,4)+'-'+raw.t.slice(4,6)+'-'+raw.t.slice(6,8);
-      const days=getDaysInRange(f,t);
-      Object.entries(raw.c||{}).forEach(([di,bStr])=>{
-        const d=days[parseInt(di,10)];
-        if(!d)return;
-        const parts=(bStr||'0_0').split('_');
-        const lo=parseInt(parts[0]||'0',36)||0;
-        const hi=parseInt(parts[1]||'0',36)||0;
-        const obj={};
-        HIDS.forEach((id,j)=>{
-          const bit=j<16?((lo>>j)&1):((hi>>(j-16))&1);
-          if(bit===1)obj[id]=true;
-        });
-        if(Object.keys(obj).length)comp[d]=obj;
-      });
-    } else {
-      // Legacy v1
-      f=raw.f; t=raw.t;
-      Object.entries(raw.c||{}).forEach(([date,ids])=>{
-        const obj={};
-        (Array.isArray(ids)?ids:[]).forEach(id=>{obj[id]=true;});
-        if(Object.keys(obj).length)comp[date]=obj;
-      });
-    }
-
-    // Init minimal ST for rendering if needed
-    if(typeof ST==='undefined'||!ST){
-      try{const sv=localStorage.getItem('bh_v4');window.ST=sv?JSON.parse(sv):{};}
-      catch(e){window.ST={};}
-    }
-    if(!ST.medals)ST.medals=[];
-    if(!ST.completions)ST.completions={};
-    if(!ST.hiddenHabits)ST.hiddenHabits=[];
-    if(!ST.deletedDefaults)ST.deletedDefaults=[];
-    if(!ST.customHabits)ST.customHabits=[];
-    if(!ST.settings)ST.settings={};
-
-    // Render async — simple read-only view (guaranteed non-editable)
-    setTimeout(function(){
-      try{renderReadOnly({n:raw.n||'',f:f,t:t,c:comp,v:raw.v||1});}
-      catch(e){console.error('[share] renderReadOnly error:',e);}
-    },0);
-    return true;
-  }catch(e){
-    console.error('[share] Error decoding:',e);
-    return false;
-  }
-}
 function switchTab(tab){currentTab=tab;sessionStorage.setItem('bh_active_tab',tab);document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));renderTab();}
 function renderTab(){if(currentTab==='hoy')renderHoy();else if(currentTab==='semana')renderSemana();else if(currentTab==='habitos')renderHabitos();else if(currentTab==='stats')renderStats();}
 
@@ -3260,108 +3192,8 @@ function toggleGlobalMenu(){
 var ST_READONLY=false;
 var ST_SHARED_NAME='';
 
-async function renderSharedView(data){
-  if(!data||!data.f||!data.t)return;
-  if(window.location.protocol!=='https:'&&window.location.hostname!=='localhost')return;
 
-  const comp=data.c||{};
-  const uname=data.n||'';
-  ST_READONLY=true;
-  ST_SHARED_NAME=uname?(uname.charAt(0).toUpperCase()+uname.slice(1)):'';
 
-  // Initialize ST with shared data
-  if(typeof ST==='undefined'||!ST){
-    window.ST={completions:{},medals:[],userName:'',hiddenHabits:[],deletedDefaults:[],customHabits:[],settings:{}};
-  }
-  ST.completions=comp;
-  ST.userName=ST_SHARED_NAME;
-  ST.medals=data.m||[];
-  if(!ST.hiddenHabits)ST.hiddenHabits=[];
-  if(!ST.deletedDefaults)ST.deletedDefaults=[];
-  if(!ST.customHabits)ST.customHabits=[];
-  if(!ST.settings)ST.settings={};
-
-  // Hide onboarding, show app
-  const onb=document.getElementById('onboarding');
-  if(onb)onb.classList.add('hidden');
-  const sv=document.getElementById('shared-view');
-  if(sv){sv.innerHTML='';sv.classList.add('hidden');}
-  const app=document.getElementById('app');
-  if(app)app.classList.remove('hidden');
-
-  // Add readonly banner + "Ver resumen" button
-  const banner=document.createElement('div');
-  banner.id='readonly-banner';
-  banner.style.cssText='position:sticky;top:0;z-index:9000;background:linear-gradient(90deg,#0e6b8c,#00B9C8);color:white;display:flex;align-items:center;justify-content:space-between;padding:8px 16px;font-size:13px;font-weight:700;gap:8px';
-  banner.innerHTML='<span>👁 Vista de '+(ST_SHARED_NAME||'usuario')+' · Solo lectura</span>'+
-    '<button onclick="showSharedSummary()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">📊 Ver resumen</button>';
-  document.body.prepend(banner);
-
-  // Initialize and render full app
-  // Setup full app in readonly mode
-  try{
-    // 1. Load app defaults (habits structure etc.)
-    if(typeof loadState==='function')loadState();
-    // 2. Override with shared data
-    ST.completions=comp;
-    ST.userName=ST_SHARED_NAME;
-    ST.medals=data.m||ST.medals||[];
-    // 3. Init full app (sets up all event listeners, navigation)
-    if(typeof initApp==='function')initApp();
-  }catch(e){console.error('[share] setup error:',e);}
-  setTimeout(function(){
-    try{renderHeader();}catch(e){}
-    try{if(typeof renderHoy==='function')renderHoy();}catch(e){}
-    // Hide tools and share from readonly view
-    const gt=document.getElementById('gt-menu-btn');if(gt)gt.style.display='none';
-    const gtTools=document.getElementById('global-tools');if(gtTools)gtTools.parentElement&&(gtTools.parentElement.style.pointerEvents='none',gtTools.parentElement.style.opacity='0.3');
-    document.querySelectorAll('[onclick*="openShare"],[onclick*="resetAll"],[onclick*="openHabitSheet"]').forEach(function(el){
-      el.style.pointerEvents='none';el.style.opacity='0.4';
-    });
-  },100);
-}
-
-function closeSharedSummary(){var o=document.getElementById('shared-summary-overlay');if(o)o.remove();}
-function showSharedSummary(){
-  const f=new URLSearchParams(window.location.search).get('share')||'';
-  const overlay=document.createElement('div');
-  overlay.id='shared-summary-overlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:9500;background:rgba(8,14,28,.92);overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px';
-
-  const days=getDaysInRange(ST._sharedF||'',ST._sharedT||'');
-  const allH=allHabitsAll();
-  const comp=ST.completions||{};
-  let totalPts=0,activeDays=0,totalPct=0;
-  (days.length?days:getDaysInRange(Object.keys(comp)[0]||todayStr(),Object.keys(comp).slice(-1)[0]||todayStr())).forEach(function(d){
-    const done=Object.keys(comp[d]||{}).filter(function(k){return !!(comp[d]||{})[k];});
-    totalPts+=done.length*10;if(done.length)activeDays++;
-    totalPct+=allH.length?Math.round(done.length/allH.length*100):0;
-  });
-  const dLen=days.length||1;
-  const avgP=Math.round(totalPct/dLen);
-  const lvName=typeof getLevel!=='undefined'?getLevel(totalPts).name:'Iniciado';
-
-  const el=document.createElement('div');
-  el.style.cssText='width:100%;max-width:420px;background:#0f172a;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.6)';
-  el.innerHTML='<div style="background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);padding:20px 20px 16px">'+
-    '<div style="font-size:18px;font-weight:800;color:#003d57">Tracker de Hábitos Biohacker</div>'+
-    '<div style="font-size:12px;color:rgba(0,61,87,.75)">by Marcos Apud'+(ST_SHARED_NAME?' · '+ST_SHARED_NAME:'')+' · Solo lectura</div>'+
-    '</div>'+
-    '<div style="padding:16px">'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'+
-    ['<b style="color:#00B9C8">'+totalPts+' pts</b>|Puntos',
-     '<b style="color:#00B9C8">'+activeDays+'/'+dLen+' días</b>|Días activos',
-     '<b style="color:#f59e0b">'+avgP+'%</b>|Promedio',
-     '<b style="color:#00B9C8">'+lvName+'</b>|Nivel'].map(function(s){
-      var p=s.split('|');
-      return '<div style="background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:10px 12px;border-radius:4px"><div style="font-size:11px;color:#64748b;margin-bottom:2px">'+p[1]+'</div><div style="font-size:22px">'+p[0]+'</div></div>';
-    }).join('')+
-    '</div>'+
-    '<button onclick="closeSharedSummary()" style="width:100%;padding:12px;background:rgba(0,185,200,.15);border:1px solid rgba(0,185,200,.3);color:#00B9C8;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer">← Volver a la app</button>'+
-    '</div>';
-  overlay.appendChild(el);
-  document.body.appendChild(overlay);
-}
 
 function initApp(){
   // Ensure finance habits are visible (clear stale hide/delete state)
@@ -3485,100 +3317,6 @@ if(!_shareHandled){
   } else {
     showOnboarding();
   }
-}
-
-async function renderSharedView(data){
-  const sv=document.getElementById('shared-view');
-  if(!sv)return;
-  const _sv_params=new URLSearchParams(window.location.search);
-  if(!_sv_params.has('share')&&!(window.location.hash||'').startsWith('#share='))return;
-  if(window.location.protocol!=='https:'&&window.location.hostname!=='localhost')return;
-
-  const f=data.f,t=data.t,comp=data.c||{},uname=data.n||'';
-  const days=getDaysInRange(f,t);
-  const allH=allHabitsAll();
-  let totalPts=0,activeDays=0,totalPct=0;
-  days.forEach(function(d){
-    const done=Object.keys(comp[d]||{}).filter(function(k){return !!(comp[d]||{})[k];});
-    totalPts+=done.length*10;if(done.length)activeDays++;
-    totalPct+=allH.length?Math.round(done.length/allH.length*100):0;
-  });
-  const avgP=days.length?Math.round(totalPct/days.length):0;
-  const nameStr=uname?(uname.charAt(0).toUpperCase()+uname.slice(1)):'';
-  const lvName=typeof getLevel!=='undefined'?getLevel(totalPts).name:'Iniciado';
-
-  // Build using DOM — no innerHTML with dynamic vars
-  sv.style.cssText='position:fixed;inset:0;background:#0f172a;z-index:9500;overflow-y:auto;color:white;font-family:inherit';
-  sv.classList.remove('hidden');
-  document.getElementById('onboarding')&&document.getElementById('onboarding').classList.add('hidden');
-  document.getElementById('app')&&document.getElementById('app').classList.add('hidden');
-
-  function el(tag,style,text){
-    const e=document.createElement(tag);
-    if(style)e.style.cssText=style;
-    if(text!=null)e.textContent=text;
-    return e;
-  }
-
-  const wrap=el('div','max-width:600px;margin:0 auto;padding-bottom:60px');
-
-  // Header
-  const hdr=el('div','background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);padding:28px 24px 20px');
-  const hRow=el('div','display:flex;align-items:center;gap:12px;margin-bottom:10px');
-  const logoBox=el('div','width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#00B9C8,#00BC88);display:flex;align-items:center;justify-content:center;flex-shrink:0');
-  logoBox.innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>';
-  const titleBox=el('div');
-  const appTitle=el('div','font-size:19px;font-weight:800;color:#003d57','Tracker de Hábitos Biohacker');
-  const appSub=el('div','font-size:13px;color:rgba(0,61,87,.75)','by Marcos Apud'+(nameStr?' · Informe de '+nameStr:''));
-  titleBox.append(appTitle,appSub);hRow.append(logoBox,titleBox);
-  const dateBadge=el('div','background:rgba(0,61,87,.15);border-radius:8px;padding:6px 12px;display:inline-block;font-size:13px;font-weight:700;color:#003d57',fmtShort(f)+' — '+fmtShort(t));
-  hdr.append(hRow,dateBadge);
-
-  // Content
-  const content=el('div','background:#0f172a;padding:20px 24px');
-  content.appendChild(el('div','color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px','RESUMEN'));
-
-  const grid=el('div','display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px');
-  [[totalPts+' pts','Puntos del período','#00B9C8'],[activeDays+'/'+days.length+' días','Días activos','#00B9C8'],[avgP+'%','Promedio diario','#f59e0b'],[lvName,'Nivel','#00B9C8']].forEach(function(s){
-    const card=el('div','background:rgba(255,255,255,.04);border-left:3px solid rgba(0,185,200,.4);padding:12px 14px;border-radius:4px');
-    card.appendChild(el('div','font-size:12px;color:#64748b;margin-bottom:4px',s[1]));
-    card.appendChild(el('b','font-size:26px;color:'+s[2],s[0]));
-    grid.appendChild(card);
-  });
-  content.appendChild(grid);
-
-  // Categories
-  const CATS=typeof CATEGORIES!=='undefined'?CATEGORIES:[];
-  if(CATS.length){
-    content.appendChild(el('div','color:#00B9C8;font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:14px','DESEMPEÑO POR CATEGORÍA'));
-    CATS.forEach(function(cat){
-      const catHabs=allH.filter(function(h){return h.cat===cat.id;});
-      const catMax=catHabs.length*10*days.length||1;
-      let catPts=0;
-      days.forEach(function(d){
-        const done=Object.keys(comp[d]||{}).filter(function(k){return !!(comp[d]||{})[k];});
-        catPts+=done.filter(function(id){return catHabs.some(function(h){return h.id===id;});}).length*10;
-      });
-      const pct=Math.min(100,Math.round(catPts/catMax*100));
-      const col=cat.color||'#00B9C8';
-      const row=el('div','display:flex;align-items:center;gap:10px;margin-bottom:10px');
-      row.appendChild(el('span','width:130px;font-size:14px;font-weight:600;color:'+col,cat.name));
-      const barWrap=el('div','flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden');
-      const barFill=el('div','height:100%;width:'+pct+'%;background:'+col+';border-radius:4px');
-      barWrap.appendChild(barFill);row.appendChild(barWrap);
-      row.appendChild(el('span','width:42px;text-align:right;font-size:13px;font-weight:700;color:'+col,pct+'%'));
-      content.appendChild(row);
-    });
-  }
-
-  // CTA
-  const cta=el('button','margin-top:32px;padding:16px;background:linear-gradient(135deg,#00B9C8,#00BC88);color:white;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;width:100%','⚡ Quiero usar esta app');
-  cta.onclick=function(){window.location.href=window.location.origin;};
-  content.appendChild(cta);
-
-  wrap.append(hdr,content);
-  sv.innerHTML='';
-  sv.appendChild(wrap);
 }
 
 
