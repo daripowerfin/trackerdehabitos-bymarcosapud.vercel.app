@@ -1545,14 +1545,14 @@ function launchConfetti(n=20,ox,oy){
   if(cP.length>=cap)cP=cP.slice(-cap+n);
   for(let i=0;i<Math.min(n,cap);i++)cP.push({
     x:sx,y:sy,
-    vx:(Math.random()-.5)*16,   // wider spread
-    vy:-(Math.random()*10+5),   // higher launch
+    vx:(Math.random()-.5)*12,
+    vy:-(Math.random()*8+4),
     color:cols[Math.floor(Math.random()*cols.length)],
-    r:Math.random()*6+4,        // 4-10px (bigger)
+    r:Math.random()*5+3,
     rot:Math.random()*360,
-    rotV:(Math.random()-.5)*14,
+    rotV:(Math.random()-.5)*10,
     life:1,
-    decay:Math.random()*.06+.04, // 0.04-0.10 → disappear in 10-25 frames
+    decay:Math.random()*.08+.06,
     s:'r'
   });
   if(!cRAF)animConf();
@@ -1750,12 +1750,12 @@ function toggleHabit(ev,hid,ds){
     const prevPts=newPts-(hb?hb.pts:0);
     const newLv=getLevel(newPts);
     const prevLv=getLevel(prevPts);
-    launchConfetti(22,cx,cy);
+    launchConfetti(15,cx,cy);
     if(cat&&catComplete(cat.id,ds)){
-      setTimeout(function(){launchConfetti(22,cx,cy);sndCat();showCatToast(cat);},300);
+      setTimeout(function(){launchConfetti(15,cx,cy);sndCat();showCatToast(cat);},300);
     }
     if(newLv.n>prevLv.n){
-      setTimeout(function(){launchConfetti(30);sndLevel();showLevelToast(newLv);},600);
+      setTimeout(function(){launchConfetti(20);sndLevel();showLevelToast(newLv);},600);
     }
     if(newPts>prevPts){
       const nm=evalMedals(ds);
@@ -2939,40 +2939,118 @@ function getShareFilename(from,to){
 function copyShareLink(){
   const[from,to]=getShareRange();
   const days=getDaysInRange(from,to);
-  const HIDS=['h1','h2','h3','h4','h5','h6','h7','h8','h9','h10','h11','h12','h13',
-    'h14','h15','h16','h17','h18','h19','h20','h21','h22','h23','h24','h25',
-    'f1','f2','f3','f4','f5','f6'];
-  // Compact: day index → bitmask as base36 (no BigInt needed — 31 habits fit in 32bit int)
-  const comp={};
-  days.forEach((d,i)=>{
-    const done=Object.keys(ST.completions[d]||{}).filter(id=>(ST.completions[d]||{})[id]);
-    if(!done.length)return;
-    let lo=0,hi=0; // two 16-bit ints (covers 32 habits safely)
-    done.forEach(id=>{const j=HIDS.indexOf(id);if(j<0)return;if(j<16)lo|=(1<<j);else hi|=(1<<(j-16));});
-    comp[i]=lo.toString(36)+'_'+hi.toString(36);
+  const name=ST.userName||'';
+  const tot=days.reduce((s,d)=>s+dayPts(d),0);
+  const active=days.filter(d=>dayHasHabit(d)).length;
+  const avgP=days.length?Math.round(days.reduce((s,d)=>s+getDayPctDone(d),0)/days.length):0;
+  const str=computeStreak();
+  const lv=getLevel(getTotalPts());
+  const earnedMedals=ST.medals||[];
+
+  // Category performance
+  let catRowsHTML='';
+  let bestN='',bestP=0;
+  const CCLR={mente:'#7c3aed',nutricion:'#be123c',luz:'#a16207',movimiento:'#c2410c',
+    naturaleza:'#4d7c0f',recuperacion:'#0e6b8c',sueno:'#4338ca',finanzas:'#065f46',custom:'#a21caf'};
+  CATEGORIES.filter(cat=>catHabits(cat.id).length>0).forEach(cat=>{
+    const ch=catHabits(cat.id);let done=0;const tot2=ch.length*days.length;
+    days.forEach(d=>{const cc=ST.completions[d]||{};done+=ch.filter(h=>cc[h.id]).length;});
+    const pct=tot2>0?Math.round(done/tot2*100):0;
+    if(pct>bestP){bestP=pct;bestN=cat.name;}
+    const col=CCLR[cat.id]||'#0e6b8c';
+    catRowsHTML+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:140px;font-weight:700;font-size:14px;color:${col}">${cat.name}</div>
+      <div style="flex:1;height:16px;background:rgba(0,185,200,.15);border-radius:8px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${col},#00BC88);border-radius:8px"></div>
+      </div>
+      <div style="width:40px;text-align:right;font-weight:700;font-size:14px;color:${col}">${pct}%</div>
+    </div>`;
   });
-  const payload={n:ST.userName||'',f:from.replace(/-/g,''),t:to.replace(/-/g,''),v:2,c:comp};
-  let encoded;
-  try{
-    const raw=btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-    // URL-safe base64: replace chars that break query strings
-    encoded=raw.replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-  }catch(e){encoded=btoa(JSON.stringify(payload)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');}
-  const base=getBaseURL();
-  if(!base){const el=document.getElementById('share-status');if(el){el.textContent='Sin URL disponible';el.style.color='#ef4444';}return;}
-  const url=base+'?share='+encoded;
-  const nameStr=ST.userName?(ST.userName.charAt(0).toUpperCase()+ST.userName.slice(1)+' '):'';
-  const title='Informe '+nameStr+'Tracking Habitos Biohacker - By Marcos Apud - '+fmtFileDate(from)+' al '+fmtFileDate(to);
+
+  // Medals
+  let medalHTML='';
+  if(earnedMedals.length){
+    MEDALS_DEF.filter(m=>earnedMedals.includes(m.id)).forEach(m=>{
+      medalHTML+=`<div style="background:rgba(0,185,200,.07);border:1px solid rgba(0,185,200,.2);border-radius:10px;padding:10px 14px;margin-bottom:8px">
+        <div style="font-weight:700;font-size:14px">${m.name}</div>
+        <div style="font-size:12px;color:#475569;margin-top:2px">${m.desc}</div>
+      </div>`;
+    });
+  }
+
+  // Reflexion
+  let refText='';
+  try{refText=getRefText(avgP,str,bestN,bestP,earnedMedals,from,to);}catch(e){}
+
+  const sc=(label,val,col)=>`<div style="background:rgba(0,185,200,.06);border:1px solid rgba(0,185,200,.18);border-left:4px solid ${col};border-radius:10px;padding:12px 16px">
+    <div style="font-size:11px;color:#64748b;margin-bottom:2px">${label}</div>
+    <div style="font-size:20px;font-weight:700;color:${col}">${val}</div>
+  </div>`;
+
+  const nameStr=name?(name.charAt(0).toUpperCase()+name.slice(1)):'';
+  const avgCol=avgP>=65?'#0a7c57':avgP>=35?'#0e6b8c':'#b45309';
+
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Informe Biohacker${nameStr?' - '+nameStr:''}</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f0f7fa;font-family:Arial,sans-serif;color:#0f172a;padding:0}</style>
+</head><body>
+<div style="max-width:680px;margin:0 auto;padding:20px 16px 48px">
+  <div style="background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);border-radius:14px;padding:24px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:50px;height:50px;background:linear-gradient(135deg,#00B9C8,#00BC88);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+      </div>
+      <div>
+        <div style="font-size:22px;font-weight:800;color:white">Tracker de Hábitos Biohacker</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.85);font-weight:700">by Marcos Apud</div>
+        ${nameStr?`<div style="font-size:12px;color:rgba(255,255,255,.75);font-weight:700">Informe de ${nameStr}</div>`:''}
+      </div>
+    </div>
+    <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:5px 12px;display:inline-block;font-size:13px;color:white;font-weight:700">${fmtShort(from)} — ${fmtShort(to)}</div>
+  </div>
+  <div style="margin-bottom:14px">
+    <div style="font-size:11px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Resumen</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${sc('Puntos del período',tot.toLocaleString()+' pts','#0e6b8c')}
+      ${sc('Días activos',active+'/'+days.length+' días','#0e6b8c')}
+      ${sc('Promedio diario',avgP+'%',avgCol)}
+      ${sc('Nivel',lv.name,'#4f46e5')}
+      ${sc('Racha activa',str+' días',str>=7?'#b45309':'#0e6b8c')}
+    </div>
+  </div>
+  ${catRowsHTML?`<div style="margin-bottom:14px">
+    <div style="font-size:11px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Desempeño por Categoría</div>
+    ${catRowsHTML}
+  </div>`:''}
+  ${medalHTML?`<div style="margin-bottom:14px">
+    <div style="font-size:11px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Medallas Obtenidas</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${medalHTML}</div>
+  </div>`:''}
+  ${refText?`<div style="margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Reflexión</div>
+    <div style="background:rgba(0,185,200,.07);border:1px solid rgba(0,185,200,.2);border-radius:12px;padding:16px;font-size:14px;line-height:1.65;color:#334155">${refText}</div>
+  </div>`:''}
+  <div style="text-align:center;font-size:11px;color:#94a3b8;border-top:1px solid rgba(0,185,200,.15);padding-top:14px">
+    Tracker de Hábitos Biohacker &nbsp;·&nbsp; by Marcos Apud &nbsp;·&nbsp; Generado el ${fmtShort(todayStr())}
+  </div>
+</div></body></html>`;
+
+  // Open informe in new tab
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const w=window.open(url,'_blank');
+  if(!w){
+    // Fallback: copy URL to clipboard
+    if(navigator.clipboard){navigator.clipboard.writeText(url);}
+  }
+  // Revoke after 60s
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
   const statusEl=document.getElementById('share-status');
-  const boxEl=document.getElementById('share-url-box');
-  const textEl=document.getElementById('share-url-text');
-  const shareText=url+' Informe '+nameStr+'Tracking Habitos Biohacker - By Marcos Apud - '+fmtFileDate(from)+' al '+fmtFileDate(to);
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(shareText).then(function(){
-      if(statusEl){statusEl.textContent='✓ Link copiado';statusEl.style.color='#34d399';setTimeout(function(){if(statusEl)statusEl.textContent='';},3000);}
-    }).catch(function(){showFallbackURL(shareText,textEl,boxEl,statusEl);});
-  }else{showFallbackURL(shareText,textEl,boxEl,statusEl);}
+  if(statusEl){statusEl.textContent='✓ Informe abierto en nueva pestaña';statusEl.style.color='#34d399';
+    setTimeout(()=>{if(statusEl)statusEl.textContent='';},3000);}
 }
+
 function fallbackCopy(url,cb){
   const ta=document.createElement('textarea');ta.value=url;ta.style.cssText='position:fixed;top:-9999px';
   document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,99999);
@@ -2982,121 +3060,7 @@ function fallbackCopy(url,cb){
 
 // READ-ONLY VIEW
 
-function renderReadOnly(data){
-  // Replace entire page with web version of the PDF informe
-  document.body.innerHTML='';
-  document.body.style.cssText='margin:0;padding:0;background:#f0f7fa;font-family:Arial,sans-serif;color:#0f172a';
-  document.title='Informe Biohacker'+(data.n?' - '+data.n:'');
 
-  const comp=data.c||{}, f=data.f, t=data.t, name=data.n||'';
-  // Set ST FIRST so dayPts/dayHasHabit/getDayPctDone use the shared completions
-  if(typeof ST==='undefined'||!ST)window.ST={completions:{},medals:[],userName:'',hiddenHabits:[],deletedDefaults:[],customHabits:[],settings:{}};
-  ST.completions=comp;
-  ST.medals=data.m||[];
-  ST.userName=name;
-  if(!ST.hiddenHabits)ST.hiddenHabits=[];
-  if(!ST.deletedDefaults)ST.deletedDefaults=[];
-  if(!ST.customHabits)ST.customHabits=[];
-  const days=getDaysInRange(f,t);
-  const tot=days.reduce(function(s,d){return s+dayPts(d);},0);
-  const active=days.filter(function(d){return dayHasHabit(d);}).length;
-  const avgP=days.length?Math.round(days.reduce(function(s,d){return s+getDayPctDone(d);},0)/days.length):0;
-  ST.medals=data.m||[];
-  ST.userName=name;
-  if(!ST.hiddenHabits)ST.hiddenHabits=[];
-  if(!ST.deletedDefaults)ST.deletedDefaults=[];
-  if(!ST.customHabits)ST.customHabits=[];
-
-  const lv=getLevel(typeof getTotalPts==='function'?getTotalPts():0);
-  const str=typeof computeStreak==='function'?computeStreak():0;
-  const earnedMedals=ST.medals||[];
-
-  // Category performance
-  var catRows='';
-  var bestN='',bestP=0;
-  var CCLR2={mente:'#7c3aed',nutricion:'#be123c',luz:'#a16207',movimiento:'#c2410c',naturaleza:'#4d7c0f',recuperacion:'#0e6b8c',sueno:'#4338ca',finanzas:'#065f46',custom:'#a21caf'};
-  CATEGORIES.filter(function(cat){return catHabits(cat.id).length>0;}).forEach(function(cat){
-    var ch=catHabits(cat.id),done=0,tot2=ch.length*days.length;
-    days.forEach(function(d){var cc=comp[d]||{};done+=ch.filter(function(h){return cc[h.id];}).length;});
-    var pct=tot2>0?Math.round(done/tot2*100):0;
-    if(pct>bestP){bestP=pct;bestN=cat.name;}
-    var col=CCLR2[cat.id]||'#0e6b8c';
-    catRows+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
-      '<div style="width:160px;font-weight:700;font-size:15px;color:'+col+'">'+cat.name+'</div>'+
-      '<div style="flex:1;height:18px;background:rgba(0,185,200,.15);border-radius:9px;overflow:hidden">'+
-        '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,'+col+',#00BC88);border-radius:9px"></div>'+
-      '</div>'+
-      '<div style="width:44px;text-align:right;font-weight:700;font-size:15px;color:'+col+'">'+pct+'%</div>'+
-    '</div>';
-  });
-
-  // Medals
-  var medalCards='';
-  if(earnedMedals.length){
-    MEDALS_DEF.filter(function(m){return earnedMedals.includes(m.id);}).forEach(function(m){
-      medalCards+='<div style="background:rgba(0,185,200,.07);border:1px solid rgba(0,185,200,.2);border-radius:10px;padding:10px 14px;margin-bottom:8px">'+
-        '<div style="font-weight:700;font-size:14px">'+m.name+'</div>'+
-        '<div style="font-size:12px;color:#475569;margin-top:2px">'+m.desc+'</div>'+
-      '</div>';
-    });
-  }
-
-  // Reflexion text
-  var refText='';
-  try{refText=getRefText(avgP,str,bestN,bestP,earnedMedals,f,t);}catch(e){}
-
-  var html='<div style="max-width:720px;margin:0 auto;padding:24px 16px 48px">'+
-    // Header
-    '<div style="background:linear-gradient(135deg,#87CEEB,#3AADD4,#0e6b8c);border-radius:16px;padding:28px 28px 22px;margin-bottom:20px;position:relative;overflow:hidden">'+
-      '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">'+
-        '<div style="width:56px;height:56px;background:linear-gradient(135deg,#00B9C8,#00BC88);border-radius:12px;display:flex;align-items:center;justify-content:center">'+
-          '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>'+
-        '</div>'+
-        '<div>'+
-          '<div style="font-size:24px;font-weight:800;color:white">Tracker de Hábitos Biohacker</div>'+
-          '<div style="font-size:14px;color:rgba(255,255,255,.8);font-weight:600">by Marcos Apud</div>'+
-          (name?'<div style="font-size:13px;color:rgba(255,255,255,.7)">Informe de '+name+'</div>':'')+
-        '</div>'+
-      '</div>'+
-      '<div style="display:inline-block;background:rgba(0,0,0,.2);border-radius:8px;padding:5px 14px;font-size:13px;color:white;font-weight:700">'+
-        fmtShort(f)+' — '+fmtShort(t)+
-      '</div>'+
-    '</div>'+
-    // Resumen
-    '<div style="margin-bottom:16px">'+
-      '<div style="font-size:12px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Resumen</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
-        statCard('Puntos del período',tot.toLocaleString()+' pts','#0e6b8c')+
-        statCard('Días activos',active+'/'+days.length+' días','#0e6b8c')+
-        statCard('Promedio diario',avgP+'%',avgP>=65?'#0a7c57':avgP>=35?'#0e6b8c':'#b45309')+
-        statCard('Nivel',lv.name,'#4f46e5')+
-        statCard('Racha activa',str+' días',str>=7?'#b45309':'#0e6b8c')+
-      '</div>'+
-    '</div>'+
-    // Categorias
-    (catRows?'<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Desempeño por Categoría</div>'+catRows+'</div>':'')+
-    // Medallas
-    (medalCards?'<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Medallas obtenidas</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+medalCards+'</div></div>':'')+
-    // Reflexion
-    (refText?'<div style="margin-bottom:24px">'+
-      '<div style="font-size:12px;font-weight:700;color:#00B9C8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Reflexión</div>'+
-      '<div style="background:rgba(0,185,200,.07);border:1px solid rgba(0,185,200,.2);border-radius:12px;padding:18px;font-size:15px;line-height:1.65;color:#334155">'+refText+'</div>'+
-    '</div>':'')+
-    // Footer
-    '<div style="text-align:center;font-size:12px;color:#94a3b8;border-top:1px solid rgba(0,185,200,.15);padding-top:16px">'+
-      'Tracker de Hábitos Biohacker &nbsp;·&nbsp; by Marcos Apud &nbsp;·&nbsp; Generado el '+fmtShort(todayStr())+
-    '</div>'+
-  '</div>';
-
-  function statCard(label,val,col){
-    return '<div style="background:rgba(0,185,200,.06);border:1px solid rgba(0,185,200,.18);border-left:4px solid '+col+';border-radius:10px;padding:12px 16px">'+
-      '<div style="font-size:12px;color:#64748b;margin-bottom:2px">'+label+'</div>'+
-      '<div style="font-size:22px;font-weight:700;color:'+col+'">'+val+'</div>'+
-    '</div>';
-  }
-
-  document.body.innerHTML=html;
-}
 
 
 
@@ -3259,54 +3223,8 @@ document.addEventListener('visibilitychange',()=>{
 const _hash = window.location.hash || '';
   const _search = window.location.search || '';
 const _isRealSite = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
-// SHARE MODE — detect and handle SYNCHRONOUSLY before any app init
-var _shareHandled = false;
-if(_isRealSite){
-  var _shareRaw='';
-  if(_search.indexOf('?share=')===0) _shareRaw=decodeURIComponent(_search.slice(7));
-  else if(_hash.indexOf('#share=')===0) _shareRaw=decodeURIComponent(_hash.slice(7));
-  if(_shareRaw){
-    try{
-      // Restore URL-safe base64 → standard base64
-      var _enc=_shareRaw.replace(/-/g,'+').replace(/_/g,'/');
-      var _pad=_enc.length%4; if(_pad)_enc+=('====').slice(_pad);
-      var _json=decodeURIComponent(escape(atob(_enc)));
-      var _raw=JSON.parse(_json);
-      if(_raw&&_raw.f&&_raw.t){
-        // Decode completions
-        var _HIDS=['h1','h2','h3','h4','h5','h6','h7','h8','h9','h10','h11','h12','h13',
-          'h14','h15','h16','h17','h18','h19','h20','h21','h22','h23','h24','h25',
-          'f1','f2','f3','f4','f5','f6'];
-        var _sf=_raw.f,_st=_raw.t,_comp={};
-        if(typeof _sf==='string'&&_sf.length===8){
-          _sf=_sf.slice(0,4)+'-'+_sf.slice(4,6)+'-'+_sf.slice(6,8);
-          _st=_st.slice(0,4)+'-'+_st.slice(4,6)+'-'+_st.slice(6,8);
-        }
-        var _days=getDaysInRange(_sf,_st);
-        if(_raw.v===2){
-          Object.keys(_raw.c||{}).forEach(function(di){
-            var d=_days[parseInt(di,10)]; if(!d)return;
-            var parts=(_raw.c[di]||'0_0').split('_');
-            var lo=parseInt(parts[0]||'0',36)||0, hi=parseInt(parts[1]||'0',36)||0;
-            var obj={};
-            _HIDS.forEach(function(id,j){var bit=j<16?((lo>>j)&1):((hi>>(j-16))&1);if(bit)obj[id]=true;});
-            if(Object.keys(obj).length)_comp[d]=obj;
-          });
-        } else {
-          Object.keys(_raw.c||{}).forEach(function(date){
-            var ids=_raw.c[date],obj={};
-            (Array.isArray(ids)?ids:[]).forEach(function(id){obj[id]=true;});
-            if(Object.keys(obj).length)_comp[date]=obj;
-          });
-        }
-        renderReadOnly({n:_raw.n||'',f:_sf,t:_st,c:_comp});
-        _shareHandled=true;
-      }
-    }catch(_e){console.error('[share]',_e);}
-  }
-}
-if(!_shareHandled){
-  // Normal app
+// INIT — normal app
+// Normal app
   try{history.replaceState(null,'',window.location.pathname);}catch(e){} // clear stale hash
   loadState();
   injectLogos();
@@ -3317,7 +3235,6 @@ if(!_shareHandled){
   } else {
     showOnboarding();
   }
-}
 
 
 async function generateSharedPDF(from,to,comp,name){
