@@ -631,6 +631,10 @@ button:active,.nav-tab:active,.habit-check:active,.share-action-btn:active,.onb-
 .gen-day-bar{height:100%;background:linear-gradient(90deg,#00B9C8,#00BC88);border-radius:2px;transition:width .4s}
 .gen-day-habits{display:flex;flex-wrap:wrap;gap:4px}
 .gen-habit-chip{font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid;font-weight:500;white-space:nowrap}
+
+.gen-hab-pct{font-size:12px;font-weight:700;min-width:32px;text-align:right;margin-right:4px;flex-shrink:0}
+.gen-hab-bar-wrap{height:3px;background:rgba(51,65,85,.3);border-radius:2px;margin:2px 16px 6px;overflow:hidden}
+.gen-hab-bar{height:100%;border-radius:2px;transition:width .4s}
 </style>
 <script>
 let swRegistration=null,deferredInstallPrompt=null;
@@ -1751,7 +1755,7 @@ function renderHoy(){
   });
   document.getElementById('main-content').innerHTML=html;attachTooltips();
 }
-function toggleCat(key){catExpanded[key]=!catExpanded[key];if(currentTab==='hoy')renderHoy();}
+function toggleCat(key){catExpanded[key]=!catExpanded[key];if(currentTab==='hoy')renderHoy();else if(currentTab==='semana')renderSemana();}
 function toggleHabit(ev,hid,ds){
   if(typeof ST_READONLY!=='undefined'&&ST_READONLY)return;
   if(ds>todayStr())return; // Block future dates absolutely
@@ -1866,14 +1870,17 @@ function renderSemana(){
   });
 
   var html=
-    '<div class="period-bar-sticky" style="top:'+topH+'px"><div class="tab-period-bar">'+btnHtml+'</div></div>'+
-    '<div class="date-nav">'+
-      '<button class="date-nav-btn" onclick="prevGeneral()"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>'+
-      '<div class="date-nav-center">'+
-        '<div class="date-nav-label">'+navLabel+'</div>'+
-        '<div class="date-nav-sub">'+navSub+'</div>'+
+    // Single sticky block: period buttons + date-nav
+    '<div class="period-bar-sticky" style="top:'+topH+'px">'+
+      '<div class="tab-period-bar">'+btnHtml+'</div>'+
+      '<div class="date-nav" style="position:relative;border-top:1px solid rgba(51,65,85,.3);border-radius:0 0 12px 12px;margin:0;border-left:none;border-right:none;border-bottom:none">'+
+        '<button class="date-nav-btn" onclick="prevGeneral()"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>'+
+        '<div class="date-nav-center">'+
+          '<div class="date-nav-label">'+navLabel+'</div>'+
+          '<div class="date-nav-sub">'+navSub+'</div>'+
+        '</div>'+
+        '<button class="date-nav-btn" onclick="nextGeneral()" style="opacity:'+(canNext?'1':'0.3')+';pointer-events:'+(canNext?'auto':'none')+'"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>'+
       '</div>'+
-      '<button class="date-nav-btn" onclick="nextGeneral()" style="opacity:'+(canNext?'1':'0.3')+';pointer-events:'+(canNext?'auto':'none')+'"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>'+
     '</div>'+
     // Stats for selected period
     '<div class="gen-stats-row">'+
@@ -1883,7 +1890,11 @@ function renderSemana(){
       '<div class="gen-stat"><div class="gen-stat-val">'+str+'</div><div class="gen-stat-lbl">racha</div></div>'+
     '</div>';
 
-  // Day-by-day habit completion grid
+  // Category-based view — same structure as HOY
+  var activeDays2=days.filter(function(d){return d<=today;}).length||1;
+  var totalPts=pts;
+  var totalPct=avg;
+  // Day-by-day chip view (original General tab design)
   var activeDaysData=days.filter(function(d){return d<=today;});
   if(activeDaysData.length===0){
     html+='<div style="text-align:center;padding:40px;color:#475569">No hay datos para este período</div>';
@@ -1891,30 +1902,29 @@ function renderSemana(){
     html+='<div class="gen-days">';
     activeDaysData.forEach(function(ds){
       var comp=ST.completions[ds]||{};
-      var done=habits.filter(function(h){return comp[h.id];});
-      var pct=habits.length?Math.round(done.length/habits.length*100):0;
+      var habList=allHabits();
+      var done=habList.filter(function(h){return comp[h.id];});
+      var pct=habList.length?Math.round(done.length/habList.length*100):0;
       var isT=ds===today;
-      var dayPts2=dayPts(ds);
+      var dp2=dayPts(ds);
       var d=new Date(ds+'T12:00:00');
       var DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-      var dayName=DAYS[d.getDay()];
-      var dayNum=d.getDate();
       html+='<div class="gen-day'+(isT?' gen-day-today':'')+'">'+
-        '<div class="gen-day-label"><span class="gen-day-name">'+dayName+' '+dayNum+'</span><span class="gen-day-pts">'+dayPts2+' pts</span></div>'+
+        '<div class="gen-day-label"><span class="gen-day-name">'+DAYS[d.getDay()]+' '+d.getDate()+'</span><span class="gen-day-pts">'+dp2+' pts</span></div>'+
         '<div class="gen-day-bar-wrap"><div class="gen-day-bar" style="width:'+pct+'%"></div></div>'+
         '<div class="gen-day-habits">';
       done.forEach(function(h){
-        var cat=CATEGORIES.find(function(cat){return catHabits(cat.id).some(function(ch){return ch.id===h.id;});});
-        var col=cat?{mente:'#7c3aed',nutricion:'#be123c',luz:'#a16207',movimiento:'#c2410c',naturaleza:'#4d7c0f',recuperacion:'#0e6b8c',sueno:'#4338ca',finanzas:'#065f46',custom:'#a21caf'}[cat.id]||'#00B9C8':'#00B9C8';
+        var cat=CATEGORIES.find(function(ct){return catHabits(ct.id).some(function(ch){return ch.id===h.id;});});
+        var cols={mente:'#7c3aed',nutricion:'#be123c',luz:'#a16207',movimiento:'#c2410c',naturaleza:'#4d7c0f',recuperacion:'#0e6b8c',sueno:'#4338ca',finanzas:'#065f46',custom:'#a21caf'};
+        var col=cat?cols[cat.id]||'#00B9C8':'#00B9C8';
         html+='<span class="gen-habit-chip" style="background:'+col+'22;border-color:'+col+'44;color:'+col+'">'+h.name+'</span>';
       });
-      if(done.length===0)html+='<span style="color:#334155;font-size:11px">Sin hábitos</span>';
+      if(done.length===0)html+='<span style="color:#475569;font-size:11px">Sin hábitos este día</span>';
       html+='</div></div>';
     });
     html+='</div>';
   }
-
-  document.getElementById('main-content').innerHTML=html;
+    document.getElementById('main-content').innerHTML=html;
   checkStickyState();
 }
 
@@ -1923,7 +1933,7 @@ function renderSemana(){
 // HÁBITOS TAB
 // ═══════════════════════════════════════════════════════════
 function renderHabitos(){
-  let html=`<div style="font-size:11px;color:#334155;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">${allHabits().length} hábitos · ${maxPts()} pts máximos por día</div>`;
+  let html='';
   CATEGORIES.filter(cat=>catHabits(cat.id).length>0).forEach(cat=>{
     const ch=catHabits(cat.id),cp=ch.reduce((s,h)=>s+h.pts,0);
     html+=`<div class="habits-guide-card"><div class="habits-cat-header"><div class="habits-cat-left"><div class="cat-dot bg-${cat.color}"></div><div><div class="habits-cat-name col-${cat.color}">${cat.name}</div><div class="habits-cat-desc">${cat.desc}</div></div></div><span class="habits-cat-pts">${cp} pts</span></div>`;
@@ -1931,9 +1941,13 @@ function renderHabitos(){
   });
   html+=`<button class="add-habit-btn" onclick="openModal()"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 5v14M5 12h14"/></svg>Agregar hábito nuevo</button>`;
   html+=`<button class="manage-open-btn" onclick="openManage()"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Gestionar hábitos</button>`;
-  document.getElementById('main-content').innerHTML=html;attachTooltips();
+    html+=`<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+    <button class="add-habit-btn" onclick="openNewHabit()"><svg class="gt-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Agregar nuevo hábito</span></button>
+    <button class="manage-open-btn" onclick="openManage()"><svg class="gt-icon" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Gestionar hábitos</span></button>
+    <div style="font-size:12px;color:#94a3b8;font-weight:600;text-align:center;padding:8px 0;letter-spacing:.04em">${allHabits().length} hábitos · <span style="color:#22d3ee;font-weight:700">${maxPts()} pts máximos por día</span></div>
+  </div>`;
+  document.getElementById('main-content').innerHTML=html;
 }
-
 // ═══════════════════════════════════════════════════════════
 // MANAGE
 // ═══════════════════════════════════════════════════════════
@@ -2195,6 +2209,7 @@ function _onScroll(){
   _stickyRAF=requestAnimationFrame(function(){_stickyRAF=null;checkStickyState();});
 }
 window.addEventListener('scroll',_onScroll,{passive:true});
+window.addEventListener('resize',function(){_stickyRAF=null;checkStickyState();},{passive:true});
 
 function updateStickyTop(){
   var h=(document.getElementById('top-bar')||{}).offsetHeight||0;
@@ -2315,6 +2330,7 @@ function openShare(){
     if(h)h.style.cssText='width:40px;height:4px;background:rgba(148,163,184,.4);border-radius:2px;margin:0 auto 12px;display:block';
   },50);
   document.getElementById('share-overlay').classList.remove('hidden');
+  (function(){var _o=document.getElementById('share-overlay');if(_o&&!_o._sw){_o._sw=true;addSwipeToDismiss(_o,closeShare);}})();
   const today=todayStr();
   const fi=document.getElementById('share-from');const ti=document.getElementById('share-to');
   if(fi)fi.max=today;if(ti)ti.max=today;
@@ -2950,7 +2966,17 @@ function checkStickyState(){
   var topH=(document.getElementById('top-bar')||{}).offsetHeight||0;
   document.querySelectorAll('.date-nav,.period-bar-sticky').forEach(function(el){
     var rect=el.getBoundingClientRect();
-    el.classList.toggle('stuck',Math.round(rect.top)<=topH+1&&rect.top>=0);
+    var isStuck=Math.round(rect.top)<=topH+1&&rect.top>=0;
+    el.classList.toggle('stuck',isStuck);
+    if(isStuck){
+      var pr=el.parentElement?el.parentElement.getBoundingClientRect():{left:0};
+      el.style.marginLeft=(-pr.left)+'px';
+      el.style.width=window.innerWidth+'px';
+      el.style.boxSizing='border-box';
+    }else{
+      el.style.marginLeft='';
+      el.style.width='';
+    }
   });
 }
 
@@ -2961,6 +2987,7 @@ function _onScroll(){
   _stickyRAF=requestAnimationFrame(function(){_stickyRAF=null;checkStickyState();});
 }
 window.addEventListener('scroll',_onScroll,{passive:true});
+window.addEventListener('resize',function(){_stickyRAF=null;checkStickyState();},{passive:true});
 
 function updateStickyTop(){
   var h=(document.getElementById('top-bar')||{}).offsetHeight||0;
