@@ -2880,10 +2880,6 @@ function toggleHabit(ev,hid,ds){
 // changeWeek removed — use prevGeneral/nextGeneral
 
 
-
-
-
-
 function getGeneralRange(){
   var fmt=function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
   var today=new Date(todayStr()+'T12:00:00');
@@ -3515,7 +3511,6 @@ function mSem(bw){
 }
 
 
-
 function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalFn();}
 
 function closeModalFn(){document.getElementById('modal-overlay').classList.add('hidden');}
@@ -3612,7 +3607,6 @@ function saveCustomHabit(){
 }
 
 
-
 function showOnboarding(){
   document.getElementById('app').classList.add('hidden');
   var ob=document.getElementById('onboarding');
@@ -3642,9 +3636,6 @@ function requestNotifPermission(cb){
     else{ST.settings.reminderOn=false;saveState();syncVolUI();showToast('Notificaciones no habilitadas');}
   });
 }
-
-
-
 
 
 function buildNotifBody(){
@@ -3731,6 +3722,50 @@ function openShare(){
 
 function closeShare(e){if(e.target===document.getElementById('share-overlay'))document.getElementById('share-overlay').classList.add('hidden');}
 
+// Codificacion compacta del link (mucho mas corta que JSON+LZ)
+function encShareCompact(data){
+  var EP=Date.UTC(2024,0,1);
+  function dn(s){return Math.round((Date.parse(s+'T00:00:00Z')-EP)/86400000);}
+  var fD=dn(data.f), dur=dn(data.t)-fD;
+  var mp=data.mp||{};
+  var lvlIdx=-1; for(var i=0;i<LEVELS.length;i++){if(LEVELS[i].name===mp.n){lvlIdx=i;break;}}
+  var c=data.c||{}, table=[], EPf=Date.parse(data.f+'T00:00:00Z'), compDays=[];
+  Object.keys(c).sort().forEach(function(ds){
+    var ids=c[ds]; if(!ids||!ids.length)return;
+    var off=Math.round((Date.parse(ds+'T00:00:00Z')-EPf)/86400000);
+    var idxs=ids.map(function(id){var k=table.indexOf(id);if(k<0){k=table.length;table.push(id);}return k.toString(36);});
+    compDays.push(off.toString(36)+'.'+idxs.join('.'));
+  });
+  var parts=['1',encodeURIComponent(data.n||''),fD.toString(36),dur.toString(36),
+    (data.mb||'')+(data.mx!=null?data.mx.toString(36):''),
+    (lvlIdx>=0?lvlIdx.toString(36):''),
+    mp.r?mp.r.toString(36):'', mp.p?mp.p.toString(36):'', mp.c?mp.c.toString(36):'', mp.t?mp.t.toString(36):'',
+    table.join('-'), compDays.join('_')];
+  while(parts.length>5 && parts[parts.length-1]==='') parts.pop();
+  return parts.join('~');
+}
+function decShareCompact(str){
+  var p=str.split('~'); if(p[0]!=='1')return null;
+  var EP=Date.UTC(2024,0,1);
+  function ds(n){return new Date(EP+n*86400000).toISOString().slice(0,10);}
+  var fD=parseInt(p[2]||'0',36), dur=parseInt(p[3]||'0',36);
+  var f=ds(fD), t=ds(fD+dur);
+  var mbmx=p[4]||'', mb=mbmx.charAt(0)||'', mx=mbmx.length>1?parseInt(mbmx.slice(1),36):0;
+  var mp={};
+  if(p[5]!=null&&p[5]!==''){var lv=LEVELS[parseInt(p[5],36)];if(lv)mp.n=lv.name;}
+  if(p[6])mp.r=parseInt(p[6],36); if(p[7])mp.p=parseInt(p[7],36);
+  if(p[8])mp.c=parseInt(p[8],36); if(p[9])mp.t=parseInt(p[9],36);
+  var table=(p[10])?p[10].split('-'):[];
+  var c={}, EPf=Date.parse(f+'T00:00:00Z');
+  if(p[11]){
+    p[11].split('_').forEach(function(seg){
+      var a=seg.split('.'); var off=parseInt(a[0],36);
+      var ids=a.slice(1).map(function(x){return table[parseInt(x,36)];}).filter(Boolean);
+      c[new Date(EPf+off*86400000).toISOString().slice(0,10)]=ids;
+    });
+  }
+  return {n:decodeURIComponent(p[1]||''),f:f,t:t,mb:mb,mx:mx,mp:mp,c:c};
+}
 function copyShareLink(){
   var res=getShareRange();var from=res[0],to=res[1];
   var days=getDaysInRange(from,to);
@@ -3746,12 +3781,9 @@ function copyShareLink(){
   var data={n:ST.userName||'',f:from,t:to,mb:_pk.bag,mx:_pk.idx};
   if(Object.keys(compact).length)data.c=compact;
   if(Object.keys(_mp).length)data.mp=_mp;
-  var _sjson=JSON.stringify(data);
-  var encoded;
-  try{encoded=LZString.compressToEncodedURIComponent(_sjson);}
-  catch(e){try{encoded=btoa(unescape(encodeURIComponent(_sjson)));}catch(e2){encoded=btoa(_sjson);}}
+  var encoded=encShareCompact(data);
   var base='https://trackerdehabitos-bymarcosapud.vercel.app/';
-  var url=base+'#share='+encoded;
+  var url=base+'#s='+encoded;
   var statusEl=document.getElementById('share-status');
   function _showCopied(u){if(statusEl){statusEl.textContent='✓ Link copiado. Ya podés pegarlo donde quieras.';statusEl.style.color='#34d399';}}
   function _tryExecCopy(u){
@@ -3773,7 +3805,7 @@ function copyShareLink(){
   function _openPreview(){
     // A los 4 segundos abre la vista compartida en una PESTAÑA NUEVA (la app sigue activa donde estaba)
     setTimeout(function(){
-      var pv=(location.protocol==='file:')?url:(location.origin+location.pathname+'#share='+encoded);
+      var pv=(location.protocol==='file:')?url:(location.origin+location.pathname+'#s='+encoded);
       var w=window.open(pv,'_blank');
       if(statusEl)statusEl.textContent=w?'✓ Link copiado. Vista previa abierta en otra pestaña.':'✓ Link copiado. (El navegador bloqueó la pestaña nueva — pegá el link en otra pestaña para verlo.)';
     },4000);
@@ -3796,13 +3828,15 @@ function copyShareLink(){
 }
 
 
-
 function checkSharedView(){
   const hash=window.location.hash;
-  if(!hash.startsWith('#share='))return false;
-  const encoded=hash.slice(7);
+  var encoded=null, isCompact=false;
+  if(hash.startsWith('#s=')){encoded=hash.slice(3);isCompact=true;}
+  else if(hash.startsWith('#share=')){encoded=hash.slice(7);}
+  else return false;
   var data=null;
-  try{var j=LZString.decompressFromEncodedURIComponent(encoded);if(j)data=JSON.parse(j);}catch(e){}
+  if(isCompact){try{data=decShareCompact(encoded);}catch(e){}}
+  if(!data){try{var j=LZString.decompressFromEncodedURIComponent(encoded);if(j)data=JSON.parse(j);}catch(e){}}
   if(!data){try{data=JSON.parse(decodeURIComponent(escape(atob(encoded))));}catch(e){}}
   if(!data){console.error('Invalid share link');return false;}
   renderSharedView(data);
@@ -4359,28 +4393,8 @@ document.addEventListener('keydown',function(e){
     if(action==='ob-goto')   obGoTo(n);
   }
   ob.addEventListener('click',handle);
-  ob.addEventListener('touchend',function(e){
-    // solo si no fue un swipe
-    if(Math.abs(_obSX-(e.changedTouches[0]?.clientX||0))<15) handle(e);
-  });
 })();
 
-
-// ── Onboarding: un listener por botón, adjuntado una sola vez ──
-(function(){
-  document.querySelectorAll('#onboarding [data-action]').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var ob=document.getElementById('onboarding');
-      if(!ob||ob.classList.contains('hidden'))return;
-      var a=btn.getAttribute('data-action');
-      var n=parseInt(btn.getAttribute('data-n')||'0');
-      if(a==='ob-next')   obNext();
-      if(a==='ob-prev')   obPrev();
-      if(a==='ob-finish') obFinish();
-      if(a==='ob-goto')   obGoTo(n);
-    });
-  });
-})();
 
 // ── Boot sequence ──────────────────────────────────────────────────
 if(!checkSharedView()){
