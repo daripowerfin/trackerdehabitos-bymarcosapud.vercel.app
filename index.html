@@ -3781,54 +3781,73 @@ function copyShareLink(){
   var data={n:ST.userName||'',f:from,t:to,mb:_pk.bag,mx:_pk.idx};
   if(Object.keys(compact).length)data.c=compact;
   if(Object.keys(_mp).length)data.mp=_mp;
-  var encoded=encShareCompact(data);
-  var base='https://trackerdehabitos-bymarcosapud.vercel.app/';
-  var url=base+'#s='+encoded;
+  var encoded=encShareCompact(data); // respaldo por si el backend falla
   var statusEl=document.getElementById('share-status');
-  function _showCopied(u){if(statusEl){statusEl.textContent='✓ Link copiado. Ya podés pegarlo donde quieras.';statusEl.style.color='#34d399';}}
   function _tryExecCopy(u){
     try{
       var ta=document.createElement('textarea');
       ta.value=u;ta.style.cssText='position:fixed;top:-9999px;left:-9999px';
       document.body.appendChild(ta);ta.focus();ta.select();
-      var ok=document.execCommand('copy');
+      document.execCommand('copy');
       document.body.removeChild(ta);
-      if(ok){_showCopied(u);}
-      else{if(statusEl){statusEl.textContent='No se pudo copiar automáticamente. Copiá el link desde la barra de dirección.';statusEl.style.color='#94a3b8';}}
-    }catch(e){if(statusEl){statusEl.textContent='No se pudo copiar. Abrí el link en el navegador.';statusEl.style.color='#94a3b8';}}
+    }catch(e){}
   }
-  if(encoded.length>9000){
-    if(statusEl){statusEl.textContent='Período muy largo. Elegí un rango más corto.';statusEl.style.color='#fb923c';}
-    return;
+  function _openPreview(u){
+    setTimeout(function(){try{window.open(u,'_blank');}catch(e){}},1200);
   }
-  if(statusEl){statusEl.textContent='Generando link…';statusEl.style.color='#94a3b8';}
-  function _openPreview(){
-    // A los 4 segundos abre la vista compartida en una PESTAÑA NUEVA (la app sigue activa donde estaba)
-    setTimeout(function(){
-      var pv=(location.protocol==='file:')?url:(location.origin+location.pathname+'#s='+encoded);
-      var w=window.open(pv,'_blank');
-      if(statusEl)statusEl.textContent=w?'✓ Link copiado. Vista previa abierta en otra pestaña.':'✓ Link copiado. (El navegador bloqueó la pestaña nueva — pegá el link en otra pestaña para verlo.)';
-    },4000);
-  }
-  function _copyFinal(u,wasShortened){
+  function _copyFinal(u){
     if(statusEl){
-      statusEl.textContent=(wasShortened?'✓ Link corto copiado.':'✓ Link copiado.')+' Abriendo vista previa en 4s…';
-      statusEl.style.color='#34d399';
+      statusEl.innerHTML='<div style="color:#34d399;margin-bottom:6px;font-weight:600">Link listo y copiado</div>'+
+        '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 10px;font-size:12px;color:#cbd5e1;word-break:break-all;user-select:all">'+u+'</div>'+
+        '<div style="color:#94a3b8;font-size:11px;margin-top:6px">Si no se copio solo, tocá el link de arriba para seleccionarlo.</div>';
     }
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(u).catch(function(){_tryExecCopy(u);});
-    }else{_tryExecCopy(u);}
-    _openPreview();
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).catch(function(){_tryExecCopy(u);});}
+    else{_tryExecCopy(u);}
+    _openPreview(u);
   }
-  // is.gd redirige DIRECTO (sin página intermedia). Si falla → link completo (también directo, sin TinyURL).
-  fetch('https://is.gd/create.php?format=json&url='+encodeURIComponent(url))
+  function _fallback(){_copyFinal(location.origin+location.pathname+'#s='+encoded);}
+  if(statusEl){statusEl.textContent='Generando link...';statusEl.style.color='#94a3b8';}
+  fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
     .then(function(r){return r.json();})
-    .then(function(d){if(d&&d.shorturl)_copyFinal(d.shorturl,true);else throw new Error('x');})
-    .catch(function(){_copyFinal(url,false);});
+    .then(function(j){if(j&&j.slug){_copyFinal(location.origin+'/?r='+j.slug);}else{_fallback();}})
+    .catch(function(){_fallback();});
 }
 
 
+function _hideAppForShare(){
+  try{
+    var a=document.getElementById('app'); if(a)a.classList.add('hidden');
+    var o=document.getElementById('onboarding'); if(o)o.classList.add('hidden');
+  }catch(e){}
+}
+function _showSharedLoading(){
+  _hideAppForShare();
+  if(document.getElementById('shared-loading'))return;
+  if(!document.getElementById('_shspin-style')){var s=document.createElement('style');s.id='_shspin-style';s.textContent='@keyframes _shspin{to{transform:rotate(360deg)}}';document.head.appendChild(s);}
+  var d=document.createElement('div');
+  d.id='shared-loading';
+  d.style.cssText='position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0b1220;color:#e2e8f0;font-family:Geist,sans-serif;text-align:center;padding:24px';
+  d.innerHTML='<div style="width:42px;height:42px;border:4px solid rgba(255,255,255,.15);border-top-color:#22d3ee;border-radius:50%;animation:_shspin .8s linear infinite"></div><div style="font-size:15px;color:#94a3b8">Cargando informe...</div>';
+  document.body.appendChild(d);
+}
+function _showSharedError(){
+  _hideAppForShare();
+  var d=document.getElementById('shared-loading');
+  if(!d){d=document.createElement('div');d.id='shared-loading';d.style.cssText='position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0b1220;color:#e2e8f0;font-family:Geist,sans-serif;text-align:center;padding:24px';document.body.appendChild(d);}
+  d.innerHTML='<div style="font-size:40px">&#128269;</div><div style="font-size:17px;font-weight:600">No encontramos este informe</div><div style="font-size:14px;color:#94a3b8;max-width:320px;line-height:1.5">El link puede haber vencido o ser incorrecto. Pedile a quien te lo compartio que genere uno nuevo.</div>';
+}
+function _clearSharedLoading(){var d=document.getElementById('shared-loading');if(d)d.remove();}
 function checkSharedView(){
+  var r=null;
+  try{r=new URLSearchParams(window.location.search).get('r');}catch(e){}
+  if(r){
+    _showSharedLoading();
+    fetch('/api/get?r='+encodeURIComponent(r))
+      .then(function(resp){return resp.json();})
+      .then(function(j){if(j&&j.data){_clearSharedLoading();renderSharedView(j.data);}else{_showSharedError();}})
+      .catch(function(){_showSharedError();});
+    return true;
+  }
   const hash=window.location.hash;
   var encoded=null, isCompact=false;
   if(hash.startsWith('#s=')){encoded=hash.slice(3);isCompact=true;}
