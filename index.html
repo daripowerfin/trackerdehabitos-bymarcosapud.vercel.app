@@ -3223,9 +3223,6 @@ function renderSemana(){
       var cb=e.target.closest('[data-close]');
       if(cb&&window._genDayExp){var cbDay='m_'+cb.getAttribute('data-mday');window._genDayExp[cbDay]=false;renderSemana();return;}
       var hr=e.target.closest('.habit-row[data-hid]');if(hr){toggleHabit(e,hr.getAttribute('data-hid'),hr.getAttribute('data-ds'));return;}
-      var spb=e.target.closest('[data-sp]');if(spb){setStatsPeriod(spb.getAttribute('data-sp'));return;}
-      if(e.target.closest('#stats-prev-btn')){prevStatsPeriod();return;}
-      if(e.target.closest('#stats-next-btn')){nextStatsPeriod();return;}
     };
     mc.addEventListener('click',window._genClickHandler);
   }
@@ -3564,12 +3561,12 @@ function renderStats(){
     '<div class="period-bar-sticky" id="stats-nav-block" style="top:'+topH+'px">'+
       '<div class="stats-period-bar">'+btnHtml+'</div>'+
       '<div class="date-nav" style="border-radius:0;border-top:1px solid rgba(51,65,85,.25);border-left:none;border-right:none;border-bottom:none;margin:0;background:transparent">'+
-        '<button class="date-nav-btn" id="stats-prev-btn" onclick="prevStatsPeriod()"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>'+
+        '<button class="date-nav-btn" id="stats-prev-btn"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>'+
         '<div class="date-nav-center">'+
           '<div class="date-nav-label">'+navLabel+(navChip?'<span class="today-chip" style="margin-left:6px">'+navChip+'</span>':'')+' </div>'+
           '<div class="date-nav-sub">'+days.length+(days.length===1?' día':' días')+'</div>'+
         '</div>'+
-        '<button class="date-nav-btn" id="stats-next-btn" onclick="nextStatsPeriod()" style="opacity:'+(canNext?'1':'0.3')+';pointer-events:'+(canNext?'auto':'none')+'"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>'+
+        '<button class="date-nav-btn" id="stats-next-btn" style="opacity:'+(canNext?'1':'0.3')+';pointer-events:'+(canNext?'auto':'none')+'"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>'+
       '</div>'+
     '</div>';
 
@@ -3598,6 +3595,19 @@ function renderStats(){
   <div class="record-card"><div class="record-icon">📅</div><div class="record-val">${bw.pts}</div><div class="record-label">Mejor semana</div><div class="record-motive">${bw.start?mSem(bw):'Sin datos aún.'}</div></div>
   <div class="record-card"><div class="record-icon">⚡</div><div class="record-val">${tp}</div><div class="record-label">Hoy</div><div class="record-motive">${tp>0?'Vas bien. Seguí sumando.':'Todavía no empezaste.'}</div></div>
   <div class="streak-record"><div class="streak-record-icon">🔥</div><div><div class="streak-record-val">${str} días activa</div><div class="streak-record-label">Racha actual · Récord: ${bstr} días</div></div></div>
+  </div>`;
+  // ── Récords del período seleccionado (cambia con el date-nav) ──
+  var pbd={date:null,pts:0};
+  days.forEach(function(d){var p=dayPts(d);if(p>pbd.pts){pbd.pts=p;pbd.date=d;}});
+  var wkMap={};
+  days.forEach(function(ds){var d2=new Date(ds+'T12:00:00'),dw=d2.getDay();var mon=new Date(d2);mon.setDate(d2.getDate()-(dw===0?6:dw-1));var k=dateStr(mon);wkMap[k]=(wkMap[k]||0)+dayPts(ds);});
+  var pbw={start:null,pts:0};
+  Object.keys(wkMap).forEach(function(k){if(wkMap[k]>pbw.pts){pbw.pts=wkMap[k];pbw.start=k;}});
+  var ptot=days.reduce(function(s,d){return s+dayPts(d);},0);
+  html+=`<div class="stat-section-title">Récords del período · ${navLabel}</div><div class="records-grid">
+  <div class="record-card"><div class="record-icon">🏆</div><div class="record-val">${pbd.pts}</div><div class="record-label">Mejor día</div><div class="record-motive">${pbd.date?mDia(pbd):'Sin datos en este período.'}</div></div>
+  <div class="record-card"><div class="record-icon">📅</div><div class="record-val">${pbw.pts}</div><div class="record-label">Mejor semana</div><div class="record-motive">${pbw.start?mSem(pbw):'Sin datos en este período.'}</div></div>
+  <div class="record-card"><div class="record-icon">⚡</div><div class="record-val">${ptot}</div><div class="record-label">Total del período</div><div class="record-motive">${ptot>0?'Suma de todos los días del período.':'Sin puntos en este período.'}</div></div>
   </div>`;
   html+=`<div class="stat-section-title">Niveles</div><div class="level-card"><div class="level-top"><div class="level-name-big">${lv.name}</div><div class="level-num-badge">Nivel ${lv.n}</div></div><div class="level-bar-lg"><div class="level-bar-lg-fill" style="width:${lp}%"></div></div><div class="level-progress-text">${nlv?`${tot.toLocaleString()} / ${nlv.min.toLocaleString()} pts · faltan ${(nlv.min-tot).toLocaleString()} para ${nlv.name}`:'Nivel máximo — '+tot.toLocaleString()+' pts'}</div></div>`;
   html+=`<div class="stat-section-title">Medallas (${ST.medals.length}/${MEDALS_DEF.length})</div><div class="medals-grid">`;
