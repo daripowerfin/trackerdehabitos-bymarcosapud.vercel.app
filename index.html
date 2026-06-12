@@ -221,18 +221,17 @@ main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:14px 16px 80px}
 .info-btn{width:24px;height:24px;border-radius:50%;border:2px solid rgba(0,185,200,.7);color:#00B9C8;background:rgba(0,185,200,.14);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;box-shadow:0 0 0 0 rgba(0,185,200,.3)}
 .info-btn
 .habit-info-panel{display:none;width:100%;background:rgba(0,185,200,.04);border-top:1px solid rgba(0,185,200,.1);padding:9px 15px;font-size:12px;color:#64748b;line-height:1.6}
-.habit-info-panel
 
 /* ── COLORS ── */
-.col-purple{color:#c084fc}.bg-purple{background:#a855f7}
-.col-rose{color:#fb7185}.bg-rose{background:#f43f5e}
-.col-yellow{color:#facc15}.bg-yellow{background:#eab308}
-.col-orange{color:#fb923c}.bg-orange{background:#f97316}
-.col-lime{color:#a3e635}.bg-lime{background:#84cc16}
-.col-cyan{color:#22d3ee}.bg-cyan{background:#06b6d4}
-.col-indigo{color:#818cf8}.bg-indigo{background:#6366f1}
-.col-custom{color:#e879f9}.bg-custom{background:#d946ef}
-.col-emerald{color:#34d399}.bg-emerald{background:#10b981}
+.col-purple{color:#a855f7}.bg-purple{background:#a855f7}
+.col-rose{color:#f43f5e}.bg-rose{background:#f43f5e}
+.col-yellow{color:#eab308}.bg-yellow{background:#eab308}
+.col-orange{color:#f97316}.bg-orange{background:#f97316}
+.col-lime{color:#84cc16}.bg-lime{background:#84cc16}
+.col-cyan{color:#06b6d4}.bg-cyan{background:#06b6d4}
+.col-indigo{color:#6366f1}.bg-indigo{background:#6366f1}
+.col-custom{color:#d946ef}.bg-custom{background:#d946ef}
+.col-emerald{color:#10b981}.bg-emerald{background:#10b981}
 
 /* ── SEMANA ── */
 
@@ -322,12 +321,12 @@ main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:14px 16px 80px}
 .manage-head{padding:0 18px 14px;border-bottom:1px solid rgba(51,65,85,.4);flex-shrink:0}
 .manage-title{font-size:16px;font-weight:700;color:#f1f5f9;letter-spacing:-.03em}
 .manage-sub{font-size:12px;color:#475569;margin-top:3px}
-.manage-cols{display:grid;grid-template-columns:1fr 84px 44px;padding:7px 18px;background:rgba(15,23,42,.5);border-bottom:1px solid rgba(51,65,85,.35);flex-shrink:0}
+.manage-cols{display:grid;grid-template-columns:1fr 72px 56px 64px;column-gap:4px;padding:7px 18px;background:rgba(15,23,42,.5);border-bottom:1px solid rgba(51,65,85,.35);flex-shrink:0}
 .manage-col-label{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;text-align:center}
 .manage-col-label:first-child{text-align:left}
 .manage-body{overflow-y:auto;flex:1}
 .manage-cat-title{font-size:11px;font-weight:700;padding:10px 18px 5px;border-top:1px solid rgba(51,65,85,.25)}
-.manage-habit-row{display:grid;grid-template-columns:1fr 84px 44px;align-items:center;padding:9px 18px;border-top:1px solid rgba(51,65,85,.15)}
+.manage-habit-row{display:grid;grid-template-columns:1fr 72px 56px 64px;column-gap:4px;align-items:center;padding:9px 18px;border-top:1px solid rgba(51,65,85,.15)}
 .manage-habit-left{display:flex;align-items:center;gap:6px;min-width:0}
 .manage-habit-name{font-size:13px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .manage-habit-name.shown{color:#e2e8f0}
@@ -342,6 +341,13 @@ main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:14px 16px 80px}
 .manage-sw-knob{width:13px;height:13px;border-radius:50%;background:white;position:absolute;top:2px;left:2px;transition:transform .2s}
 .manage-sw.on .manage-sw-knob{transform:translateX(15px)}
 .manage-trash-cell{display:flex;justify-content:center;align-items:center}
+.manage-edit-cell{display:flex;justify-content:center;align-items:center}
+.manage-edit{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#22d3ee;background:rgba(34,211,238,.09);border:none;cursor:pointer;transition:all .15s}
+.manage-edit:hover{background:rgba(34,211,238,.2)}
+.manage-edit svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.manage-cat-edit{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;margin-left:7px;vertical-align:-5px;color:inherit;background:rgba(148,163,184,.12);border:none;cursor:pointer}
+.manage-cat-edit:hover{background:rgba(148,163,184,.25)}
+.manage-cat-edit svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .manage-trash{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#ef4444;background:rgba(239,68,68,.09);transition:all .15s}
 .manage-trash:active{color:#ff1a1a;background:rgba(239,68,68,.2)}
 .manage-trash svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -1255,7 +1261,7 @@ function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone
   <button class="dlg-close" onclick="document.getElementById('manage-overlay').classList.add('hidden')" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
   <div class="manage-handle"></div>
   <div class="manage-head"><div class="manage-title">Gestionar Hábitos y Categorías</div><div class="manage-sub">Los puntos históricos se conservan siempre.</div></div>
-  <div class="manage-cols"><span class="manage-col-label">Hábito</span><span class="manage-col-label">Mostrar hábito</span><span class="manage-col-label">Eliminar hábito</span></div>
+  <div class="manage-cols"><span class="manage-col-label" style="text-align:left">Hábito</span><span class="manage-col-label">Mostrar</span><span class="manage-col-label">Editar</span><span class="manage-col-label">Eliminar</span></div>
   <div class="manage-body" id="manage-body"></div>
 </div>
 </div>
@@ -1265,11 +1271,11 @@ function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone
 <div class="modal-sheet" onclick="event.stopPropagation()">
   <button class="dlg-close" onclick="closeModalFn()" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
   <div class="modal-handle"></div>
-  <div class="modal-title">Agregar hábito</div>
-  <div class="modal-sub">Se agrega a todas las pestañas automáticamente.</div>
-  <div class="modal-label">Nombre</div>
+  <div class="modal-title" id="modal-title-txt">Agregar hábito</div>
+  <div class="modal-sub" id="modal-sub-txt">Se agrega a todas las pestañas automáticamente.</div>
+  <div class="modal-label" id="lbl-hname">Nombre</div>
   <input class="modal-input" id="new-habit-name" placeholder="Ej: Lectura 30 minutos" maxlength="60" autocomplete="off">
-  <div class="modal-label">Categoría</div>
+  <div class="modal-label" id="lbl-hcat">Categoría</div>
   <div class="cat-dd" id="cat-dd">
     <div class="cat-dd-trigger" onclick="toggleCatDD(event)">
       <span class="cat-dd-current"><span class="cat-dot bg-purple" id="cat-dd-dot"></span><span id="cat-dd-label">Mente</span></span>
@@ -1279,18 +1285,18 @@ function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone
   </div>
   <input type="hidden" id="new-habit-cat" value="mente">
   <div id="new-cat-form" class="hidden" style="margin-top:13px">
-    <div class="modal-label" style="margin-top:0">Nombre de la nueva categoría</div>
+    <div class="modal-label" id="lbl-ncat" style="margin-top:0">Nombre de la nueva categoría</div>
     <input class="modal-input" id="new-cat-name" placeholder="Ej: Relaciones" maxlength="24" autocomplete="off">
     <div class="modal-label">Descripción <span style="color:#475569;font-weight:400;font-size:11px">(aparece como explicación emergente)</span></div>
     <input class="modal-input" id="new-cat-desc" placeholder="Ej: Conexión con familia y amigos" maxlength="120" autocomplete="off">
     <div class="new-cat-color-label">Color <span style="color:#475569;font-weight:400;font-size:11px">(elegí uno libre o personalizado)</span></div>
     <div class="cat-color-swatches" id="cat-color-swatches"></div>
   </div>
-  <div class="modal-label" style="margin-top:12px">Descripción <span style="color:#475569;font-weight:400;font-size:11px">(aparece como explicación emergente)</span></div>
+  <div class="modal-label" id="lbl-hdesc" style="margin-top:12px">Descripción <span style="color:#475569;font-weight:400;font-size:11px">(aparece como explicación emergente)</span></div>
   <input class="modal-input" id="new-habit-desc" placeholder="Ej: Mejora el foco y reduce el estrés" maxlength="120" autocomplete="off">
-  <div class="modal-label">Puntos</div>
-  <div class="modal-pts-row"><button class="pts-btn" onclick="changePts(-5)">−</button><div class="pts-display" id="pts-display">10</div><button class="pts-btn" onclick="changePts(5)">+</button></div>
-  <div class="modal-actions"><button class="btn-cancel" onclick="closeModalFn()">Cancelar</button><button class="btn-confirm" onclick="saveCustomHabit()">Agregar</button></div>
+  <div class="modal-label" id="lbl-hpts">Puntos</div>
+  <div class="modal-pts-row" id="pts-row"><button class="pts-btn" onclick="changePts(-5)">−</button><div class="pts-display" id="pts-display">10</div><button class="pts-btn" onclick="changePts(5)">+</button></div>
+  <div class="modal-actions"><button class="btn-cancel" onclick="closeModalFn()">Cancelar</button><button class="btn-confirm" id="modal-confirm-btn" onclick="saveCustomHabit()">Agregar</button></div>
 </div>
 </div>
 <div id="del-confirm-overlay" class="hidden" onclick="if(event.target===this)closeConfirm()">
@@ -2614,26 +2620,14 @@ function launchConfetti(n=20,ox,oy){
   const sy=oy!==undefined?oy:innerHeight/2;
   const cap=80;
   if(cP.length>=cap)cP=cP.slice(-cap+n);
-  const isMob=innerWidth<=768;
   for(let i=0;i<Math.min(n,cap);i++){
-    let vx,vy,r,decay;
-    if(isMob){
-      // Mobile: igual que antes pero más compacto (menos apertura)
-      const angle=(Math.random()-.5)*Math.PI*0.6;  // ±54° (antes ±81°)
-      const speed=3+Math.random()*4;
-      vx=Math.sin(angle)*speed;
-      vy=-(Math.cos(angle)*speed+2+Math.random()*3);
-      r=Math.random()*4+2.5;
-      decay=Math.random()*.016+.010;               // desaparece un poco antes
-    } else {
-      // Desktop: burst rápido y compacto (pop tipo fuego artificial)
-      const angle=(Math.random()-.5)*Math.PI*0.30; // ±27°: muy concentrado
-      const speed=20+Math.random()*10;             // 20-30 px/frame
-      vx=Math.sin(angle)*speed;
-      vy=-(Math.cos(angle)*speed*0.4+Math.random()*3);
-      r=Math.random()*2.5+3;
-      decay=Math.random()*.06+.11;                 // vida 6-10 frames: compacto, no se expande
-    }
+    // Mismos parámetros en mobile y desktop (vuelo amplio y duradero)
+    const angle=(Math.random()-.5)*Math.PI*0.6;  // ±54°
+    const speed=3+Math.random()*4;
+    const vx=Math.sin(angle)*speed;
+    const vy=-(Math.cos(angle)*speed+2+Math.random()*3);
+    const r=Math.random()*4+2.5;
+    const decay=Math.random()*.016+.010;
     cP.push({
       x:sx, y:sy, vx, vy,
       color:cols[Math.floor(Math.random()*cols.length)],
@@ -2653,7 +2647,7 @@ function animConf(){
   for(let i=0;i<cP.length;i++){
     const p=cP[i];
     p.x+=p.vx; p.y+=p.vy;
-    p.vy+=innerWidth<=768?0.65:2.6; // gravedad desktop fuerte = compacto
+    p.vy+=0.65; // misma gravedad en mobile y desktop
     p.vx*=0.97;      // fricción leve: desacelera pero mantiene la apertura
     p.rot+=p.rotV;
     p.life-=p.decay;
@@ -2776,7 +2770,7 @@ function registerCustomCategory(cat){
     var sid='cat-style-'+cat.id;
     var st=document.getElementById(sid);
     if(!st){st=document.createElement('style');st.id=sid;document.head.appendChild(st);}
-    st.textContent='.bg-'+cat.id+'{background:'+cat.hex+' !important}.col-'+cat.id+'{color:'+_lighten(cat.hex,0.34)+' !important}.cat-dist-fill.bg-'+cat.id+'{background:'+cat.hex+' !important}';
+    st.textContent='.bg-'+cat.id+'{background:'+cat.hex+' !important}.col-'+cat.id+'{color:'+cat.hex+' !important}.cat-dist-fill.bg-'+cat.id+'{background:'+cat.hex+' !important}';
     rgb=_hexToRgbStr(cat.hex);
   } else {
     rgb=CAT_COLOR_RGB[cat.color]||'100,116,139';
@@ -2877,7 +2871,7 @@ function renderHoy(){
   CATEGORIES.filter(cat=>catHabits(cat.id).length>0).forEach(cat=>{
     const ch=catHabits(cat.id),cd=ch.filter(x=>c[x.id]).length,cmpl=cd===ch.length&&ch.length>0;
     const key=`h_${cat.id}`;if(catExpandedHoy[key]===undefined)catExpandedHoy[key]=true;const open=catExpandedHoy[key];
-    html+=`<div class="cat-group"><div class="cat-header" onclick="toggleCat('${key}')"><div class="cat-header-left"><div class="cat-dot bg-${cat.color}"></div><div><div class="cat-name"${dha("cat_"+cat.id)}>${cat.name}</div><div class="cat-progress">${cd} de ${ch.length} completados</div></div></div><div class="cat-header-right">${cmpl?`<span class="cat-bonus-badge">+${CAT_BONUS}</span>`:''}<svg class="cat-chevron ${open?'open':''}" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></div></div>`;
+    html+=`<div class="cat-group"><div class="cat-header" onclick="toggleCat('${key}')"><div class="cat-header-left"><div class="cat-dot bg-${cat.color}"></div><div><div class="cat-name col-${cat.color}"${dha("cat_"+cat.id)}>${cat.name}</div><div class="cat-progress">${cd} de ${ch.length} completados</div></div></div><div class="cat-header-right">${cmpl?`<span class="cat-bonus-badge">+${CAT_BONUS}</span>`:''}<svg class="cat-chevron ${open?'open':''}" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></div></div>`;
     if(open){html+=`<div class="cat-body">`;ch.forEach(hb=>{const isDone=!!c[hb.id],pc=isDone?'#00BC88':hb.pts>=20?'#22d3ee':'#64748b';html+=`<div class="habit-row" onclick=\"toggleHabit(event,'${hb.id}','${ds}')\"><div class="habit-check ${isDone?'checked bg-'+cat.color:''}"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div><span class="habit-name${isDone?' done':''}"${dha(hb.id)}>${hb.name}</span><span class="habit-pts" style="color:${pc}">+${hb.pts}</span>${infoBtn(hb.id)}</div>${infoPanel(hb.id)}`;}); html+=`</div>`;}
     html+=`</div>`;
   });
@@ -2900,7 +2894,7 @@ function updateGeneralCells(ds,hid){
   var GCOLS={mente:'#7c3aed',nutricion:'#be123c',luz:'#a16207',movimiento:'#c2410c',naturaleza:'#4d7c0f',recuperacion:'#0e6b8c',sueno:'#4338ca',finanzas:'#065f46',custom:'#a21caf'};
   var hb=allHabitsAll().find(function(x){return x.id===hid;});
   var cat=CATEGORIES.find(function(ct){return hb&&ct.id===hb.cat;});
-  var catCol=(cat&&GCOLS[cat.id])||'#00B9C8';
+  var catCol=(cat&&(GCOLS[cat.id]||cat.hex))||'#00B9C8';
   var isDone=!!(ST.completions[ds]||{})[hid];
   // Update grid checkbox cell
   var cell=document.querySelector('.gen-grid-cell[data-hid="'+hid+'"][data-ds="'+ds+'"]');
@@ -3088,7 +3082,7 @@ function renderSemana(){
       g+='</tr></thead><tbody>';
       CATEGORIES.filter(function(cat){return catHabits(cat.id).length>0;}).forEach(function(cat){
         var ch=catHabits(cat.id);
-        var catCol=CATCOLS[cat.id]||'#00B9C8';
+        var catCol=CATCOLS[cat.id]||cat.hex||'#00B9C8';
         var catKey2='h_'+cat.id;
         if(catExpandedGen[catKey2]===undefined)catExpandedGen[catKey2]=true;
         var catOpen2=catExpandedGen[catKey2];
@@ -3193,7 +3187,7 @@ function renderSemana(){
         var catKey3='mg_'+cat.id;
         if(catExpandedGen[catKey3]===undefined)catExpandedGen[catKey3]=true;
         var openCat3=catExpandedGen[catKey3];
-        html+='<div class="cat-group"><div class="cat-header" data-catkey="'+catKey3+'"><div class="cat-header-left"><div class="cat-dot bg-'+cat.color+'"></div><div><div class="cat-name"'+dha("cat_"+cat.id)+''+cat.name+'</div><div class="cat-progress">'+cd2+' de '+ch2.length+' completados</div></div></div><div class="cat-header-right"><svg class="cat-chevron '+(openCat3?'open':'')+'" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></div></div>';
+        html+='<div class="cat-group"><div class="cat-header" data-catkey="'+catKey3+'"><div class="cat-header-left"><div class="cat-dot bg-'+cat.color+'"></div><div><div class="cat-name col-'+cat.color+'"'+dha("cat_"+cat.id)+'>'+cat.name+'</div><div class="cat-progress">'+cd2+' de '+ch2.length+' completados</div></div></div><div class="cat-header-right"><svg class="cat-chevron '+(openCat3?'open':'')+'" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></div></div>';
         if(openCat3){
           html+='<div class="cat-body">';
           ch2.forEach(function(hb){
@@ -3262,7 +3256,7 @@ function renderHabitos(){
   CATEGORIES.filter(cat=>catHabits(cat.id).length>0).forEach(cat=>{
     const ch=catHabits(cat.id),cd=0,cmpl=false;
     const key=`h_${cat.id}`;if(catExpandedHoy[key]===undefined)catExpandedHoy[key]=true;const open=catExpandedHoy[key];
-    html+=`<div class="cat-group"><div class="cat-header" onclick="toggleCat('${key}')"><div class="cat-header-left"><div class="cat-dot bg-${cat.color}"></div><div><div class="cat-name"${dha("cat_"+cat.id)}>${cat.name}</div><div class="cat-progress">${ch.length} hábitos</div></div>${IS_TOUCH&&HINFO['cat_'+key]?`<button class="info-btn" style="margin-left:6px" onclick="event.stopPropagation();toggleCatInfo('${key}')">ⓘ</button>`:''}</div><div class="cat-header-right"><svg class="cat-chevron ${open?'open':''}" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></div></div>`;
+    html+=`<div class="cat-group"><div class="cat-header" onclick="toggleCat('${key}')"><div class="cat-header-left"><div class="cat-dot bg-${cat.color}"></div><div><div class="cat-name col-${cat.color}"${dha("cat_"+cat.id)}>${cat.name}</div><div class="cat-progress">${ch.length} hábitos</div></div>${IS_TOUCH&&HINFO['cat_'+key]?`<button class="info-btn" style="margin-left:6px" onclick="event.stopPropagation();toggleCatInfo('${key}')">ⓘ</button>`:''}</div><div class="cat-header-right"><svg class="cat-chevron ${open?'open':''}" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></div></div>`;
     html+=`<div class="habit-info-panel" id="catip-${key}">${HINFO['cat_'+key]||''}</div>`;
     if(open){html+=`<div class="cat-body">`;ch.forEach(hb=>{const custom=isCustom(hb.id);html+=`<div class="habits-habit-row" ${dha(hb.id)}><span class="habits-habit-name">${hb.name}</span><span class="habit-pts" style="color:#22d3ee">+${hb.pts}</span>${custom&&isDeletable(hb.id)?`<button class="habits-del-btn" onclick="deleteHabit('${hb.id}')">✕</button>`:''}${infoBtn(hb.id)}</div>${infoPanel(hb.id)}`;}); html+=`</div>`;}
     html+=`</div>`;
@@ -3271,7 +3265,18 @@ function renderHabitos(){
   document.getElementById('main-content').innerHTML=html;
 }
 
+var _editHabitId=null,_editCatId=null;
+var _HF_IDS=['lbl-hname','new-habit-name','lbl-hcat','cat-dd','lbl-hdesc','new-habit-desc','lbl-hpts','pts-row'];
+function _resetModalMode(){
+  _editHabitId=null;_editCatId=null;
+  _HF_IDS.forEach(function(i){var el=document.getElementById(i);if(el)el.classList.remove('hidden');});
+  var t=document.getElementById('modal-title-txt');if(t)t.textContent='Agregar hábito';
+  var s=document.getElementById('modal-sub-txt');if(s)s.textContent='Se agrega a todas las pestañas automáticamente.';
+  var b=document.getElementById('modal-confirm-btn');if(b)b.textContent='Agregar';
+  var ln=document.getElementById('lbl-ncat');if(ln)ln.textContent='Nombre de la nueva categor\u00eda';
+}
 function openNewHabit(){
+  _resetModalMode();
   newHabitPts=15;
   var pd=document.getElementById('pts-display');if(pd)pd.textContent=newHabitPts;
   var nm=document.getElementById('new-habit-name');if(nm){nm.value='';}
@@ -3286,11 +3291,54 @@ function openNewHabit(){
   var dsc=document.getElementById('new-habit-desc');if(dsc)dsc.value='';
   setTimeout(function(){if(nm)nm.focus();},120);
 }
+function openEditHabit(id){
+  var h=(ST.customHabits||[]).find(function(x){return x.id===id;});if(!h)return;
+  openNewHabit();
+  _editHabitId=id;
+  document.getElementById('modal-title-txt').textContent='Editar h\u00e1bito';
+  document.getElementById('modal-sub-txt').textContent='Modific\u00e1 lo que quieras y guard\u00e1.';
+  document.getElementById('modal-confirm-btn').textContent='Guardar';
+  document.getElementById('new-habit-name').value=h.name;
+  document.getElementById('new-habit-desc').value=h.desc||HINFO[h.id]||'';
+  newHabitPts=h.pts;document.getElementById('pts-display').textContent=h.pts;
+  var cat=CATEGORIES.find(function(cc){return cc.id===h.cat;});
+  document.getElementById('new-habit-cat').value=h.cat;
+  document.getElementById('cat-dd-label').textContent=cat?cat.name:h.cat;
+  var dot=document.getElementById('cat-dd-dot');
+  if(cat&&cat.hex){dot.className='cat-dot';dot.style.background=cat.hex;}
+  else{dot.className='cat-dot bg-'+(cat?cat.color:'purple');dot.style.background='';}
+}
+function openEditCat(id){
+  var cat=(ST.customCategories||[]).find(function(x){return x.id===id;});if(!cat)return;
+  openNewHabit();
+  _editCatId=id;
+  document.getElementById('modal-title-txt').textContent='Editar categor\u00eda';
+  document.getElementById('modal-sub-txt').textContent='Modific\u00e1 lo que quieras y guard\u00e1.';
+  document.getElementById('modal-confirm-btn').textContent='Guardar';
+  _HF_IDS.forEach(function(i){var el=document.getElementById(i);if(el)el.classList.add('hidden');});
+  showNewCatForm();
+  var lnc=document.getElementById('lbl-ncat');if(lnc)lnc.textContent='Nombre de la categor\u00eda';
+  document.getElementById('new-cat-name').value=cat.name;
+  document.getElementById('new-cat-desc').value=cat.desc||HINFO['cat_'+cat.id]||'';
+  _newCatColor=cat.hex||'#06b6d4';
+  var wheel=document.getElementById('cat-color-wheel');if(wheel)wheel.value=_newCatColor;
+  document.querySelectorAll('#cat-color-swatches .cat-swatch').forEach(function(s){
+    s.classList.toggle('sel',s.style.background&&_sameHex(s.style.background,_newCatColor));
+  });
+  setTimeout(function(){var n=document.getElementById('new-cat-name');if(n)n.focus();},120);
+}
+function _sameHex(cssColor,hex){
+  var d=document.createElement('div');d.style.color=hex;document.body.appendChild(d);
+  var a=getComputedStyle(d).color;d.style.color=cssColor;var b=getComputedStyle(d).color;
+  document.body.removeChild(d);return a===b;
+}
 function openManage(){
   const body=document.getElementById('manage-body');let html='';
   CATEGORIES.forEach(cat=>{
     const all=allHabitsAll().filter(h=>h.cat===cat.id);if(!all.length)return;
-    html+=`<div class="manage-cat-title col-${cat.color}"${dha("cat_"+cat.id)}>${cat.name}</div>`;
+    const isCustomCat=(ST.customCategories||[]).some(cc=>cc.id===cat.id);
+    const catPencil=isCustomCat?`<button class="manage-cat-edit" onclick="openEditCat('${cat.id}')" title="Editar categoría"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>`:'';
+    html+=`<div class="manage-cat-title col-${cat.color}"${dha("cat_"+cat.id)}>${cat.name}${catPencil}</div>`;
     all.forEach(hb=>{
       const shown=!(ST.hiddenHabits||[]).includes(hb.id);
       const canDel=isDeletable(hb.id);
@@ -3303,6 +3351,7 @@ function openManage(){
           <span class="manage-t-label ${shown?'yes':'no'}">${shown?'Sí':'No'}</span>
           <div class="manage-sw ${shown?'on':''}" onclick="toggleHideHabit('${hb.id}',this)"><div class="manage-sw-knob"></div></div>
         </div>
+        <div class="manage-edit-cell">${isCustom(hb.id)?`<button class="manage-edit" onclick="openEditHabit('${hb.id}')" title="Editar hábito"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>`:''}</div>
         <div class="manage-trash-cell">${canDel?`<button class="manage-trash" onclick="deleteHabit('${hb.id}')" title="Eliminar"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 12.142A2 2 0 0 1 16.138 20H7.862a2 2 0 0 1-1.995-1.858L5 6"/></svg></button>`:''}</div>
       </div>
       <div class="manage-info-row" id="mip-${hb.id}"><div class="manage-info-text">${HINFO[hb.id]||''}</div></div>`;
@@ -3327,6 +3376,7 @@ function toggleHideHabit(id,sw){
   (ST.customHabits||[]).forEach(function(h){if(h.desc)HINFO[h.id]=h.desc;});
   // Restaurar categorías personalizadas
   (ST.customCategories||[]).forEach(function(cat){registerCustomCategory(cat);});
+  if(pruneEmptyCustomCats())saveState();
 }
 
 var _confirmCb=null;
@@ -3338,10 +3388,25 @@ function confirmModal(msg,onOk,okLabel){
 }
 function closeConfirm(){document.getElementById('del-confirm-overlay').classList.add('hidden');_confirmCb=null;}
 function _doConfirm(){var cb=_confirmCb;closeConfirm();if(cb)cb();}
+function pruneEmptyCustomCats(){
+  var removed=false;
+  (ST.customCategories||[]).slice().forEach(function(cc){
+    var tiene=allHabitsAll().some(function(h){return h.cat===cc.id;});
+    if(!tiene){
+      ST.customCategories=ST.customCategories.filter(function(x){return x.id!==cc.id;});
+      for(var i=CATEGORIES.length-1;i>=0;i--){if(CATEGORIES[i].id===cc.id)CATEGORIES.splice(i,1);}
+      delete HINFO['cat_'+cc.id];
+      var st=document.getElementById('cat-style-'+cc.id);if(st)st.remove();
+      removed=true;
+    }
+  });
+  return removed;
+}
 function deleteHabit(id){
   confirmModal('¿Eliminar este hábito? Los puntos históricos se conservan.',function(){
     if(isCustom(id)){ST.customHabits=ST.customHabits.filter(h=>h.id!==id);}else{if(!ST.deletedDefaults)ST.deletedDefaults=[];if(!ST.deletedDefaults.includes(id))ST.deletedDefaults.push(id);}
     if(ST.hiddenHabits)ST.hiddenHabits=ST.hiddenHabits.filter(x=>x!==id);
+    pruneEmptyCustomCats();
     saveState();openManage();renderHeader();if(currentTab==='habitos')renderHabitos();
   });
 }
@@ -3624,7 +3689,8 @@ function populateCatDD(){
   var sel=document.getElementById('new-habit-cat').value;
   var h='';
   CATEGORIES.forEach(function(cat){
-    h+='<div class="cat-dd-item'+(cat.id===sel?' sel':'')+'" onclick="selectCatDD(\''+cat.id+'\')"><span class="cat-dot bg-'+cat.color+'"></span><span>'+cat.name+'</span></div>';
+    var nota=cat.id==='custom'?' <span style="color:#64748b;font-size:11px;font-weight:400">(aparece si agreg\u00e1s un h\u00e1bito propio)</span>':'';
+    h+='<div class="cat-dd-item'+(cat.id===sel?' sel':'')+'" onclick="selectCatDD(\''+cat.id+'\')"><span class="cat-dot bg-'+cat.color+'"></span><span>'+cat.name+nota+'</span></div>';
   });
   h+='<div class="cat-dd-item cat-dd-new" onclick="showNewCatForm()"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span>Crear nueva categoría</span></div>';
   menu.innerHTML=h;
@@ -3651,10 +3717,20 @@ function showNewCatForm(){
   document.getElementById('new-habit-cat').value='__new__';
   document.getElementById('new-cat-form').classList.remove('hidden');
   var used=CATEGORIES.map(function(cat){return (cat.hex||CAT_COLOR_HEX[cat.color]||'').toLowerCase();}).filter(Boolean);
-  var EXT=['#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#64748b','#a8a29e','#b45309','#0d9488','#dc2626','#7c3aed','#db2777'];
-  var avail=EXT.filter(function(h){return used.every(function(u){return _colorDist(h,u)>72;});});
-  if(avail.length<5)avail=avail.concat(['#ef4444','#0ea5e9','#22c55e','#f59e0b','#a8a29e','#8b5cf6']).filter(function(v,i,a){return a.indexOf(v)===i;}).slice(0,5);
-  if(avail.length>5)avail=avail.slice(0,5);
+  var EXT=['#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#64748b','#a8a29e','#b45309','#0d9488','#dc2626','#7c3aed','#db2777','#1e40af','#9f1239','#7f1d1d','#0c4a6e','#365314','#78350f','#94a3b8','#fda4af','#fde047'];
+  // Selecci\u00f3n codiciosa: cada color elegido maximiza su distancia m\u00ednima
+  // contra los colores ya usados Y contra los otros sugeridos.
+  var avail=[],pool=EXT.slice();
+  while(avail.length<5&&pool.length){
+    var best=pool[0],bestD=-1;
+    pool.forEach(function(h){
+      var refs=used.concat(avail);
+      var d=refs.length?Math.min.apply(null,refs.map(function(u){return _colorDist(h,u);})):999;
+      if(d>bestD){bestD=d;best=h;}
+    });
+    avail.push(best);
+    pool=pool.filter(function(x){return x!==best;});
+  }
   _newCatColor=avail[0];
   var sw=avail.map(function(h){return '<div class="cat-swatch'+(h===_newCatColor?' sel':'')+'" style="background:'+h+'" onclick="pickCatColor(\''+h+'\',event)"></div>';}).join('');
   sw+='<label class="cat-wheel" title="Elegí un color personalizado"><input type="color" id="cat-color-wheel" value="'+_newCatColor+'" oninput="pickCatColorWheel(this.value)"><span class="cat-wheel-plus">+</span></label>';
@@ -3677,8 +3753,26 @@ function pickCatColorWheel(hex){
 document.addEventListener('click',function(e){
   var dd=document.getElementById('cat-dd');
   if(dd&&!dd.contains(e.target)){var menu=document.getElementById('cat-dd-menu');if(menu&&!menu.classList.contains('hidden')){menu.classList.add('hidden');dd.classList.remove('open');}}
-});
+},true); // captura: funciona aunque el modal frene la propagaci\u00f3n
 function saveCustomHabit(){
+  // \u2500\u2500 Modo editar categor\u00eda \u2500\u2500
+  if(_editCatId){
+    var ecat=(ST.customCategories||[]).find(function(x){return x.id===_editCatId;});
+    var ncn2=(document.getElementById('new-cat-name')||{}).value.trim();
+    if(!ncn2){var ni2=document.getElementById('new-cat-name');if(ni2)ni2.focus();return;}
+    var ncd2=((document.getElementById('new-cat-desc')||{}).value||'').trim();
+    if(ecat){
+      ecat.name=ncn2;ecat.hex=_newCatColor;ecat.desc=ncd2;
+      var cc2=CATEGORIES.find(function(x){return x.id===ecat.id;});
+      if(cc2){cc2.name=ncn2;cc2.hex=_newCatColor;cc2.desc=ncd2;}
+      registerCustomCategory(ecat);
+      if(ncd2)HINFO['cat_'+ecat.id]=ncd2;else delete HINFO['cat_'+ecat.id];
+      saveState();closeModalFn();showToast('"'+ncn2+'" actualizada');sndHabit();renderHeader();
+      if(currentTab==='habitos')renderHabitos();
+      if(!document.getElementById('manage-overlay').classList.contains('hidden'))openManage();
+    }
+    return;
+  }
   const nm=document.getElementById('new-habit-name').value.trim();
   let cat=document.getElementById('new-habit-cat').value;
   const desc=(document.getElementById('new-habit-desc')||{}).value||'';
@@ -3694,6 +3788,20 @@ function saveCustomHabit(){
     registerCustomCategory(newCat);
     if(ncd)HINFO['cat_'+ncid]=ncd;
     cat=ncid;
+  }
+  // \u2500\u2500 Modo editar h\u00e1bito \u2500\u2500
+  if(_editHabitId){
+    var eh=ST.customHabits.find(function(x){return x.id===_editHabitId;});
+    if(eh){
+      eh.name=nm;eh.cat=cat;eh.pts=newHabitPts;
+      if(desc.trim()){eh.desc=desc.trim();HINFO[eh.id]=desc.trim();}
+      else{delete eh.desc;delete HINFO[eh.id];}
+      pruneEmptyCustomCats();
+      saveState();closeModalFn();showToast('"'+nm+'" actualizado');sndHabit();renderHeader();
+      if(currentTab==='habitos')renderHabitos();
+      if(!document.getElementById('manage-overlay').classList.contains('hidden'))openManage();
+    }
+    return;
   }
   const hid='c'+Date.now();
   const habit={id:hid,cat,name:nm,pts:newHabitPts};
