@@ -3803,11 +3803,12 @@ function renderStats(){
     var ds2=yr+'-'+String(mo+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
     var inSel=ds2>=sf&&ds2<=st;
     var fut=isFuture(ds2);
-    var cls='cal-day ';
+    var cls='cal-day ';var ttDay='';
     if(!inSel){cls+='cal-out';}
-    else if(fut){cls+='future-cal';}
-    else{var p2=getDayPctDone(ds2);if(p2===0)cls+='no-data';else if(p2<50)cls+='pct-low';else if(p2<80)cls+='pct-mid';else if(p2<100)cls+='pct-high';else cls+='pct-perfect';}
-    html+='<div class="'+cls+'"></div>';
+    else if(fut){cls+='future-cal';ttDay=fmtShort(ds2)+' \u2014 d\u00eda futuro';}
+    else{var p2=getDayPctDone(ds2);if(p2===0)cls+='no-data';else if(p2<50)cls+='pct-low';else if(p2<80)cls+='pct-mid';else if(p2<100)cls+='pct-high';else cls+='pct-perfect';
+      ttDay=fmtShort(ds2)+' \u2014 '+dayPts(ds2)+' pts \u00b7 '+p2+'% de h\u00e1bitos';}
+    html+='<div class="'+cls+'"'+(ttDay?' data-tt="'+ttDay+'"':'')+'></div>';
   }
   html+='</div><div class="cal-legend"><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(51,65,85,.25)"></div>Sin datos</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.18)"></div>1–49%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.45)"></div>50–79%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.7)"></div>80–99%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:linear-gradient(135deg,#00B9C8,#00BC88)"></div>100%</div></div>';
 
@@ -3825,6 +3826,7 @@ function renderStats(){
     };
     mc.addEventListener('click',window._statsClickHandler);
   }
+  attachTooltips();
   checkStickyState();
 }
 
