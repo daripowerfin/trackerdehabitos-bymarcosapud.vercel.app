@@ -141,6 +141,34 @@ p.body strong{color:#f1f5f9;font-weight:600}
 .signature .st{font-size:17px;font-weight:700;color:var(--txt)}
 .signature .ss{font-size:14px;color:var(--sec);margin-top:2px}
 .footer{text-align:center;color:var(--dim);font-size:12px;margin-top:36px;padding-top:24px;border-top:1px solid var(--line)}
+
+/* ── IMPRESIÓN / PDF: idéntico a la página ── */
+@media print{
+  @page{margin:0;size:A4}
+  html,body{
+    background:#080e1c !important;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+  }
+  /* Forzar que TODOS los elementos conserven sus colores/fondos */
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+  /* Ocultar la barra superior (con su botón) en el PDF */
+  .topbar{display:none !important}
+  /* El fondo (glows + ADN) se mantiene fijo cubriendo todo */
+  .bg-fx{position:absolute !important;height:100% !important}
+  .dna{height:100% !important}
+  .wrap{max-width:100% !important;padding:30px 38px 50px !important}
+  .hero{padding-top:20px !important}
+  /* Evitar cortes feos: que las tarjetas/tablas no se partan al medio */
+  .tbl,.highlight,.method,.band,.signature,.url-card,.metric,.step{
+    break-inside:avoid;page-break-inside:avoid;
+  }
+  .sec-head{break-after:avoid;page-break-after:avoid}
+  section{break-inside:avoid-page}
+  /* Mantener los grises de filas alternas en tablas */
+  .tbl tr:nth-child(even) td{background:rgba(15,28,50,.4) !important}
+  .tbl th{background:rgba(0,185,200,.1) !important}
+}
 </style>
 </head>
 <body>
@@ -166,7 +194,7 @@ p.body strong{color:#f1f5f9;font-weight:600}
   </div>
   <button class="dl-btn" onclick="window.print()">
     <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    <span>Descargar / Imprimir</span>
+    <span>Descargar PDF</span>
   </button>
 </div>
 
