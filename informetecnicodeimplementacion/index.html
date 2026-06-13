@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe Técnico de Implementación V5 · Tracker de Hábitos Biohacker · by Marcos Apud</title>
+<meta name="description" content="Informe técnico de implementación del Tracker de Hábitos Biohacker, by Marcos Apud. Junio 2026.">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080e1c; --cy:#00B9C8; --gr:#00BC88; --txt:#e2e8f0;
+  --sec:#94a3b8; --dim:#475569; --card:rgba(15,28,50,.6);
+  --border:rgba(0,185,200,.18); --line:rgba(51,65,85,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--txt);
+  font-family:'Geist','Segoe UI',system-ui,sans-serif;
+  line-height:1.6;-webkit-font-smoothing:antialiased;
+  position:relative;overflow-x:hidden;
+}
+/* Fondo: glows + doble hélice ADN a la derecha */
+.bg-fx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5}
+.glow.g1{width:60vw;height:60vw;background:rgba(0,185,200,.13);top:-10vw;left:-15vw}
+.glow.g2{width:50vw;height:50vw;background:rgba(46,168,204,.10);bottom:10vh;right:-15vw}
+.glow.g3{width:46vw;height:46vw;background:rgba(0,188,136,.09);bottom:-10vw;left:25vw}
+.dna{position:absolute;top:0;right:4%;height:100%;width:120px;opacity:.10}
+@media(max-width:768px){.dna{right:-30px;opacity:.06}}
+
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* Barra superior sticky */
+.topbar{
+  position:sticky;top:0;z-index:10;
+  background:linear-gradient(90deg,#1e8aad,#0d4a60);
+  display:flex;align-items:center;gap:12px;
+  padding:14px 20px;box-shadow:0 4px 24px rgba(0,0,0,.4);
+}
+.topbar .logo{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--cy) 25%,var(--gr) 75%);
+  display:flex;align-items:center;justify-content:center}
+.topbar .logo svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.topbar .tb-txt{flex:1;min-width:0}
+.topbar .tb-t{font-size:15px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .tb-s{font-size:12px;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  color:#fff;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:600;
+  font-family:inherit;cursor:pointer;transition:all .15s;text-decoration:none}
+.dl-btn:hover{background:rgba(255,255,255,.25)}
+.dl-btn:active{transform:scale(.95)}
+.dl-btn svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:560px){.dl-btn span{display:none}.dl-btn{padding:9px 11px}}
+
+/* Portada / hero */
+.hero{text-align:center;padding:60px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;color:rgba(0,185,200,.75);text-transform:uppercase;margin-bottom:18px}
+.hero-logo{width:90px;height:90px;border-radius:22px;margin:0 auto 22px;
+  background:linear-gradient(135deg,var(--cy) 25%,var(--gr) 75%);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(0,185,200,.3)}
+.hero-logo svg{width:52px;height:52px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hero h1{font-size:clamp(28px,6vw,44px);font-weight:800;color:#f1f5f9;line-height:1.1;margin-bottom:4px}
+.hero h1 .accent{color:var(--cy);display:block}
+.hero .by{font-size:14px;color:var(--sec);margin-top:14px}
+.meta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.meta{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 18px;min-width:120px}
+.meta .ml{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--sec);text-transform:uppercase}
+.meta .mv{font-size:14px;font-weight:700;color:var(--txt);margin-top:3px}
+
+/* Secciones */
+section{padding:42px 0 8px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:22px}
+.sec-num{font-size:13px;font-weight:700;color:var(--cy);font-variant-numeric:tabular-nums}
+.sec-title{font-size:clamp(20px,4vw,27px);font-weight:800;color:#f1f5f9;letter-spacing:-.01em}
+.sec-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(0,185,200,.3),rgba(0,185,200,0));align-self:center}
+p.body{color:rgba(203,213,225,.85);font-size:16px;margin-bottom:16px}
+p.body strong{color:#f1f5f9;font-weight:600}
+
+/* Tabla */
+.tbl{width:100%;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:10px 0 8px;font-size:14.5px}
+.tbl table{width:100%;border-collapse:collapse}
+.tbl th{background:rgba(0,185,200,.1);color:var(--cy);font-weight:700;text-align:left;padding:13px 14px;font-size:13px}
+.tbl td{padding:12px 14px;border-top:1px solid rgba(51,65,85,.25);vertical-align:top;color:var(--txt)}
+.tbl td:first-child{font-weight:600;color:var(--sec)}
+.tbl tr:nth-child(even) td{background:rgba(15,28,50,.4)}
+.tbl .ok{color:var(--gr);font-weight:700;text-align:center;width:44px}
+.tbl .star{color:#fbbf24}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* URL destacada */
+.url-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin:8px 0}
+.url-card .ul{font-size:13px;font-weight:600;color:var(--cy);margin-bottom:6px}
+.url-card .uv{font-size:clamp(13px,3.4vw,17px);font-weight:700;color:var(--gr);word-break:break-all}
+
+/* Card destacada cero fricción */
+.highlight{background:linear-gradient(135deg,rgba(0,185,200,.12),rgba(0,188,136,.05));
+  border:1.5px solid rgba(0,185,200,.3);border-radius:16px;padding:24px;margin:8px 0}
+.hl-icons{display:flex;justify-content:space-around;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.hl-ico{text-align:center;flex:1;min-width:90px}
+.hl-ico .e{font-size:30px;line-height:1}
+.hl-ico .l{font-size:13px;font-weight:700;color:var(--cy);margin-top:8px}
+
+/* Métodos sync */
+.method{display:flex;gap:15px;align-items:flex-start;background:rgba(15,28,50,.7);
+  border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+.method .m-ico{font-size:28px;line-height:1;flex-shrink:0;width:40px;text-align:center}
+.method .m-t{font-size:16px;font-weight:700;color:var(--cy);margin-bottom:4px}
+.method .m-d{font-size:14px;color:rgba(203,213,225,.82)}
+
+/* Métricas */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0}
+@media(min-width:560px){.metrics{grid-template-columns:repeat(6,1fr)}}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 8px;text-align:center}
+.metric .mn{font-size:clamp(24px,5vw,30px);font-weight:800;color:var(--cy)}
+.metric .ml{font-size:12px;color:var(--sec);margin-top:4px}
+
+/* Estado/roadmap */
+.step{display:flex;gap:12px;align-items:flex-start;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.step.done{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.22)}
+.step.next{background:rgba(0,185,200,.06);border:1px solid var(--border)}
+.step .tag{font-size:13px;font-weight:700;flex-shrink:0;width:74px}
+.step.done .tag{color:var(--gr)}
+.step.next .tag{color:var(--cy)}
+.step .sd{font-size:15px;color:rgba(203,213,225,.85)}
+
+/* Banda */
+.band{display:flex;gap:14px;align-items:center;
+  background:linear-gradient(135deg,rgba(0,185,200,.12),rgba(0,188,136,.06));
+  border:1.5px solid rgba(0,185,200,.3);border-radius:14px;padding:18px;margin:18px 0 4px}
+.band .be{font-size:26px;flex-shrink:0}
+.band .bt{font-size:15px;color:rgba(203,213,225,.9)}
+
+/* Firma / footer */
+.signature{display:flex;gap:14px;align-items:center;background:linear-gradient(135deg,rgba(0,185,200,.1),rgba(0,188,136,.05));
+  border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:40px}
+.signature .logo{width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--cy) 25%,var(--gr) 75%);display:flex;align-items:center;justify-content:center}
+.signature .logo svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.signature .st{font-size:17px;font-weight:700;color:var(--txt)}
+.signature .ss{font-size:14px;color:var(--sec);margin-top:2px}
+.footer{text-align:center;color:var(--dim);font-size:12px;margin-top:36px;padding-top:24px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="bg-fx">
+  <div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+  <svg class="dna" viewBox="0 0 120 1000" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M30 0 Q90 125 30 250 Q-30 375 30 500 Q90 625 30 750 Q-30 875 30 1000" stroke="#00B9C8" stroke-width="2.5" fill="none"/>
+    <path d="M90 0 Q30 125 90 250 Q150 375 90 500 Q30 625 90 750 Q150 875 90 1000" stroke="#00BC88" stroke-width="2.5" fill="none"/>
+    <g stroke="rgba(0,185,200,.5)" stroke-width="1.4">
+      <line x1="30" y1="60" x2="90" y2="60"/><line x1="30" y1="190" x2="90" y2="190"/>
+      <line x1="30" y1="310" x2="90" y2="310"/><line x1="30" y1="440" x2="90" y2="440"/>
+      <line x1="30" y1="560" x2="90" y2="560"/><line x1="30" y1="690" x2="90" y2="690"/>
+      <line x1="30" y1="810" x2="90" y2="810"/><line x1="30" y1="940" x2="90" y2="940"/>
+    </g>
+  </svg>
+</div>
+
+<div class="topbar">
+  <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+  <div class="tb-txt">
+    <div class="tb-t">Tracker de Hábitos Biohacker</div>
+    <div class="tb-s">Informe Técnico de Implementación V5 · by Marcos Apud</div>
+  </div>
+  <button class="dl-btn" onclick="window.print()">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span>Descargar / Imprimir</span>
+  </button>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="eyebrow">Informe Técnico de Implementación</div>
+    <div class="hero-logo"><svg viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+    <h1>Tracker de Hábitos<span class="accent">Biohacker</span></h1>
+    <div class="by">V5 · Junio 2026 · by Marcos Apud</div>
+    <div class="meta-row">
+      <div class="meta"><div class="ml">Tipo</div><div class="mv">Doc. Técnico Interno</div></div>
+      <div class="meta"><div class="ml">Versión</div><div class="mv">V5</div></div>
+      <div class="meta"><div class="ml">Fecha</div><div class="mv">12/06/2026</div></div>
+    </div>
+  </div>
+
+  <!-- 01 RESUMEN -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><span class="sec-title">Resumen Ejecutivo</span><span class="sec-line"></span></div>
+    <p class="body">El presente documento describe la implementación técnica del <strong>Tracker de Hábitos Biohacker V5</strong>, una aplicación web standalone (HTML5 + CSS3 + JavaScript puro) alojada en Vercel con HTTPS. La app funciona <strong>sin inicio de sesión</strong>: el usuario abre y empieza, sin registro ni contraseña. Incorpora gamificación de 10 niveles, generación de PDF, música de fondo (binaural + campanas tibetanas independientes), un motor de compartir multi-canal con links legibles respaldados por un backend serverless (Vercel + Upstash Redis) y, como novedad principal de esta versión, un sistema de <strong>Sincronización entre Dispositivos</strong> por código corto, QR o archivo — también sin crear cuenta.</p>
+  </section>
+
+  <!-- 02 ARQUITECTURA -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><span class="sec-title">Arquitectura Técnica</span><span class="sec-line"></span></div>
+    <div class="tbl tbl-scroll"><table>
+      <thead><tr><th>Tecnología</th><th>Uso principal</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td>HTML5 / CSS3</td><td>Estructura, layout, animaciones</td><td>Sin framework UI. CSS custom properties.</td></tr>
+        <tr><td>JavaScript ES2022</td><td>Lógica, estado, renderizado</td><td>Vanilla JS en el cliente.</td></tr>
+        <tr><td>Web Audio API</td><td>Campanas tibetanas (solfeggio)</td><td>Osciladores inline, volumen en vivo.</td></tr>
+        <tr><td>YouTube IFrame API</td><td>Música binaural 40Hz de fondo</td><td>Reproductor oculto, toggle persistente.</td></tr>
+        <tr><td>jsPDF</td><td>Generación del informe PDF</td><td>Caja de reflexión translúcida sobre ADN.</td></tr>
+        <tr><td>Vercel Serverless Functions</td><td>Backend de links y sincronización</td><td>/api/save, /get, /sync-save, /sync-get.</td></tr>
+        <tr><td>Upstash Redis</td><td>Almacén de links e informes</td><td>Plan free. TTL: links 1 año, sync 48 hs.</td></tr>
+        <tr><td>localStorage</td><td>Persistencia local del progreso</td><td>Todo el estado vive en el dispositivo.</td></tr>
+        <tr><td>Vercel (hosting + CI)</td><td>CDN + HTTPS + deploy automático</td><td>trackerdehabitos-bymarcosapud.vercel.app</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 03 ALOJAMIENTO -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><span class="sec-title">Alojamiento y Acceso</span><span class="sec-line"></span></div>
+    <div class="url-card">
+      <div class="ul">URL de producción:</div>
+      <div class="uv">https://trackerdehabitos-bymarcosapud.vercel.app</div>
+    </div>
+  </section>
+
+  <!-- 04 SIN LOGIN -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><span class="sec-title">Sin Inicio de Sesión</span><span class="sec-line"></span></div>
+    <div class="highlight">
+      <div class="hl-icons">
+        <div class="hl-ico"><div class="e">🔓</div><div class="l">Sin registro</div></div>
+        <div class="hl-ico"><div class="e">⚡</div><div class="l">Sin contraseña</div></div>
+        <div class="hl-ico"><div class="e">📲</div><div class="l">Acceso inmediato</div></div>
+      </div>
+      <p class="body" style="margin-bottom:0"><strong>Decisión de diseño central:</strong> la app NO tiene inicio de sesión. El usuario abre y empieza a usarla en el acto — sin crear cuenta, sin email, sin contraseña y sin verificación. Cero fricción de entrada, cero abandono en el registro. Todo el progreso se guarda localmente en el dispositivo, sin pasar por ningún servidor. Esto plantea una pregunta lógica: si no hay cuenta, ¿cómo se pasa el progreso de un celular a otro? La respuesta es la nueva <strong>Sincronización entre Dispositivos</strong> (sección 06), que resuelve la portabilidad sin reintroducir la fricción del login.</p>
+    </div>
+  </section>
+
+  <!-- 05 FUNCIONALIDADES -->
+  <section>
+    <div class="sec-head"><span class="sec-num">05</span><span class="sec-title">Funcionalidades Implementadas</span><span class="sec-line"></span></div>
+    <div class="tbl tbl-scroll"><table>
+      <thead><tr><th style="width:34px">#</th><th>Módulo</th><th>Descripción</th><th class="ok">OK</th></tr></thead>
+      <tbody>
+        <tr><td class="star">★</td><td>Sin Inicio de Sesión</td><td>Acceso inmediato sin registro, cuenta ni contraseña. Cero fricción.</td><td class="ok">✓</td></tr>
+        <tr><td class="star">★</td><td>Sincronizar Dispositivos</td><td>Pasar el progreso por código corto, QR o archivo. Sin cuenta.</td><td class="ok">✓</td></tr>
+        <tr><td>01</td><td>Onboarding Interactivo</td><td>Slides con iconos SVG, dots y barra de progreso.</td><td class="ok">✓</td></tr>
+        <tr><td>02</td><td>Motor de Hábitos</td><td>Hábitos biohacker + finanzas + propios editables. 9+ categorías.</td><td class="ok">✓</td></tr>
+        <tr><td>03</td><td>Gamificación</td><td>10 niveles históricos, 12 medallas, puntos + bonus por categoría.</td><td class="ok">✓</td></tr>
+        <tr><td>04</td><td>Música de Fondo</td><td>Binaural 40Hz (YouTube) con toggle que ahora sí se recuerda.</td><td class="ok">✓</td></tr>
+        <tr><td>05</td><td>Campanas Tibetanas</td><td>Slider y toggle propios e independientes, con ondas animadas.</td><td class="ok">✓</td></tr>
+        <tr><td>06</td><td>Confetti</td><td>Igualado en mobile y desktop: vuelo amplio y duradero.</td><td class="ok">✓</td></tr>
+        <tr><td>07</td><td>Categorías a Color</td><td>Nombre y punto con el mismo color exacto en todas las pestañas.</td><td class="ok">✓</td></tr>
+        <tr><td>08</td><td>235 Mensajes de Reflexión</td><td>3 estados, 5 líneas exactas en PDF, anti-repetición.</td><td class="ok">✓</td></tr>
+        <tr><td>09</td><td>Informe PDF</td><td>Caja de reflexión translúcida sobre fondo de ADN. Branding completo.</td><td class="ok">✓</td></tr>
+        <tr><td>10</td><td>Compartir Link Legible</td><td>URL tipo /?r=informe-... vía backend Vercel + Upstash Redis.</td><td class="ok">✓</td></tr>
+        <tr><td>11</td><td>Compartir WhatsApp / PDF</td><td>Resumen con emojis y descarga directa del informe.</td><td class="ok">✓</td></tr>
+        <tr><td>12</td><td>Editar Hábitos y Categorías</td><td>Lápiz para editar los creados por el usuario. Limpieza de vacías.</td><td class="ok">✓</td></tr>
+        <tr><td>13</td><td>Récords por Período</td><td>Sección que cambia con el date-nav (mejor día/semana del rango).</td><td class="ok">✓</td></tr>
+        <tr><td>14</td><td>Estadísticas</td><td>Récords históricos, medallas, calendario de actividad con tooltips.</td><td class="ok">✓</td></tr>
+        <tr><td>15</td><td>Date-nav Corregido</td><td>Avance de a un período exacto (día/semana/quincena/mes).</td><td class="ok">✓</td></tr>
+        <tr><td>16</td><td>Popups Mobile</td><td>Tamaño adaptado + manija para cerrar deslizando hacia abajo.</td><td class="ok">✓</td></tr>
+        <tr><td>17</td><td>Efecto Apretado Universal</td><td>Todos los botones se hunden levemente al tocarlos.</td><td class="ok">✓</td></tr>
+        <tr><td>18</td><td>Sticky Sólido</td><td>Barras pegadas 100% opacas, sin parpadeo al navegar.</td><td class="ok">✓</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 06 SINCRONIZACIÓN -->
+  <section>
+    <div class="sec-head"><span class="sec-num">06</span><span class="sec-title">Sincronizar Dispositivos</span><span class="sec-line"></span></div>
+    <p class="body">Como la app no tiene cuentas, esta función resuelve la portabilidad del progreso entre un celular, una tablet o una compu — sin reintroducir el login. Se ofrecen tres caminos, del más simple al más técnico, todos sin registro:</p>
+    <div class="method"><div class="m-ico">🔢</div><div><div class="m-t">Código de 6 caracteres</div><div class="m-d">El dispositivo viejo genera un código (ej: K4T9M2). En el nuevo se escribe y listo. Vence a las 48 hs.</div></div></div>
+    <div class="method"><div class="m-ico">📷</div><div><div class="m-t">Código QR</div><div class="m-d">El mismo envío muestra un QR. El otro dispositivo lo escanea con la cámara y abre la app ya con los datos.</div></div></div>
+    <div class="method"><div class="m-ico">💾</div><div><div class="m-t">Archivo de respaldo</div><div class="m-d">Descarga un archivo .json con todo el progreso. Sirve de copia de seguridad y se puede cargar en otro lado.</div></div></div>
+
+    <div class="sec-head" style="margin-top:30px"><span class="sec-num">·</span><span class="sec-title" style="font-size:19px">Cómo funciona</span><span class="sec-line"></span></div>
+    <div class="tbl tbl-scroll"><table>
+      <thead><tr><th style="width:120px">Paso</th><th>Qué ocurre</th></tr></thead>
+      <tbody>
+        <tr><td>Enviar</td><td>La app sube una copia del estado a Upstash Redis vía /api/sync-save y recibe un código corto único.</td></tr>
+        <tr><td>Transferir</td><td>El código viaja como texto, QR o link (?code=...). También se puede mandar por WhatsApp a uno mismo.</td></tr>
+        <tr><td>Recibir</td><td>El nuevo dispositivo pide el dato con /api/sync-get y muestra un resumen: días, puntos y hábitos propios.</td></tr>
+        <tr><td>Aplicar</td><td>Si el dispositivo está vacío, carga directo. Si ya tiene datos, pregunta antes de reemplazar.</td></tr>
+        <tr><td>Privacidad</td><td>El código se autodestruye a las 48 hs. Sin código, nadie puede acceder a esa copia.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="band"><div class="be">🔄</div><div class="bt">Portabilidad total del progreso conservando la filosofía de cero fricción: sin cuentas, sin contraseñas.</div></div>
+  </section>
+
+  <!-- 07 COMPARATIVA -->
+  <section>
+    <div class="sec-head"><span class="sec-num">07</span><span class="sec-title">Comparativa: App Original → V5</span><span class="sec-line"></span></div>
+    <div class="tbl tbl-scroll"><table>
+      <thead><tr><th>Área</th><th>App Original</th><th>V5</th></tr></thead>
+      <tbody>
+        <tr><td>Sin inicio de sesión</td><td>Requería registro</td><td>Acceso inmediato, cero fricción</td></tr>
+        <tr><td>Pasar datos entre equipos</td><td>No existía</td><td>Sincronización por código / QR / archivo</td></tr>
+        <tr><td>Compartir progreso</td><td>No incluido</td><td>Link legible (/?r=...) con backend propio</td></tr>
+        <tr><td>Backend</td><td>Ninguno</td><td>Vercel Serverless + Upstash Redis</td></tr>
+        <tr><td>Música</td><td>No incluida</td><td>Binaural 40Hz + campanas tibetanas aparte</td></tr>
+        <tr><td>Toggle de música</td><td>—</td><td>Ahora recuerda el estado apagado</td></tr>
+        <tr><td>Color de categorías</td><td>Inconsistente</td><td>Nombre y punto con el mismo hex exacto</td></tr>
+        <tr><td>Popups en mobile</td><td>Muy grandes</td><td>Tamaño adaptado + cerrar deslizando</td></tr>
+        <tr><td>Confetti</td><td>Distinto en desktop</td><td>Igualado: vuelo amplio en todos lados</td></tr>
+        <tr><td>Date-nav</td><td>Saltaba de a 2 períodos</td><td>Avance exacto de a un período</td></tr>
+        <tr><td>Récords</td><td>Solo históricos</td><td>+ Récords por período (cambian con fechas)</td></tr>
+        <tr><td>Botones</td><td>Sin feedback táctil</td><td>Efecto apretado universal</td></tr>
+        <tr><td>Deploy</td><td>Netlify</td><td>Vercel con HTTPS y deploy automático</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 08 MÉTRICAS -->
+  <section>
+    <div class="sec-head"><span class="sec-num">08</span><span class="sec-title">Métricas del Producto</span><span class="sec-line"></span></div>
+    <div class="metrics">
+      <div class="metric"><div class="mn">31</div><div class="ml">hábitos</div></div>
+      <div class="metric"><div class="mn">9</div><div class="ml">categorías</div></div>
+      <div class="metric"><div class="mn">10</div><div class="ml">niveles</div></div>
+      <div class="metric"><div class="mn">12</div><div class="ml">medallas</div></div>
+      <div class="metric"><div class="mn">235</div><div class="ml">mensajes</div></div>
+      <div class="metric"><div class="mn">4</div><div class="ml">endpoints</div></div>
+    </div>
+  </section>
+
+  <!-- 09 ESTADO -->
+  <section>
+    <div class="sec-head"><span class="sec-num">09</span><span class="sec-title">Estado y Próximos Pasos</span><span class="sec-line"></span></div>
+    <div class="step done"><span class="tag">Activa</span><span class="sd">trackerdehabitos-bymarcosapud.vercel.app — funcional y en producción.</span></div>
+    <div class="step done"><span class="tag">Activa</span><span class="sd">Backend de links y sincronización operativo (Vercel + Upstash).</span></div>
+    <div class="step next"><span class="tag">Roadmap</span><span class="sd">PWA instalable con icono propio en la pantalla de inicio.</span></div>
+    <div class="step next"><span class="tag">Roadmap</span><span class="sd">Análisis automático mensual de hábitos asistido por IA.</span></div>
+
+    <div class="signature">
+      <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+      <div><div class="st">Marcos Apud</div><div class="ss">Diseño, desarrollo e implementación · 12/06/2026</div></div>
+    </div>
+  </section>
+
+  <div class="footer">Tracker de Hábitos Biohacker · Informe Técnico de Implementación V5 · by Marcos Apud · Junio 2026</div>
+
+</div>
+</body>
+</html>
