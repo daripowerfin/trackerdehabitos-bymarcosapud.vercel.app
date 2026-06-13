@@ -512,6 +512,37 @@ body{opacity:0;animation:appFadeIn 1.2s cubic-bezier(.4,0,.2,1) forwards}
   .confirm-box,.confirm-sheet{max-width:330px;width:calc(100vw - 48px)}
 }
 
+/* ── Modal sincronización ── */
+#sync-overlay{position:fixed;inset:0;isolation:isolate;background:rgba(0,0,0,.72);z-index:8300;display:flex;align-items:center;justify-content:center;padding:20px}
+#sync-overlay.hidden{display:none}
+.sync-sheet{position:relative;background:#1e293b;border-radius:20px;padding:26px 20px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;animation:slideUp .3s ease}
+.sync-big-btn{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:rgba(30,41,59,.55);border:1px solid rgba(51,65,85,.5);border-radius:13px;padding:15px 14px;margin-bottom:11px;cursor:pointer;color:#e2e8f0;font-family:inherit}
+.sync-big-btn:active{transform:scale(.97);filter:brightness(.85)}
+.sync-big-ico{font-size:26px;flex-shrink:0;width:34px;text-align:center}
+.sync-big-t{font-size:15px;font-weight:700;margin-bottom:2px}
+.sync-big-d{font-size:12px;color:#94a3b8;line-height:1.35}
+.sync-sep{display:flex;align-items:center;text-align:center;color:#64748b;font-size:12px;margin:14px 0 10px}
+.sync-sep::before,.sync-sep::after{content:'';flex:1;height:1px;background:rgba(51,65,85,.5)}
+.sync-sep span{padding:0 12px}
+.sync-mini-btn{display:block;width:100%;text-align:center;background:transparent;border:1px solid rgba(51,65,85,.5);border-radius:9px;padding:11px;margin-bottom:8px;cursor:pointer;color:#94a3b8;font-size:13px;font-weight:600;font-family:inherit}
+.sync-mini-btn:active{transform:scale(.97);filter:brightness(.85)}
+.sync-label{font-size:13px;color:#cbd5e1;font-weight:600;margin:6px 0 8px}
+.sync-code{font-size:34px;font-weight:800;letter-spacing:8px;text-align:center;color:#22d3ee;background:rgba(8,14,28,.7);border:1px dashed rgba(34,211,238,.5);border-radius:12px;padding:16px 8px;margin-bottom:11px;font-family:'Geist Mono',monospace}
+.sync-copy-code,.sync-wa-btn,.sync-confirm-btn{display:block;width:100%;border:none;border-radius:11px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px;color:#fff}
+.sync-copy-code{background:linear-gradient(135deg,#00B9C8,#00BC88)}
+.sync-wa-btn{background:#25D366;color:#04221a}
+.sync-confirm-btn{background:linear-gradient(135deg,#00B9C8,#00BC88)}
+.sync-copy-code:active,.sync-wa-btn:active,.sync-confirm-btn:active{transform:scale(.97);filter:brightness(.9)}
+.sync-qr-wrap{margin:12px 0;text-align:center}
+.sync-qr-wrap #sync-qr img{width:170px;height:170px;border-radius:10px;background:#fff;padding:8px;margin-top:6px}
+.sync-hint{font-size:12px;color:#94a3b8;line-height:1.45;background:rgba(30,41,59,.4);border-radius:8px;padding:10px;margin-top:6px}
+.sync-code-input{display:block;width:100%;box-sizing:border-box;text-align:center;font-size:28px;font-weight:800;letter-spacing:7px;text-transform:uppercase;background:rgba(8,14,28,.7);border:1px solid rgba(51,65,85,.6);border-radius:11px;padding:14px 8px;color:#e2e8f0;margin-bottom:11px;font-family:'Geist Mono',monospace}
+.sync-code-input:focus{outline:none;border-color:#00B9C8}
+.sync-loading{text-align:center;color:#94a3b8;padding:30px 0;font-size:14px}
+.sync-error{color:#fb923c;font-size:13px;text-align:center;padding:14px}
+.sync-status{font-size:13px;text-align:center;min-height:18px;margin-bottom:8px;line-height:1.4}
+.sync-back{display:block;width:100%;background:transparent;border:none;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;padding:8px;font-family:inherit;margin-top:4px}
+
 /* ── Efecto hundido/apretado universal en botones ── */
 button:not(:disabled):active{transform:scale(.95);filter:brightness(.85)}
 .gt-row:active,.cat-header:active,.habit-row:active,.date-nav-center:active,.cat-dd-trigger:active,.cat-dd-item:active,.cat-swatch:active{transform:scale(.97);filter:brightness(.85)}
@@ -1522,6 +1553,10 @@ function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone
       <svg class="gt-icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
       <span class="gt-row-label">Instructivo</span>
     </div>
+    <div class="gt-row" onclick="openSyncMenu()">
+      <svg class="gt-icon" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      <span class="gt-row-label">Sincronizar dispositivos</span>
+    </div>
     <div class="gt-row red" onclick="resetAll()">
       <svg class="gt-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 12.142A2 2 0 0 1 16.138 20H7.862a2 2 0 0 1-1.995-1.858L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
       <span class="gt-row-label">Resetear todo</span>
@@ -1537,7 +1572,7 @@ function isInStandaloneMode(){return window.matchMedia('(display-mode:standalone
         <div class="vol-row" style="margin-bottom:10px">
           <div class="vol-icon vol-icon-music"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M17.5 6.5a8 8 0 0 1 0 11"/><path d="M19.5 4.5a11 11 0 0 1 0 15"/></svg></div>
           <span class="vol-label" style="margin-bottom:0;flex:1;padding-left:6px">Música</span>
-          <button id="music-toggle-btn" onclick="toggleMusicOnOff()" class="toggle-btn">ON</button>
+          <button id="music-toggle-btn" onclick="toggleMusicOnOff()" class="toggle-btn">OFF</button>
           <input class="vol-slider" type="range" min="0" max="100" id="vol-slider" oninput="updateMusicVol(this.value)">
           <span class="vol-val" id="vol-val">50%</span>
         </div>
@@ -1623,6 +1658,9 @@ function syncVolUI(){
     bellBtn.style.borderColor=isOn?'rgba(0,185,200,.4)':'rgba(51,65,85,.5)';
   }
   if(sw)sw.classList.toggle('on',ST.settings.sound!==false);
+  var musOn=!ST.settings.musicOff&&(mv>0);
+  if(musicStarted&&ytPlayer){try{musOn=ytPlayer.getPlayerState()===1;}catch(e){}}
+  setMusicBtn(musOn);
   const tv2=ST.settings.tibetanVolume??70;
   const tsl=document.getElementById('tibetan-slider'),tvv2=document.getElementById('tibetan-val');
   if(tsl){tsl.value=tv2;tsl.style.setProperty('--v',tv2+'%');}
@@ -1665,8 +1703,15 @@ function updateMusicVol(v){
   var vv=document.getElementById('vol-val');
   if(vv)vv.textContent=n+'%';
   ST.settings.musicVolume=n;
+  if(n>0&&ST.settings.musicOff){ST.settings.musicOff=false;}
   saveState();
-  if(ytPlayer&&ytPlayer.setVolume)ytPlayer.setVolume(n);
+  if(ytPlayer&&ytPlayer.setVolume){
+    ytPlayer.setVolume(n);
+    try{
+      if(n===0){ytPlayer.pauseVideo();setMusicBtn(false);}
+      else if(!ST.settings.musicOff){ytPlayer.playVideo();setMusicBtn(true);}
+    }catch(e){}
+  }
   updateSpeakerIcon(n);
 }
 function updateBellIcon(v){
@@ -1809,6 +1854,7 @@ function tryAutoplayMusic(){
 }
 function startMusic(){
   if(musicStarted)return;
+  if(ST.settings.musicOff){_scheduleBells();return;} // música apagada por preferencia; campanas sí
   musicStarted=true;
   _startYouTube();
   _scheduleBells();
@@ -1833,12 +1879,17 @@ function _startYouTube(){
         onReady:function(e){
           var v=ST.settings.musicVolume??70;
           e.target.setVolume(v);
-          e.target.playVideo();
-          var btn=document.getElementById('music-toggle-btn');
-          if(btn){btn.textContent='ON';btn.style.background='rgba(0,185,200,.12)';btn.style.color='#00B9C8';}
+          if(ST.settings.musicOff||v===0){e.target.pauseVideo();setMusicBtn(false);}
+          else{e.target.playVideo();setMusicBtn(true);}
           updateSpeakerIcon(v);
         },
-        onError:function(e){console.warn('YouTube error:',e.data);}
+        onError:function(e){
+          console.warn('YouTube error:',e.data);
+          var lbl=document.querySelector('.vol-icon-music');
+          if(lbl){var row=lbl.closest('.vol-row');if(row){var warn=row.querySelector('.music-warn');
+            if(!warn){warn=document.createElement('div');warn.className='music-warn';warn.style.cssText='font-size:10px;color:#fb923c;width:100%;margin-top:2px;padding-left:6px';warn.textContent='\u26A0\uFE0F No se pudo cargar la m\u00fasica (revis\u00e1 tu conexi\u00f3n)';row.appendChild(warn);}}}
+          setMusicBtn(false);
+        }
       }
     });
   };
@@ -2626,21 +2677,28 @@ function infoPanel(hid){if(!IS_TOUCH||!openHabitInfo.has(hid)||!HINFO[hid])retur
 function prevDay(){if(!currentViewDate)currentViewDate=todayStr();currentViewDate=shiftDate(currentViewDate,-1);renderHoy();}
 function nextDay(){if(!currentViewDate)currentViewDate=todayStr();if(currentViewDate<todayStr()){currentViewDate=shiftDate(currentViewDate,1);}renderHoy();}
 function goToToday(){currentViewDate=todayStr();renderHoy();}
+function setMusicBtn(on){
+  var btn=document.getElementById('music-toggle-btn');if(!btn)return;
+  btn.textContent=on?'ON':'OFF';
+  btn.style.background=on?'rgba(0,185,200,.12)':'transparent';
+  btn.style.color=on?'#00B9C8':'#64748b';
+  btn.style.borderColor=on?'rgba(0,185,200,.4)':'rgba(51,65,85,.5)';
+}
 function toggleMusicOnOff(){
-  var btn=document.getElementById('music-toggle-btn');
-  function setBtn(on){
-    if(!btn)return;
-    btn.textContent=on?'ON':'OFF';
-    btn.style.background=on?'rgba(0,185,200,.12)':'transparent';
-    btn.style.color=on?'#00B9C8':'#64748b';
+  // Si está apagada en preferencias -> encender
+  if(ST.settings.musicOff){
+    ST.settings.musicOff=false;
+    if((ST.settings.musicVolume??70)===0){ST.settings.musicVolume=70;updateMusicVol(70);var sl=document.getElementById('vol-slider');if(sl)sl.value=70;}
+    saveState();
+    if(!musicStarted){startMusic();}
+    else if(ytPlayer&&ytPlayer.playVideo){try{ytPlayer.playVideo();}catch(e){}}
+    setMusicBtn(true);
+    return;
   }
-  if(!musicStarted){startMusic();return;}
-  if(!ytPlayer){startMusic();return;}
-  try{
-    var state=ytPlayer.getPlayerState();
-    if(state===1){ytPlayer.pauseVideo();setBtn(false);}
-    else{ytPlayer.playVideo();setBtn(true);}
-  }catch(e){console.warn('toggleMusic:',e);}
+  // Está encendida -> apagar y recordar
+  ST.settings.musicOff=true;saveState();
+  if(ytPlayer&&ytPlayer.pauseVideo){try{ytPlayer.pauseVideo();}catch(e){}}
+  setMusicBtn(false);
 }
 
 // ── Respiración de nubes sincronizada con el LFO de audio ──────────
@@ -3301,7 +3359,7 @@ function renderSemana(){
           html+='<div class="cat-body">';
           ch2.forEach(function(hb){
             var isDone=!!expComp[hb.id],pc=isDone?'#00BC88':hb.pts>=20?'#22d3ee':'#64748b';
-            html+='<div class="habit-row" data-hid="'+hb.id+'" data-ds="'+expDs+'"><div class="habit-check '+(isDone?'checked bg-'+cat.color:'')+'"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div><span class="habit-name'+(isDone?' done':'')+'">'+hb.name+'</span><span class="habit-pts" style="color:'+pc+'">+'+hb.pts+'</span></div>';
+            html+='<div class="habit-row" data-hid="'+hb.id+'" data-ds="'+expDs+'"><div class="habit-check '+(isDone?'checked bg-'+cat.color:'')+'"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div><span class="habit-name'+(isDone?' done':'')+'"'+dha(hb.id)+'>'+hb.name+'</span><span class="habit-pts" style="color:'+pc+'">+'+hb.pts+'</span></div>';
           });
           html+='</div>';
         }
@@ -4093,6 +4151,136 @@ function openShare(){
 
 function closeShare(e){if(e.target===document.getElementById('share-overlay'))document.getElementById('share-overlay').classList.add('hidden');}
 
+// ═══════════ SINCRONIZACIÓN ENTRE DISPOSITIVOS ═══════════
+var _syncLastCode='';
+function openSyncMenu(){
+  var ov=document.getElementById('sync-overlay');
+  ov.classList.remove('hidden');
+  syncBackHome();
+  _attachSheetDrag(ov.querySelector('.sync-sheet'));
+  if(typeof toggleGlobalMenu==='function'){var gt=document.getElementById('global-tools');if(gt&&gt.style.maxHeight&&gt.style.maxHeight!=='0px'){}}
+}
+function closeSyncMenu(){document.getElementById('sync-overlay').classList.add('hidden');}
+function syncBackHome(){
+  document.getElementById('sync-home').style.display='block';
+  document.getElementById('sync-send').style.display='none';
+  document.getElementById('sync-receive').style.display='none';
+}
+function _syncPayload(){
+  // copia profunda del estado + metadatos para el resumen
+  var snapshot=JSON.parse(JSON.stringify(ST));
+  var nDias=Object.keys(ST.completions||{}).length;
+  var pts=(typeof getTotalPts==='function')?getTotalPts():0;
+  var nHab=(ST.customHabits||[]).length;
+  return {v:4,state:snapshot,meta:{dias:nDias,pts:pts,habitos:nHab,nombre:ST.userName||'',ts:Date.now()}};
+}
+
+// ---- ENVIAR ----
+function syncStartSend(){
+  document.getElementById('sync-home').style.display='none';
+  document.getElementById('sync-send').style.display='block';
+  document.getElementById('sync-receive').style.display='none';
+  document.getElementById('sync-send-loading').style.display='block';
+  document.getElementById('sync-send-result').style.display='none';
+  document.getElementById('sync-send-error').style.display='none';
+  fetch('/api/sync-save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_syncPayload())})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(j&&j.code){
+        _syncLastCode=j.code;
+        document.getElementById('sync-send-loading').style.display='none';
+        document.getElementById('sync-code-display').textContent=j.code;
+        var link=location.origin+location.pathname+'?code='+j.code;
+        var qr=document.getElementById('sync-qr');
+        qr.innerHTML='<img alt="QR" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(link)+'">';
+        document.getElementById('sync-send-result').style.display='block';
+      }else{ _syncSendErr((j&&j.error)||'No se pudo generar el código'); }
+    })
+    .catch(function(){ _syncSendErr('Sin conexión. Revisá tu internet e intentá de nuevo.'); });
+}
+function _syncSendErr(msg){
+  document.getElementById('sync-send-loading').style.display='none';
+  var e=document.getElementById('sync-send-error');e.textContent='⚠️ '+msg;e.style.display='block';
+}
+function syncCopyCode(){
+  var ok=function(){showToast('Código copiado: '+_syncLastCode);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(_syncLastCode).then(ok).catch(ok);}
+  else{try{var ta=document.createElement('textarea');ta.value=_syncLastCode;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();ok();}catch(e){showToast(_syncLastCode);}}
+}
+function syncSendWhatsApp(){
+  var link=location.origin+location.pathname+'?code='+_syncLastCode;
+  var txt='Mi progreso del Tracker de Hábitos. Abrí este link en el otro dispositivo (o usá el código '+_syncLastCode+'): '+link;
+  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+}
+
+// ---- RECIBIR ----
+function syncStartReceive(){
+  document.getElementById('sync-home').style.display='none';
+  document.getElementById('sync-send').style.display='none';
+  document.getElementById('sync-receive').style.display='block';
+  document.getElementById('sync-receive-status').textContent='';
+  var inp=document.getElementById('sync-code-input');inp.value='';setTimeout(function(){inp.focus();},150);
+}
+function syncReceiveConfirm(){
+  var code=(document.getElementById('sync-code-input').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  var st=document.getElementById('sync-receive-status');
+  if(code.length<6){st.style.color='#fb923c';st.textContent='El código tiene 6 caracteres.';return;}
+  st.style.color='#94a3b8';st.textContent='Buscando tu progreso…';
+  fetch('/api/sync-get?code='+encodeURIComponent(code))
+    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+    .then(function(res){
+      if(res.ok&&res.j&&res.j.data&&res.j.data.state){
+        _applyIncomingState(res.j.data);
+      }else{
+        st.style.color='#fb923c';
+        st.textContent=(res.j&&res.j.error)?('No se encontró ese código (puede haber vencido).'):'No se encontró ese código.';
+      }
+    })
+    .catch(function(){st.style.color='#fb923c';st.textContent='Sin conexión. Revisá tu internet.';});
+}
+function _applyIncomingState(payload){
+  var meta=payload.meta||{};
+  var resumen='Se encontró: '+(meta.dias||0)+' días registrados, '+(meta.pts||0)+' pts'+(meta.habitos?(' y '+meta.habitos+' hábitos propios'):'')+(meta.nombre?(' (de '+meta.nombre+')'):'')+'.';
+  var hayDatos=Object.keys(ST.completions||{}).length>0||(ST.customHabits||[]).length>0||ST.userName;
+  function aplicar(){
+    ST=payload.state;
+    saveState();
+    closeSyncMenu();
+    showToast('✓ Progreso sincronizado');
+    setTimeout(function(){location.reload();},700);
+  }
+  if(hayDatos){
+    confirmModal(resumen+'\n\n¿Reemplazar lo que hay en ESTE dispositivo? No se puede deshacer.',aplicar,'Sí, reemplazar');
+  }else{
+    aplicar();
+  }
+}
+
+// ---- ARCHIVO (copia de seguridad) ----
+function syncExportFile(){
+  var blob=new Blob([JSON.stringify(_syncPayload(),null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  var fecha=todayStr();
+  a.href=url;a.download='tracker-habitos-backup-'+fecha+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  showToast('Copia de seguridad descargada');
+}
+function syncImportFile(ev){
+  var file=ev.target.files&&ev.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var payload=JSON.parse(reader.result);
+      if(!payload||!payload.state){showToast('El archivo no es válido');return;}
+      _applyIncomingState(payload);
+    }catch(e){showToast('No se pudo leer el archivo');}
+  };
+  reader.readAsText(file);
+  ev.target.value='';
+}
+
 // ── Cerrar popups deslizando hacia abajo desde la manija (solo mobile) ──
 function _sheetClose(sheet){
   var ov=sheet.parentElement;
@@ -4254,7 +4442,21 @@ function _showSharedError(){
 }
 function _clearSharedLoading(){var d=document.getElementById('shared-loading');if(d)d.remove();}
 function checkSharedView(){
-  var r=null;
+  var r=null,syncCode=null;
+  try{syncCode=new URLSearchParams(window.location.search).get('code');}catch(e){}
+  if(syncCode){
+    // viene de un link/QR de sincronización: limpiar URL y abrir el flujo de recibir
+    try{history.replaceState({},'',location.origin+location.pathname);}catch(e){}
+    setTimeout(function(){
+      if(typeof openSyncMenu==='function'){
+        openSyncMenu();syncStartReceive();
+        var inp=document.getElementById('sync-code-input');
+        if(inp){inp.value=syncCode.toUpperCase();}
+        syncReceiveConfirm();
+      }
+    },400);
+    return false; // dejar que la app cargue normal por detrás
+  }
   try{r=new URLSearchParams(window.location.search).get('r');}catch(e){}
   if(r){
     _showSharedLoading();
@@ -4869,6 +5071,54 @@ _initSheetDrag();
     </div>
     <div class="cal-grid" id="cal-grid"></div>
   </div>
+</div>
+<!-- SYNC MODAL -->
+<div id="sync-overlay" class="hidden" onclick="if(event.target===this)closeSyncMenu()">
+<div class="modal-sheet sync-sheet" onclick="event.stopPropagation()">
+  <button class="dlg-close" onclick="closeSyncMenu()" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  <div class="modal-title">Sincronizar dispositivos</div>
+  <div class="modal-sub">Pasá tu progreso de un celular o compu a otro, sin perder nada.</div>
+
+  <!-- PANTALLA INICIAL: elegir acción -->
+  <div id="sync-home">
+    <button class="sync-big-btn" onclick="syncStartSend()">
+      <div class="sync-big-ico">📤</div>
+      <div class="sync-big-txt"><div class="sync-big-t">Enviar a otro dispositivo</div><div class="sync-big-d">Genera un código para llevarte tu progreso</div></div>
+    </button>
+    <button class="sync-big-btn" onclick="syncStartReceive()">
+      <div class="sync-big-ico">📥</div>
+      <div class="sync-big-txt"><div class="sync-big-t">Recibir en este dispositivo</div><div class="sync-big-d">Escribí el código que te dio el otro aparato</div></div>
+    </button>
+    <div class="sync-sep"><span>o</span></div>
+    <button class="sync-mini-btn" onclick="syncExportFile()">💾 Descargar copia de seguridad (archivo)</button>
+    <button class="sync-mini-btn" onclick="document.getElementById('sync-file-input').click()">📂 Cargar copia desde un archivo</button>
+    <input type="file" id="sync-file-input" accept="application/json,.json" style="display:none" onchange="syncImportFile(event)">
+  </div>
+
+  <!-- PANTALLA ENVIAR -->
+  <div id="sync-send" style="display:none">
+    <div id="sync-send-loading" class="sync-loading">Generando tu código…</div>
+    <div id="sync-send-result" style="display:none">
+      <div class="sync-label">Tu código (válido 48 horas):</div>
+      <div class="sync-code" id="sync-code-display">——————</div>
+      <button class="sync-copy-code" onclick="syncCopyCode()">Copiar código</button>
+      <div class="sync-qr-wrap"><div class="sync-label" style="text-align:center">o escaneá este código QR con el otro dispositivo:</div><div id="sync-qr"></div></div>
+      <button class="sync-wa-btn" onclick="syncSendWhatsApp()">Enviarme el link por WhatsApp</button>
+      <div class="sync-hint">En el otro dispositivo: abrí esta app → Menú → Sincronizar → "Recibir" y escribí el código. O abrí el link/QR directamente.</div>
+    </div>
+    <div id="sync-send-error" class="sync-error" style="display:none"></div>
+    <button class="sync-back" onclick="syncBackHome()">‹ Volver</button>
+  </div>
+
+  <!-- PANTALLA RECIBIR -->
+  <div id="sync-receive" style="display:none">
+    <div class="sync-label">Escribí el código de 6 caracteres:</div>
+    <input id="sync-code-input" class="sync-code-input" maxlength="7" placeholder="K4T9M2" autocomplete="off" autocapitalize="characters" oninput="this.value=this.value.toUpperCase()">
+    <button class="sync-confirm-btn" onclick="syncReceiveConfirm()">Traer mi progreso</button>
+    <div id="sync-receive-status" class="sync-status"></div>
+    <button class="sync-back" onclick="syncBackHome()">‹ Volver</button>
+  </div>
+</div>
 </div>
 </body>
 </html>
