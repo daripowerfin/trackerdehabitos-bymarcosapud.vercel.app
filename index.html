@@ -500,6 +500,18 @@ body{opacity:0;animation:appFadeIn 1.2s cubic-bezier(.4,0,.2,1) forwards}
 .cal-day:disabled{color:#475569;opacity:.35;cursor:default;background:transparent}
 .cal-empty{height:34px}
 
+/* ── Popups mobile: tamaño contenido + manija de drag ── */
+.sheet-grab{display:none}
+@media (max-width:768px){
+  .sheet-grab{display:flex;justify-content:center;align-items:center;padding:6px 0 12px;touch-action:none;cursor:grab;flex-shrink:0}
+  .sheet-grab-bar{width:46px;height:5px;border-radius:99px;background:rgba(148,163,184,.5)}
+  .manage-handle{display:none}
+  .modal-sheet,.share-sheet,.manage-sheet{max-height:76vh !important;overflow-y:auto !important}
+  .manage-sheet{overflow-y:hidden !important} /* tiene scroll interno propio */
+  .msg-card{max-height:72vh;overflow-y:auto}
+  .confirm-box,.confirm-sheet{max-width:330px;width:calc(100vw - 48px)}
+}
+
 /* ── Efecto hundido/apretado universal en botones ── */
 button:not(:disabled):active{transform:scale(.95);filter:brightness(.85)}
 .gt-row:active,.cat-header:active,.habit-row:active,.date-nav-center:active,.cat-dd-trigger:active,.cat-dd-item:active,.cat-swatch:active{transform:scale(.97);filter:brightness(.85)}
@@ -4081,6 +4093,51 @@ function openShare(){
 
 function closeShare(e){if(e.target===document.getElementById('share-overlay'))document.getElementById('share-overlay').classList.add('hidden');}
 
+// ── Cerrar popups deslizando hacia abajo desde la manija (solo mobile) ──
+function _sheetClose(sheet){
+  var ov=sheet.parentElement;
+  if(!ov)return;
+  ov.classList.add('hidden');
+  if(ov.id==='manage-overlay'){var tt=document.getElementById('habit-tt');if(tt)tt.classList.remove('vis');}
+  if(ov.id==='del-confirm-overlay'){_confirmCb=null;}
+}
+function _attachSheetDrag(sheet){
+  if(sheet._dragInit)return;sheet._dragInit=true;
+  var grab=document.createElement('div');
+  grab.className='sheet-grab';
+  grab.innerHTML='<div class="sheet-grab-bar"></div>';
+  sheet.insertBefore(grab,sheet.firstChild);
+  var startY=0,curY=0,dragging=false;
+  grab.addEventListener('touchstart',function(e){
+    dragging=true;curY=0;startY=e.touches[0].clientY;
+    sheet.style.transition='none';
+  },{passive:true});
+  grab.addEventListener('touchmove',function(e){
+    if(!dragging)return;
+    curY=e.touches[0].clientY-startY;
+    if(curY<0)curY=0;
+    sheet.style.transform='translateY('+curY+'px)';
+  },{passive:true});
+  grab.addEventListener('touchend',function(){
+    if(!dragging)return;dragging=false;
+    sheet.style.transition='transform .22s ease';
+    if(curY>85){
+      sheet.style.transform='translateY(120%)';
+      setTimeout(function(){
+        _sheetClose(sheet);
+        sheet.style.transform='';sheet.style.transition='';
+      },200);
+    }else{
+      sheet.style.transform='';
+      setTimeout(function(){sheet.style.transition='';},240);
+    }
+    curY=0;
+  });
+}
+function _initSheetDrag(){
+  document.querySelectorAll('.share-sheet,.modal-sheet,.manage-sheet,.msg-card,.confirm-box,.confirm-sheet').forEach(_attachSheetDrag);
+}
+
 // Codificacion compacta del link (mucho mas corta que JSON+LZ)
 function encShareCompact(data){
   var EP=Date.UTC(2024,0,1);
@@ -4800,6 +4857,7 @@ if(!checkSharedView()){
   }
 }
 tryAutoplayMusic();
+_initSheetDrag();
 </script>
 <div id="cal-pop" class="hidden">
   <div class="cal-backdrop" onclick="closeCalPicker()"></div>
