@@ -3791,16 +3791,28 @@ function renderStats(){
     html+='<div class="cat-dist-row"><div class="cat-dist-header"><span class="cat-dist-name col-'+cat.color+'"'+dha("cat_"+cat.id)+'>'+cat.name+'</span><span class="cat-dist-pct">'+pct2+'%</span></div><div class="cat-dist-bar"><div class="cat-dist-fill bg-'+cat.color+'" style="width:'+pct2+'%"></div></div></div>';
   });
 
-  // Calendar — shows the month containing the selected period
-  var calDate=new Date(sf+'T12:00:00');
-  var yr=calDate.getFullYear(),mo=calDate.getMonth();
-  var fl=new Date(yr,mo,1),ll=new Date(yr,mo+1,0);
-  var sdow=fl.getDay()===0?6:fl.getDay()-1;
-  html+='<div class="stat-section-title">'+mNames[mo]+' '+yr+' <span style="font-size:11px;color:#64748b;font-weight:400">'+navLabel+'</span></div>';
+  // Calendar — muestra exactamente los días del período seleccionado (alineado por semanas L-D),
+  // de modo que día/semana/quincena/mes muestren TODAS sus celdas aunque crucen de mes.
+  var calFrom=new Date(sf+'T12:00:00');
+  var calTo=new Date(st+'T12:00:00');
+  // arrancar el grid el lunes de la semana del primer día del período
+  var gridStart=new Date(calFrom);
+  var gdow=gridStart.getDay()===0?6:gridStart.getDay()-1;
+  gridStart.setDate(gridStart.getDate()-gdow);
+  // título: si el período abarca un solo mes, mostrar "Mes Año"; si cruza, "Mes–Mes Año"
+  var moA=calFrom.getMonth(),moB=calTo.getMonth(),yrA=calFrom.getFullYear(),yrB=calTo.getFullYear();
+  var titulo;
+  if(moA===moB&&yrA===yrB){titulo=mNames[moA]+' '+yrA;}
+  else if(yrA===yrB){titulo=mNames[moA]+'–'+mNames[moB]+' '+yrA;}
+  else{titulo=mNames[moA]+' '+yrA+'–'+mNames[moB]+' '+yrB;}
+  html+='<div class="stat-section-title">'+titulo+' <span style="font-size:11px;color:#64748b;font-weight:400">'+navLabel+'</span></div>';
   html+='<div class="cal-grid">'+['L','M','M','J','V','S','D'].map(function(d){return '<div class="cal-day-label">'+d+'</div>';}).join('');
-  for(var i=0;i<sdow;i++)html+='<div class="cal-day empty"></div>';
-  for(var day=1;day<=ll.getDate();day++){
-    var ds2=yr+'-'+String(mo+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+  // iterar día a día desde gridStart hasta cubrir calTo (completando la última semana)
+  var cur=new Date(gridStart);
+  var guard=0;
+  while(guard<400){
+    guard++;
+    var ds2=dateStr(cur);
     var inSel=ds2>=sf&&ds2<=st;
     var fut=isFuture(ds2);
     var cls='cal-day ';var ttDay='';
@@ -3809,6 +3821,10 @@ function renderStats(){
     else{var p2=getDayPctDone(ds2);if(p2===0)cls+='no-data';else if(p2<50)cls+='pct-low';else if(p2<80)cls+='pct-mid';else if(p2<100)cls+='pct-high';else cls+='pct-perfect';
       ttDay=fmtShort(ds2)+' \u2014 '+dayPts(ds2)+' pts \u00b7 '+p2+'% de h\u00e1bitos';}
     html+='<div class="'+cls+'"'+(ttDay?' data-tt="'+ttDay+'"':'')+'></div>';
+    // parar cuando ya pasamos calTo Y completamos la semana (domingo)
+    var isSunday=cur.getDay()===0;
+    cur.setDate(cur.getDate()+1);
+    if(dateStr(new Date(cur.getTime()-86400000))>=st && isSunday)break;
   }
   html+='</div><div class="cal-legend"><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(51,65,85,.25)"></div>Sin datos</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.18)"></div>1–49%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.45)"></div>50–79%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,185,200,.7)"></div>80–99%</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:linear-gradient(135deg,#00B9C8,#00BC88)"></div>100%</div></div>';
 
