@@ -1,17 +1,65 @@
-// sw.js — Service Worker Tracker de Hábitos Biohacker v4
-const CACHE = 'bh-tracker-v4';
+// sw.js — Service Worker Tracker de Hábitos Biohacker v5
+// Cachea la app para que abra sin internet, SIN interferir con la sincronización.
+const CACHE = 'bh-tracker-v5';
 
-// ─── Install & cache ────────────────────────────────────────────
+const PRECACHE = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png'
+];
+
 self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(cache => cache.addAll(PRECACHE)).catch(() => {})
+  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
-  e.waitUntil(clients.claim());
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
 });
 
-// ─── Notification from page ─────────────────────────────────────
-// Page sends {type:'SHOW_NOTIF', title, body} via postMessage
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  const url = new URL(req.url);
+
+  // NUNCA tocar sincronización/backend ni servicios externos (QR, fuentes):
+  // van SIEMPRE a la red, sin caché.
+  if (url.pathname.startsWith('/api/') || url.origin !== self.location.origin) {
+    return;
+  }
+
+  if (req.method !== 'GET') return;
+
+  // Navegación: red primero; si no hay internet, servir index cacheado.
+  if (req.mode === 'navigate') {
+    e.respondWith(
+      fetch(req).catch(() => caches.match('/index.html').then(r => r || caches.match('/')))
+    );
+    return;
+  }
+
+  // Resto de recursos propios: caché primero, si no está, red (y se guarda).
+  e.respondWith(
+    caches.match(req).then(cached => {
+      if (cached) return cached;
+      return fetch(req).then(resp => {
+        if (resp && resp.status === 200 && resp.type === 'basic') {
+          const clone = resp.clone();
+          caches.open(CACHE).then(c => c.put(req, clone)).catch(() => {});
+        }
+        return resp;
+      }).catch(() => cached);
+    })
+  );
+});
+
 self.addEventListener('message', e => {
   if (e.data && e.data.type === 'SHOW_NOTIF') {
     const { title, body } = e.data;
@@ -33,25 +81,21 @@ self.addEventListener('message', e => {
   }
 });
 
-// ─── Notification click ─────────────────────────────────────────
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   if (e.action === 'dismiss') return;
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      // Focus existing window if open
       for (const client of list) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
           return client.focus();
         }
       }
-      // Otherwise open new window
       return clients.openWindow('/');
     })
   );
 });
 
-// ─── Push event (for future server-side push) ───────────────────
 self.addEventListener('push', e => {
   const data = e.data ? e.data.json() : {};
   e.waitUntil(
