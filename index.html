@@ -1198,6 +1198,7 @@ button:active,.nav-tab:active,.habit-check:active,.share-action-btn:active,.onb-
   
   
   .header-right{gap:3px}
+  #main-content{padding-bottom:48px}
 }
 @media (min-width:600px){
   #app{max-width:100%;margin:0}
@@ -2654,14 +2655,20 @@ function attachTooltips(){
       el.addEventListener('mouseleave',()=>tt.classList.remove('vis'));
     }
   });
-  // Tooltips genéricos por data-tt (hover, solo desktop: en táctil tocar la celda ya muestra/expande)
-  if(!IS_TOUCH){
-    document.querySelectorAll('[data-tt]').forEach(el=>{
-      if(el._tt2Bound)return;el._tt2Bound=true;
+  // Tooltips genéricos por data-tt
+  document.querySelectorAll('[data-tt]').forEach(el=>{
+    if(el._tt2Bound)return;el._tt2Bound=true;
+    if(IS_TOUCH){
+      el.addEventListener('click',e=>{
+        e.stopPropagation();
+        if(tt.classList.contains('vis')&&tt._owner===el){tt.classList.remove('vis');tt._owner=null;return;}
+        tt.textContent=el.dataset.tt;tt._owner=el;tt.classList.add('vis');_posTTel(tt,el);
+      });
+    }else{
       el.addEventListener('mouseenter',()=>{tt.textContent=el.dataset.tt;tt.classList.add('vis');_posTTel(tt,el);});
       el.addEventListener('mouseleave',()=>tt.classList.remove('vis'));
-    });
-  }
+    }
+  });
 }
 if(IS_TOUCH){document.addEventListener('click',function(){var tt=document.getElementById('habit-tt');if(tt){tt.classList.remove('vis');tt._owner=null;}});}
 
