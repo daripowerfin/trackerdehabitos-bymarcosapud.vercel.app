@@ -1,6 +1,6 @@
 {
   "name": "Tracker de Hábitos Biohacker",
-  "short_name": "Biohacker",
+  "short_name": "Tracker Biohacker",
   "description": "Tracker de hábitos biohacker con gamificación. by Marcos Apud.",
   "start_url": "/",
   "display": "standalone",
@@ -8,8 +8,22 @@
   "theme_color": "#00B9C8",
   "orientation": "portrait-primary",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ],
-  "categories": ["health", "fitness", "lifestyle"]
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle"
+  ]
 }
